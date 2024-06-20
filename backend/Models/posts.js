@@ -1,20 +1,20 @@
-// posts.js
-const { DataTypes } = require('sequelize');
-const sequelize = require('../database'); // Sequelize instance
+// // posts.js
+// const { DataTypes } = require('sequelize');
+// const sequelize = require('../database/index.js'); 
 
-const Posts = sequelize.define('posts', {
-  idposts: {
-    type: DataTypes.INTEGER,
-    primaryKey: true,
-    autoIncrement: true
-  },
-  images: DataTypes.STRING,
-  desc: DataTypes.STRING,
-  hashtags: DataTypes.STRING,
-  category: DataTypes.STRING,
-  reviews: DataTypes.DECIMAL,
-  lang: DataTypes.DECIMAL,
-  latt: DataTypes.DECIMAL
-});
+// const Posts = sequelize.define('posts', {
+//   idposts: {
+//     type: DataTypes.INTEGER,
+//     primaryKey: true,
+//     autoIncrement: true
+//   },
+//   images: DataTypes.STRING,
+//   desc: DataTypes.STRING,
+//   hashtags: DataTypes.STRING,
+//   category: DataTypes.STRING,
+//   reviews: DataTypes.DECIMAL,
+//   lang: DataTypes.DECIMAL,
+//   latt: DataTypes.DECIMAL
+// });
 
-module.exports = Posts;
+// module.exports = Posts;
