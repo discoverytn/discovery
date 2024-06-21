@@ -13,7 +13,7 @@ const router = express.Router();
 
 router.get("/getAll", getAllUsers);
 router.get('/business', getAllBO);
-router.get('/explorer', getAllBO);
+router.get('/explorer', getAllExplorers);
 router.get("/getOne/:email", getUserByEmail);
 router.delete("/delete/:email", deleteUser);
 router.put("/change-role", changeUserRole);

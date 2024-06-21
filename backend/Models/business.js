@@ -7,6 +7,11 @@ module.exports = (sequelize) => {
       primaryKey: true,
       autoIncrement: true
     },
+    username:{
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique:true
+    },
     firstname: {
       type: DataTypes.STRING,
       allowNull: true
@@ -15,9 +20,11 @@ module.exports = (sequelize) => {
       type: DataTypes.STRING,
       allowNull: true
     },
+
     email: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: false,
+      unique:true
     },
     password: {
       type: DataTypes.STRING,
@@ -40,16 +47,17 @@ module.exports = (sequelize) => {
       allowNull: true
     },
     numOfPosts: {
-      type: DataTypes.STRING,
+      type: DataTypes.INTEGER,
       allowNull: true
     },
     mobileNum: {
-      type: DataTypes.STRING,
+      type: DataTypes.INTEGER,
       allowNull: true
     },
     numOfReviews: {
-      type: DataTypes.STRING,
-      allowNull: true
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      defaultValue: 0 
     },
     businessName: {
       type: DataTypes.STRING,
@@ -64,7 +72,7 @@ module.exports = (sequelize) => {
       allowNull: true
     },
     BOid: {
-      type: DataTypes.STRING,
+      type: DataTypes.INTEGER,
       allowNull: false
     },
     credImg: {
@@ -77,6 +85,10 @@ module.exports = (sequelize) => {
     },
     latt: {
       type: DataTypes.DECIMAL,
+      allowNull: true
+    },
+    location:{
+      type: DataTypes.STRING,
       allowNull: true
     }
   });
