@@ -20,6 +20,8 @@ module.exports = (sequelize) => {
     mobileNum: DataTypes.STRING,
     numOfReviews: DataTypes.STRING,
     long: DataTypes.DECIMAL,
-    latt: DataTypes.DECIMAL
+    latt: DataTypes.DECIMAL,
+    location:DataTypes.STRING,
+   
   });
 };

@@ -20,7 +20,10 @@ module.exports = (sequelize) => {
     businessName: DataTypes.STRING,
     businessDesc: DataTypes.STRING,
     businessImg: DataTypes.STRING,
+    BOid:DataTypes.STRING,
+    credImg:DataTypes.STRING,
     long: DataTypes.DECIMAL,
-    latt: DataTypes.DECIMAL
+    latt: DataTypes.DECIMAL,
+    location:DataTypes.STRING,
   });
 };
