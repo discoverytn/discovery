@@ -1,5 +1,3 @@
-// database/index.js
-
 const { Sequelize, DataTypes } = require('sequelize');
 require('dotenv').config();
 
@@ -14,12 +12,18 @@ const sequelize = new Sequelize(
 );
 
 const db = {};
+db.Sequelize = Sequelize;
+db.sequelize = sequelize;
 
-// Import and initialize models
 db.Admin = require('../models/admin')(sequelize, DataTypes);
 db.Explorer = require('../models/explorer')(sequelize, DataTypes);
 db.Business = require('../models/business')(sequelize, DataTypes);
-
+db.Posts = require('../models/posts')(sequelize, DataTypes);
+db.Comments = require('../models/comments')(sequelize, DataTypes);
+db.Notif = require('../models/notif')(sequelize, DataTypes);
+db.Chat = require('../models/chat')(sequelize, DataTypes);
+db.Events = require('../models/events')(sequelize, DataTypes);
+db.Favorites = require('../models/favorites')(sequelize, DataTypes);
 
 // Define associations
 db.Explorer.hasMany(db.Posts, { foreignKey: 'explorer_idexplorer' });
@@ -52,10 +56,18 @@ db.Explorer.belongsToMany(db.Posts, { through: db.Favorites, foreignKey: 'explor
 sequelize
   .authenticate()
   .then(() => {
-    console.log('Database connected...');
+    console.log("Database connected...");
   })
   .catch((err) => {
-    console.error('Unable to connect to the database:', err);
+    console.error("Unable to connect to the database:", err);
   });
+
+// sequelize.sync({ force: true })
+//   .then(() => {
+//     console.log("Tables created successfully!");
+//   })
+//   .catch((error) => {
+//     console.error("Unable to create tables:", error);
+//   });
 
 module.exports = db;

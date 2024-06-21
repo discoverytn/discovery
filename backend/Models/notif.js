@@ -1,14 +1,26 @@
-// // notif.js
-// const { DataTypes } = require('sequelize');
-// const sequelize = require('../database/index.js'); 
+const { DataTypes } = require('sequelize');
 
-// const Notif = sequelize.define('notif', {
-//   idnotif: {
-//     type: DataTypes.INTEGER,
-//     primaryKey: true,
-//     autoIncrement: true
-//   },
-//   content: DataTypes.STRING
-// });
-
-// module.exports = Notif;
+module.exports = (sequelize) => {
+  return sequelize.define('Notif', {
+    idnotif: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
+    },
+    message: DataTypes.STRING,
+    business_idbusiness: {
+      type: DataTypes.INTEGER,
+      references: {
+        model: 'Businesses', 
+        key: 'idbusiness',
+      }
+    },
+    explorer_idexplorer: {
+      type: DataTypes.INTEGER,
+      references: {
+        model: 'Explorers', 
+        key: 'idexplorer',
+      }
+    }
+  });
+};
