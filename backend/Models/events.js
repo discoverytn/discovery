@@ -9,14 +9,14 @@ module.exports = (sequelize) => {
     },
     eventName: DataTypes.STRING,
     eventDate: DataTypes.DATE,
-    Explorer_idexplorer: {
+    explorer_idexplorer: {
       type: DataTypes.INTEGER,
       references: {
         model: 'Explorers', 
         key: 'idexplorer',
       }
     },
-    Business_idbusiness: {
+    business_idbusiness: {
       type: DataTypes.INTEGER,
       references: {
         model: 'Businesses', 
