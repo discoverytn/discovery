@@ -3,11 +3,10 @@ const db = require('../database/index');
 // Get all users (Admin, Explorer, Business)
 const getAllUsers = async (req, res) => {
   try {
-    const admins = await db.Admin.findAll();
     const explorers = await db.Explorer.findAll();
     const businesses = await db.Business.findAll();
 
-    res.json({ admins, explorers, businesses });
+    res.json({explorers,businesses});
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: error.message });
@@ -66,41 +65,72 @@ const editUserRole = async (req, res) => {
   const { email, currentRole, newRole } = req.body;
   try {
     let user;
-    switch (currentRole) {
-      case 'admin':
-        user = await db.Admin.findOne({ where: { email } });
-        break;
-      case 'explorer':
-        user = await db.Explorer.findOne({ where: { email } });
-        break;
-      case 'business':
-        user = await db.Business.findOne({ where: { email } });
-        break;
-      default:
-        return res.status(400).json({ error: 'Invalid role' });
+
+    if (newRole === "business") {
+
+      user = await db.Explorer.findOne({ where: { email } });
+      if (user) {
+
+        await db.Business.create({
+          firstname: user.firstname,
+          lastname: user.lastname,
+          email: user.email,
+          password: user.password,
+          description: user.description,
+          image: user.image,
+          badge: user.badge,
+          numOfPosts: user.numOfPosts,
+          mobileNum: user.mobileNum,
+          numOfReviews: user.numOfReviews,
+          businessName: user.businessName,
+          businessDesc: user.businessDesc,
+          businessImg: user.businessImg,
+          long: user.long,
+          latt: user.latt
+
+
+        });
+
+        await user.destroy();
+        console.log("user has been changed from explorer to business owner successfully");
+      } else {
+
+        console.log("user not found in explorer table");
+      }
+
+    } else if (newRole === "explorer") {
+      user = await db.Business.findOne({ where: { email } });
+      if (user) {
+        await db.Explorer.create({
+          firstname: user.firstname,
+          lastname: user.lastname,
+          email: user.email,
+          password: user.password,
+          description: user.description,
+          image: user.image,
+          badge: user.badge,
+          numOfPosts: user.numOfPosts,
+          numOfVisits: user.numOfVisits,
+          coins: user.coins,
+          mobileNum: user.mobileNum,
+          numOfReviews: user.numOfReviews,
+          long: user.long,
+          latt: user.latt
+        
+        });
+        await user.destroy();
+        console.log("user has been changed from business owner to explorer successfully");
+      } else {
+        console.log("user not found in business table");
+      }
     }
     if (!user) {
-      return res.status(404).json({ error: 'User not found' });
+      return res.status(404).json({ error: "user not found" });
     }
 
-    switch (newRole) {
-      case 'admin':
-        await db.Admin.create(user.get());
-        break;
-      case 'explorer':
-        await db.Explorer.create(user.get());
-        break;
-      case 'business':
-        await db.Business.create(user.get());
-        break;
-      default:
-        return res.status(400).json({ error: 'Invalid role' });
-    }
-
-    await user.destroy();
-    res.json({ message: 'User role updated' });
+    res.status(200).json({ message: "role updated successfully" });
   } catch (error) {
-    console.error(error);
+    console.log(error);
     res.status(500).json({ error: error.message });
   }
 };

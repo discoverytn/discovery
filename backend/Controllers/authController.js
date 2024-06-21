@@ -1,5 +1,3 @@
-
-
 const db = require("../database/index");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");

@@ -17,6 +17,8 @@ db.sequelize = sequelize;
 
 db.Admin = require('../models/admin')(sequelize, DataTypes);
 db.Explorer = require('../models/explorer')(sequelize, DataTypes);
+db.Admin = require('../models/admin')(sequelize, DataTypes);
+
 db.Business = require('../models/business')(sequelize, DataTypes);
 db.Posts = require('../models/posts')(sequelize, DataTypes);
 db.Comments = require('../models/comments')(sequelize, DataTypes);
@@ -25,10 +27,9 @@ db.Chat = require('../models/chat')(sequelize, DataTypes);
 db.Events = require('../models/events')(sequelize, DataTypes);
 db.Favorites = require('../models/favorites')(sequelize, DataTypes);
 
-// Define associations
 db.Explorer.hasMany(db.Posts, { foreignKey: 'explorer_idexplorer' });
-db.Business.hasMany(db.Posts, { foreignKey: 'business_idbusiness' });
 db.Posts.belongsTo(db.Explorer, { foreignKey: 'explorer_idexplorer' });
+db.Business.hasMany(db.Posts, { foreignKey: 'business_idbusiness' });
 db.Posts.belongsTo(db.Business, { foreignKey: 'business_idbusiness' });
 
 db.Posts.hasMany(db.Comments, { foreignKey: 'posts_idposts' });
