@@ -1,8 +1,7 @@
-
 const { DataTypes } = require('sequelize');
 
-module.exports = (sequelize, DataTypes) => {
-  const Admin = sequelize.define('Admin', {
+module.exports = (sequelize) => {
+  return sequelize.define('Admin', {
     idadmin: {
       type: DataTypes.INTEGER,
       primaryKey: true,
@@ -16,6 +15,4 @@ module.exports = (sequelize, DataTypes) => {
     image: DataTypes.STRING,
     badge: DataTypes.STRING
   });
-
-  return Admin;
 };

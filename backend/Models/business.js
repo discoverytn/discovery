@@ -1,8 +1,7 @@
-
 const { DataTypes } = require('sequelize');
 
-module.exports = (sequelize, DataTypes) => {
-  const Business = sequelize.define('Business', {
+module.exports = (sequelize) => {
+  return sequelize.define('Business', {
     idbusiness: {
       type: DataTypes.INTEGER,
       primaryKey: true,
@@ -24,6 +23,4 @@ module.exports = (sequelize, DataTypes) => {
     long: DataTypes.DECIMAL,
     latt: DataTypes.DECIMAL
   });
-
-  return Business;
 };
