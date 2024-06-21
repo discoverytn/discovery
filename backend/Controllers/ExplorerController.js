@@ -27,7 +27,7 @@ module.exports = {
                       password: hashedNewPassword
                     }, { where: { email: req.body.email } })
                       .then((result) => {
-                        res.send(result);
+                        res.send("Updated with success",result);
                       })
                       .catch((updateError) => {
                         console.error("Update error:", updateError);

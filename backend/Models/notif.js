@@ -18,7 +18,7 @@ module.exports = (sequelize) => {
     explorer_idexplorer: {
       type: DataTypes.INTEGER,
       references: {
-        model: 'Explorers', 
+        model: 'Explorer', 
         key: 'idexplorer',
       }
     }
