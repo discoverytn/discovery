@@ -1,11 +1,10 @@
 const express = require("express");
 const {
-  editExplorer
-} = require("../Controllers/explorerController");
+  BOEditProfile
+} = require("../Controllers/businessController");
 const router = express.Router();
 
-router.post("/edit", editExplorer);
-
+router.post("/edit", BOEditProfile);
 
 
 module.exports = router;

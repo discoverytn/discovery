@@ -7,12 +7,36 @@ module.exports = (sequelize) => {
       primaryKey: true,
       autoIncrement: true
     },
-    firstname: DataTypes.STRING,
-    lastname: DataTypes.STRING,
-    email: DataTypes.STRING,
-    password: DataTypes.STRING,
-    description: DataTypes.STRING,
-    image: DataTypes.STRING,
-    badge: DataTypes.STRING
+    firstname: {
+      type: DataTypes.STRING,
+      allowNull: true
+    },
+    lastname: {
+      type: DataTypes.STRING,
+      allowNull: true
+    },
+
+    email: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique:true
+    },
+    password: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
+   
+    description: {
+      type: DataTypes.STRING,
+      allowNull: true
+    },
+    image: {
+      type: DataTypes.STRING,
+      allowNull: true
+    },
+    badge: {
+      type: DataTypes.STRING,
+      allowNull: true
+    }
   });
 };

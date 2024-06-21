@@ -7,21 +7,77 @@ module.exports = (sequelize) => {
       primaryKey: true,
       autoIncrement: true
     },
-    firstname: DataTypes.STRING,
-    lastname: DataTypes.STRING,
-    email: DataTypes.STRING,
-    password: DataTypes.STRING,
-    description: DataTypes.STRING,
-    image: DataTypes.STRING,
-    badge: DataTypes.STRING,
-    numOfPosts: DataTypes.STRING,
-    numOfVisits: DataTypes.STRING,
-    coins: DataTypes.STRING,
-    mobileNum: DataTypes.STRING,
-    numOfReviews: DataTypes.STRING,
-    long: DataTypes.DECIMAL,
-    latt: DataTypes.DECIMAL,
-    location:DataTypes.STRING,
+    username:{
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique:true
+    },
+    firstname: {
+      type: DataTypes.STRING,
+      allowNull: true
+    },
+    lastname: {
+      type: DataTypes.STRING,
+      allowNull: true
+    },
+ 
+    email: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique:true
+    },
+    password: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
+    description: {
+      type: DataTypes.STRING,
+      allowNull: true
+    },
+    image: {
+      type: DataTypes.STRING,
+      allowNull: true
+    },
+    badge: {
+      type: DataTypes.STRING,
+      allowNull: true
+    },
+    numOfPosts: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      defaultValue: 0 
+    },
+    numOfVisits: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      defaultValue: 0 
+    },
+    coins: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      defaultValue: 0 
+    },    
+    mobileNum:{
+      type: DataTypes.INTEGER,
+      allowNull: true
+    },
+    numOfReviews: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      defaultValue: 0 
+    },
+    long: {
+      type: DataTypes.DECIMAL,
+      allowNull: true
+    },
+    latt: {
+      type: DataTypes.DECIMAL,
+      allowNull: true
+    },
+    location:{
+      type: DataTypes.STRING,
+      allowNull: true
+    }
    
   });
 };

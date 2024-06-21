@@ -1,6 +1,6 @@
 const db = require('../database/index');
 
-// Get all users (Admin, Explorer, Business)
+
 const getAllUsers = async (req, res) => {
   try {
     const explorers = await db.Explorer.findAll();
@@ -13,7 +13,7 @@ const getAllUsers = async (req, res) => {
   }
 };
 
-// Get user by email
+
 const getUserByEmail = async (req, res) => {
   const { email } = req.params;
   try {
@@ -133,11 +133,35 @@ const editUserRole = async (req, res) => {
     console.log(error);
     res.status(500).json({ error: error.message });
   }
+}
+
+const getAllBO = (req, res) => {
+  db.Business.findAll()
+    .then((result) => {
+      res.send(result);
+    })
+    .catch((error) => {
+      console.error("find all business owners error:", error);
+      res.status(500).send(error);
+    });
+};
+
+const getAllExplorers = (req, res) => {
+  db.Explorer.findAll()
+    .then((result) => {
+      res.send(result);
+    })
+    .catch((error) => {
+      console.error("find all explorers error:", error);
+      res.status(500).send(error);
+    });
 };
 
 module.exports = {
   getAllUsers,
   getUserByEmail,
   deleteUser,
-  editUserRole
+  editUserRole,
+  getAllBO,
+  getAllExplorers
 };
