@@ -1,4 +1,3 @@
-// controllers/adminController.js
 
 const db = require("../database/index");
 
@@ -7,7 +6,6 @@ const getAllUsers = async (req, res) => {
     const admins = await db.Admin.findAll();
     const explorers = await db.Explorer.findAll();
     const businesses = await db.Business.findAll();
-    // Handle response
     res.status(200).json({ admins, explorers, businesses });
   } catch (error) {
     console.error(error);

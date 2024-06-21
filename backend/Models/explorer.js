@@ -1,6 +1,6 @@
 
 const { DataTypes } = require('sequelize');
-
+const sequelize = require('../database/index.js'); 
 module.exports = (sequelize, DataTypes) => {
   const Explorer = sequelize.define('Explorer', {
     idexplorer: {

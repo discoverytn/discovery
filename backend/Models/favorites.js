@@ -1,9 +1,8 @@
-// // favorites.js
-// const { DataTypes } = require('sequelize');
-// const sequelize = require('../database/index.js'); 
+const { DataTypes } = require('sequelize');
+const sequelize = require('../database/index.js'); 
 
-// const Favorites = sequelize.define('favorites', {
-//   // No additional fields needed, since this is a junction table
-// });
+const Favorites = sequelize.define('favorites', {
+  // joint table
+});
 
-// module.exports = Favorites;
+module.exports = Favorites;
