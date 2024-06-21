@@ -4,7 +4,7 @@ const {
   registerExplorer,
   registerBO,
   login,
-} = require("../controllers/authController");
+} = require("../Controllers/authController");
 const router = express.Router();
 
 router.post("/register/explorer", registerExplorer);

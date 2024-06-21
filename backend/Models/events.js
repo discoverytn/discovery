@@ -1,20 +1,27 @@
 const { DataTypes } = require('sequelize');
-const sequelize = require('../database/index.js'); 
 
-const Events = sequelize.define('events', {
-  idevents: {
-    type: DataTypes.INTEGER,
-    primaryKey: true,
-    autoIncrement: true
-  },
-  eventName: DataTypes.STRING,
-  desc: DataTypes.STRING,
-  eventDate: DataTypes.STRING,
-  price: {
-    type: DataTypes.STRING,
-    allowNull: true,
-    defaultValue: "Free"
-  }
-});
-
-module.exports = Events;
+module.exports = (sequelize) => {
+  return sequelize.define('Events', {
+    idevents: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
+    },
+    eventName: DataTypes.STRING,
+    eventDate: DataTypes.DATE,
+    explorer_idexplorer: {
+      type: DataTypes.INTEGER,
+      references: {
+        model: 'Explorers', 
+        key: 'idexplorer',
+      }
+    },
+    business_idbusiness: {
+      type: DataTypes.INTEGER,
+      references: {
+        model: 'Businesses', 
+        key: 'idbusiness',
+      }
+    }
+  });
+};

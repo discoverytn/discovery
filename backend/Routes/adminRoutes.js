@@ -5,8 +5,8 @@ const {
   getAllUsers,
   getUserByEmail,
   deleteUser,
-} = require("../controllers/adminController");
-const { changeUserRole } = require("../controllers/authController");
+} = require("../Controllers/adminController");
+const { changeUserRole } = require("../Controllers/authController");
 
 const router = express.Router();
 

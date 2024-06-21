@@ -1,13 +1,26 @@
 const { DataTypes } = require('sequelize');
-const sequelize = require('../database/index.js'); 
 
-const Chat = sequelize.define('chat', {
-  idchat: {
-    type: DataTypes.INTEGER,
-    primaryKey: true,
-    autoIncrement: true
-  },
-  body: DataTypes.TEXT
-});
-
-module.exports = Chat;
+module.exports = (sequelize) => {
+  return sequelize.define('Chat', {
+    idchat: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
+    },
+    message: DataTypes.STRING,
+    explorer_idexplorer: {
+      type: DataTypes.INTEGER,
+      references: {
+        model: 'Explorers', 
+        key: 'idexplorer',
+      }
+    },
+    business_idbusiness: {
+      type: DataTypes.INTEGER,
+      references: {
+        model: 'Businesses', 
+        key: 'idbusiness',
+      }
+    }
+  });
+};

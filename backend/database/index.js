@@ -1,4 +1,3 @@
-
 const { Sequelize, DataTypes } = require('sequelize');
 require('dotenv').config();
 
@@ -13,12 +12,20 @@ const sequelize = new Sequelize(
 );
 
 const db = {};
+db.Sequelize = Sequelize;
+db.sequelize = sequelize;
+
+db.Admin = require('../models/admin')(sequelize, DataTypes);
 db.Explorer = require('../models/explorer')(sequelize, DataTypes);
 db.Admin = require('../models/admin')(sequelize, DataTypes);
 
 db.Business = require('../models/business')(sequelize, DataTypes);
-// db.Posts = require('../models/posts')(sequelize, DataTypes);
-
+db.Posts = require('../models/posts')(sequelize, DataTypes);
+db.Comments = require('../models/comments')(sequelize, DataTypes);
+db.Notif = require('../models/notif')(sequelize, DataTypes);
+db.Chat = require('../models/chat')(sequelize, DataTypes);
+db.Events = require('../models/events')(sequelize, DataTypes);
+db.Favorites = require('../models/favorites')(sequelize, DataTypes);
 
 db.Explorer.hasMany(db.Posts, { foreignKey: 'explorer_idexplorer' });
 db.Posts.belongsTo(db.Explorer, { foreignKey: 'explorer_idexplorer' });

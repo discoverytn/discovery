@@ -1,5 +1,3 @@
-
-
 const db = require("../database/index");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
@@ -70,7 +68,7 @@ const login = async (req, res) => {
     }
     const token = jwt.sign(
       { id: user.id, email: user.email, role },
-      process.env.JWT_SECRET || "defaultSecretKey"
+      process.env.JWT_SECRET
     );
     res.json({ token });
   } catch (error) {
