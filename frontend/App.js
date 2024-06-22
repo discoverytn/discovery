@@ -1,20 +1,42 @@
+import 'react-native-gesture-handler';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import React from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
+import { enableScreens } from 'react-native-screens';
 
-export default function App() {
+import HomeScreen from './screens/HomeScreen';
+import LoginScreen from './screens/LoginScreen';
+import SignupScreen from './screens/SignupScreen';
+import Intro1 from './screens/Intro1'
+import Intro2 from './screens/Intro2'
+
+enableScreens();
+
+const Tab = createMaterialTopTabNavigator();
+
+function MainNavigator() {
   return (
-    <View style={styles.container}>
-      <Text>Homepage</Text>
-      <StatusBar style="auto" />
-    </View>
+    <Tab.Navigator
+      screenOptions={{
+        tabBarVisible: false, 
+        swipeEnabled: true,
+        headerShown: false,
+      }}
+    >
+      <Tab.Screen name=" " component={HomeScreen} />
+      <Tab.Screen name="  " component={LoginScreen} />
+      <Tab.Screen name="   " component={SignupScreen} />
+      <Tab.Screen name="    " component={Intro1} />
+      <Tab.Screen name="     " component={Intro2} />
+    </Tab.Navigator>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+export default function App() {
+  return (
+    <NavigationContainer>
+      <MainNavigator />
+    </NavigationContainer>
+  );
+}
