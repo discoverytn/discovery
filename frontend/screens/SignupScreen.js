@@ -70,7 +70,7 @@ export default function SignupScreen() {
           style={styles.picker}
           onValueChange={(itemValue) => setRole(itemValue)}
         >
-          <Picker.Item label="Select role" value="" />
+          <Picker.Item label="Select Role" value="" />
           <Picker.Item label="Explorer" value="explorer" />
           <Picker.Item label="Business Owner" value="business" />
         </Picker>
