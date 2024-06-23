@@ -1,65 +1,47 @@
+import 'react-native-gesture-handler';
+import { StatusBar } from 'expo-status-bar';
 import React from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
+import { NavigationContainer } from '@react-navigation/native';
+import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
+import { enableScreens } from 'react-native-screens';
 
-const HomeScreen = ({ navigation }) => {
+import HomeScreen from './screens/HomeScreen';
+import LoginScreen from './screens/LoginScreen';
+import SignupScreen from './screens/SignupScreen';
+import Intro1 from './screens/Intro1';
+import Intro2 from './screens/Intro2';
+import Intro3 from './screens/Intro3';
+
+enableScreens();
+
+const Tab = createMaterialTopTabNavigator();
+
+function MainNavigator() {
   return (
-    <View style={styles.container}>
-      <Image
-        source={require("./assets/djeem.jpg")} 
-        style={styles.image}
-      />
-      <Image
-        source={require("./assets/1.jpg")}
-        style={styles.headlineImage}
-      />
-      <Text style={styles.subheading}>
-        At Friends tours and travel, we customize reliable and trustworthy educational tours to destinations all over the world.
-      </Text>
-      <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('SignUp')}>
-        <Text style={styles.buttonText}>Get Started</Text>
-      </TouchableOpacity>
-    </View>
+    <Tab.Navigator
+      screenOptions={{
+        tabBarVisible: false, // this is deprecated but keeping it for older versions when testing
+        swipeEnabled: true,
+        headerShown: false,
+        tabBarStyle: { display: 'none' }, // This also hides the tab bar
+      }}
+    >
+      <Tab.Screen name="Home" component={HomeScreen} options={{ tabBarLabel: () => null }} />
+      <Tab.Screen name="Intro1" component={Intro1} options={{ tabBarLabel: () => null }} />
+      <Tab.Screen name="Intro2" component={Intro2} options={{ tabBarLabel: () => null }} />
+      <Tab.Screen name="Intro3" component={Intro3} options={{ tabBarLabel: () => null }} />
+      <Tab.Screen name="LoginScreen" component={LoginScreen} options={{ tabBarLabel: () => null }} />
+      <Tab.Screen name="Signup" component={SignupScreen} options={{ tabBarLabel: () => null }} />
+
+    </Tab.Navigator>
   );
-};
+}
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-    backgroundColor: '#fff',
-  },
-  image: {
-    width: '100%',
-    height: 300,
-    resizeMode: 'contain',
-    marginBottom: 20,
-  },
-  headlineImage: {
-    width: '100%',
-    height: 100,
-    resizeMode: 'contain',
-    marginBottom: 20,
-  },
-  subheading: {
-    fontSize: 16,
-    textAlign: 'center',
-    marginBottom: 40,
-    paddingHorizontal: 20,
-  },
-  button: {
-    backgroundColor: '#007BFF',
-    padding: 15,
-    borderRadius: 6,
-    alignItems: 'center',
-    width: '100%',
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-});
-
-export default HomeScreen;
+export default function App() {
+  return (
+    <NavigationContainer>
+      <MainNavigator />
+      <StatusBar style="auto" />
+    </NavigationContainer>
+  );
+}

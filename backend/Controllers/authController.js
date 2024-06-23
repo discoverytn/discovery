@@ -3,9 +3,22 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { editUserRole } = require("./adminController");
 
+const uniqueChecker = async (username, email) => {
+  const explorer = await db.Explorer.findOne({ where: { username } }) || await db.Explorer.findOne({ where: { email } });
+  const business = await db.Business.findOne({ where: { username } }) || await db.Business.findOne({ where: { email } });
+  const admin = await db.Admin.findOne({ where: { username } }) || await db.Admin.findOne({ where: { email } });
+
+  return !explorer && !business && !admin;
+};
+
 const registerExplorer = async (req, res) => {
   const { username, email, password } = req.body;
   try {
+    const isUnique = await uniqueChecker(username, email);
+    if (!isUnique) {
+      return res.status(400).json({ error: "Username or email already exists" });
+    }
+
     const hashedPassword = await bcrypt.hash(password, 10);
     const newExplorer = await db.Explorer.create({
       username,
@@ -22,6 +35,11 @@ const registerExplorer = async (req, res) => {
 const registerBO = async (req, res) => {
   const { email, username, password, businessName, BOid, credImg } = req.body;
   try {
+    const isUnique = await uniqueChecker(username, email);
+    if (!isUnique) {
+      return res.status(400).json({ error: "Username or email already exists" });
+    }
+
     const hashedPassword = await bcrypt.hash(password, 10);
     const newBusiness = await db.Business.create({
       email,
@@ -44,6 +62,7 @@ const login = async (req, res) => {
     if (!email) {
       return res.status(400).json({ error: "Please insert your email" });
     }
+
     let user = await db.Explorer.findOne({ where: { email } });
     if (!user) {
       user = await db.Business.findOne({ where: { email } });
@@ -54,10 +73,12 @@ const login = async (req, res) => {
     if (!user) {
       return res.status(401).json({ error: "Please re-check your info" });
     }
+
     const pwChecker = await bcrypt.compare(password, user.password);
     if (!pwChecker) {
       return res.status(401).json({ error: "Wrong password" });
     }
+
     let role;
     if (user instanceof db.Admin) {
       role = "admin";
@@ -66,10 +87,12 @@ const login = async (req, res) => {
     } else if (user instanceof db.Business) {
       role = "business";
     }
+
     const token = jwt.sign(
       { id: user.id, email: user.email, role },
       process.env.JWT_SECRET
     );
+
     res.json({ token });
   } catch (error) {
     console.error(error);
