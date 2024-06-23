@@ -8,8 +8,9 @@ import { enableScreens } from 'react-native-screens';
 import HomeScreen from './screens/HomeScreen';
 import LoginScreen from './screens/LoginScreen';
 import SignupScreen from './screens/SignupScreen';
-import Intro1 from './screens/Intro1'
-import Intro2 from './screens/Intro2'
+import Intro1 from './screens/Intro1';
+import Intro2 from './screens/Intro2';
+import Intro3 from './screens/Intro3';
 
 enableScreens();
 
@@ -19,16 +20,19 @@ function MainNavigator() {
   return (
     <Tab.Navigator
       screenOptions={{
-        tabBarVisible: false, 
+        tabBarVisible: false, // this is deprecated but keeping it for older versions when testing
         swipeEnabled: true,
         headerShown: false,
+        tabBarStyle: { display: 'none' }, // This also hides the tab bar
       }}
     >
-      <Tab.Screen name=" " component={HomeScreen} />
-      <Tab.Screen name="  " component={LoginScreen} />
-      <Tab.Screen name="   " component={SignupScreen} />
-      <Tab.Screen name="    " component={Intro1} />
-      <Tab.Screen name="     " component={Intro2} />
+      <Tab.Screen name="Home" component={HomeScreen} options={{ tabBarLabel: () => null }} />
+      <Tab.Screen name="Intro1" component={Intro1} options={{ tabBarLabel: () => null }} />
+      <Tab.Screen name="Intro2" component={Intro2} options={{ tabBarLabel: () => null }} />
+      <Tab.Screen name="Intro3" component={Intro3} options={{ tabBarLabel: () => null }} />
+      <Tab.Screen name="LoginScreen" component={LoginScreen} options={{ tabBarLabel: () => null }} />
+      <Tab.Screen name="Signup" component={SignupScreen} options={{ tabBarLabel: () => null }} />
+
     </Tab.Navigator>
   );
 }
@@ -37,6 +41,7 @@ export default function App() {
   return (
     <NavigationContainer>
       <MainNavigator />
+      <StatusBar style="auto" />
     </NavigationContainer>
   );
 }
