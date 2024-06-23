@@ -1,22 +1,24 @@
 import React from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 
-const Intro2 = ({ navigation }) => {
+const Intro2 = () => {
+  const navigation = useNavigation();
   return (
     <View style={styles.container}>
       <Image
-        source={require("../assets/kairouen.jpg")} 
+        source={require("../assets/souq.jpg")} 
         style={styles.image}
       />
       <Image
-        source={require("../assets/intro2title.png")}
+        source={require("../assets/intro2title.jpg")}
         style={styles.headlineImage}
       />
       <Text style={styles.subheading}>
-        At Friends tours and travel, we customize reliable and trustworthy educational tours to destinations all over the world.
+      Inviting all Innovators to showcase their unique ideas to explorers and offer them unforgettable experiences crafted just for them!
       </Text>
-      <TouchableOpacity style={styles.button} >
-        <Text style={styles.buttonText}>Get Started</Text>
+      <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Intro3')}>
+        <Text style={styles.buttonText}>Next</Text>
       </TouchableOpacity>
     </View>
   );
@@ -55,7 +57,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   button: {
-    backgroundColor: '#007BFF',
+    backgroundColor: '#00aacc',
     padding: 15,
     borderRadius: 6,
     alignItems: 'center',

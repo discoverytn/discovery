@@ -1,37 +1,63 @@
 import 'react-native-gesture-handler';
-import React ,{useState}from 'react';
-import { StyleSheet, Text,TextInput,TouchableOpacity, View } from 'react-native';
+import React , {useState} from 'react';
+import { View, Text, TextInput, Button, TouchableOpacity, StyleSheet, Image } from 'react-native';
+import { Picker } from '@react-native-picker/picker';
+import { useNavigation } from '@react-navigation/native';
 
 export default function SignupScreen() {
+  const navigation=useNavigation();
+  
+    const [name, setName] = useState('');
     const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+    const [password, setPassword] = useState('');
+    const [role, setRole] = useState('');
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Login</Text>
-      <Text style={styles.subHeader}>Please enter your details to login</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Email"
-        value={email}
-        onChangeText={setEmail}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Password"
-        secureTextEntry
-        value={password}
-        onChangeText={setPassword}
-      />
-      <TouchableOpacity style={styles.button}>
-        <Text style={styles.buttonText}>Login</Text>
-      </TouchableOpacity>
-      <Text style={styles.loginText}>
-        Don't have an account?{' '}
-        <Text style={styles.loginLink} onPress={() => navigation.navigate('SignUp')}>
-          Sign Up
-        </Text>
+    <Text style={styles.header}>Sign up now</Text>
+    <Text style={styles.subHeader}>Please fill the details and create account</Text>
+    <TextInput
+      style={styles.input}
+      placeholder="Name"
+      value={name}
+      onChangeText={setName}
+    />
+    <TextInput
+      style={styles.input}
+      placeholder="Email"
+      value={email}
+      onChangeText={setEmail}
+    />
+    <TextInput
+      style={styles.input}
+      placeholder="Password"
+      secureTextEntry
+      value={password}
+      onChangeText={setPassword}
+    />
+    <Text style={styles.passwordNote}>Password must be 8 characters</Text>
+    
+    <View style={styles.pickerContainer}>
+        <Picker
+          selectedValue={role}
+          style={styles.picker}
+          onValueChange={(itemValue) => setRole(itemValue)}
+        >
+          <Picker.Item label="Select role" value="" />
+          <Picker.Item label="Explorer" value="explorer" />
+          <Picker.Item label="Business Owner" value="business_owner" />
+        </Picker>
+      </View>
+
+    <TouchableOpacity style={styles.button}>
+      <Text style={styles.buttonText}>Sign Up</Text>
+    </TouchableOpacity>
+    <Text style={styles.loginText}>
+      Already have an account?{' '}
+      <Text style={styles.loginLink} onPress={() => navigation.navigate('LoginScreen')}>
+        Login
       </Text>
-    </View>
+    </Text>
+  </View>
   );
 }
 
@@ -61,8 +87,26 @@ const styles = StyleSheet.create({
       borderRadius: 6,
       marginBottom: 20,
     },
+    passwordNote: {
+      fontSize: 12,
+      color: '#888',
+      marginBottom: 20,
+      textAlign: 'center',
+    },
+    pickerContainer: {
+      borderWidth: 1,
+      borderColor: '#00aacc', // Cyan color
+      borderRadius: 6,
+      marginBottom: 38,
+      backgroundColor: '#fff', // Optional: Add background color if needed
+    },
+    picker: {
+      height: 50,
+      width: '100%',
+      paddingHorizontal: 10,
+    },
     button: {
-      backgroundColor: '#007BFF',
+      backgroundColor: '#00aacc',
       padding: 15,
       borderRadius: 6,
       alignItems: 'center',
@@ -76,9 +120,12 @@ const styles = StyleSheet.create({
     loginText: {
       textAlign: 'center',
       marginBottom: 20,
+      fontSize: 16,
+  
     },
     loginLink: {
       color: '#007BFF',
+     fontWeight: 'bold'
     },
     orConnectText: {
       textAlign: 'center',

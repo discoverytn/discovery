@@ -16,7 +16,7 @@ export default function HomeScreen() {
         <Text style={styles.subtitle}>Next Adventure</Text>
         <TouchableOpacity
           style={styles.button}
-          onPress={() => navigation.navigate('  ')}
+          onPress={() => navigation.navigate('Intro1')}
         >
           <Text style={styles.buttonText}>Explore</Text>
         </TouchableOpacity>
