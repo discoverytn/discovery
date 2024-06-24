@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { View, Text, Image, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
-// Import your selected GIF
 import selectedLogo from '../assets/selectedLogo.gif';
 
 const categories = [
@@ -32,7 +31,7 @@ const CategoriesScreen = () => {
 
   const handleProceed = () => {
     if (selectedCategories.length >= 3) {
-      navigation.navigate('Home'); // Navigate to home screen or next step
+      navigation.navigate('Home'); 
     } else {
       alert('Please select at least 3 categories.');
     }
