@@ -19,10 +19,10 @@ export default function SignupScreen() {
       const payload = { username: name, email, password };
 
       if (role === 'explorer') {
-        endpoint = 'http://localhost:3000/auth/register/explorer';
+        endpoint = 'http://192.168.1.19:3000/auth/register/explorer';
       } else if (role === 'business') {
        
-        endpoint = 'http://localhost:3000/auth/register/business';
+        endpoint = 'http://192.168.1.19:3000/auth/register/business';
       } else {
        
         return Alert.alert('Select a role', 'Please select a role to sign up');
