@@ -15,62 +15,228 @@ const LoginScreen = () => {
   const navigation = useNavigation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showResetForm, setShowResetForm] = useState(false);
+  const [resetEmail, setResetEmail] = useState("");
+  const [resetCode, setResetCode] = useState("");
+  const [showNewPasswordForm, setShowNewPasswordForm] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmNewPassword, setConfirmNewPassword] = useState("");
 
-  const Login = async () => {
+  const handleLogin = async () => {
     try {
       const payload = { email, password };
-      const endpoint = "http://192.168.1.8:3000/auth/login";
+      const endpoint = `http://${process.env.DB_HOST}:${PORT}/auth/login`;
 
       const response = await axios.post(endpoint, payload);
 
       if (response.status === 200) {
         const { token } = response.data;
-        const decodedToken = jwtDecode(token);
-        const { role } = decodedToken;
+        const { role } = jwtDecode(token);
 
         if (role === "explorer") {
-          navigation.navigate("Home"); // Badel
+          navigation.navigate("Home"); // Navigate to explorer's dashboard
         } else if (role === "business") {
-          navigation.navigate("Home"); // Badel
+          navigation.navigate("Home"); // Navigate to business owner's dashboard
         } else if (role === "admin") {
-          navigation.navigate("Home"); // Badel
+          navigation.navigate("Home"); // Navigate to admin's dashboard
         }
       } else {
-        Alert.alert("Login Failed, Please re-check your info");
+        Alert.alert("Login Failed", "Invalid credentials. Please try again.");
       }
     } catch (error) {
       console.error("Login error:", error);
-      Alert.alert("Login Failed");
+      Alert.alert(
+        "Login Failed",
+        "An error occurred while logging in. Please try again later."
+      );
     }
+  };
+
+  const sendResetCode = async () => {
+    try {
+      const endpoint = `http://${process.env.DB_HOST}:${PORT}/auth/send-reset-code`;
+      const payload = { email: resetEmail };
+
+      const response = await axios.post(endpoint, payload);
+
+      if (response.status === 200) {
+        Alert.alert("Reset Code Sent", "Check your email for the reset code.");
+        setShowResetForm(true);
+      } else {
+        Alert.alert(
+          "Failed to Send Code",
+          "Please check your email address and try again."
+        );
+      }
+    } catch (error) {
+      console.error("Send reset code error:", error);
+      Alert.alert(
+        "Failed to Send Code",
+        "An error occurred. Please try again later."
+      );
+    }
+  };
+
+  const verifyResetCode = async () => {
+    try {
+      const endpoint = `http://${process.env.DB_HOST}:${PORT}/auth/verify-code`;
+      const payload = { email: resetEmail, code: resetCode };
+
+      const response = await axios.post(endpoint, payload);
+
+      if (response.status === 200) {
+        Alert.alert("Code Verified", "You can now reset your password.");
+        setShowNewPasswordForm(true);
+      } else {
+        Alert.alert("Invalid Code", "Please check your code and try again.");
+      }
+    } catch (error) {
+      console.error("Verify reset code error:", error);
+      Alert.alert(
+        "Failed to Verify Code",
+        "An error occurred. Please try again later."
+      );
+    }
+  };
+
+  const resetPassword = async () => {
+    if (newPassword !== confirmNewPassword) {
+      Alert.alert(
+        "Passwords do not match",
+        "Please ensure both passwords match."
+      );
+      return;
+    }
+
+    try {
+      const endpoint = `http://${process.env.DB_HOST}:${PORT}/auth/reset-password`;
+      const payload = { email: resetEmail, newPassword };
+
+      const response = await axios.post(endpoint, payload);
+
+      if (response.status === 200) {
+        Alert.alert(
+          "Password Reset",
+          "Your password has been reset successfully."
+        );
+        setShowResetForm(false);
+        setShowNewPasswordForm(false);
+        setResetEmail("");
+        setResetCode("");
+        setNewPassword("");
+        setConfirmNewPassword("");
+      } else {
+        Alert.alert("Failed to Reset Password", "Please try again later.");
+      }
+    } catch (error) {
+      console.error("Reset password error:", error);
+      if (error.response) {
+        console.error("Server responded with:", error.response.data);
+      }
+      Alert.alert(
+        "Failed to Reset Password",
+        "An error occurred. Please try again later."
+      );
+    }
+  };
+
+  const toggleResetForm = () => {
+    setShowResetForm(!showResetForm);
+    setShowNewPasswordForm(false);
   };
 
   return (
     <View style={styles.container}>
       <View style={styles.loginContainer}>
-        <Text style={styles.header}>Log in to Discovery</Text>
-        <Text style={styles.subHeader}>Enter your details below</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Email"
-          value={email}
-          onChangeText={setEmail}
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Password"
-          secureTextEntry
-          value={password}
-          onChangeText={setPassword}
-        />
-        <TouchableOpacity style={styles.button} onPress={Login}>
-          <Text style={styles.buttonText}>Log In</Text>
-        </TouchableOpacity>
+        {!showResetForm ? (
+          <>
+            <Text style={styles.header}>Log in to Discovery</Text>
+            <Text style={styles.subHeader}>Enter your details below</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Email"
+              value={email}
+              onChangeText={setEmail}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Password"
+              secureTextEntry
+              value={password}
+              onChangeText={setPassword}
+            />
+            <TouchableOpacity style={styles.button} onPress={handleLogin}>
+              <Text style={styles.buttonText}>Log In</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={toggleResetForm}>
+              <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
+            </TouchableOpacity>
+          </>
+        ) : (
+          <>
+            {!showNewPasswordForm ? (
+              <View>
+                <Text style={styles.header}>Reset Password</Text>
+                <Text style={styles.subHeader}>
+                  Enter your email to receive a reset code
+                </Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Enter your email"
+                  value={resetEmail}
+                  onChangeText={setResetEmail}
+                />
+                <TouchableOpacity style={styles.button} onPress={sendResetCode}>
+                  <Text style={styles.buttonText}>Send Code</Text>
+                </TouchableOpacity>
+
+                <TextInput
+                  style={styles.input}
+                  placeholder="Enter the code"
+                  value={resetCode}
+                  onChangeText={setResetCode}
+                />
+                <TouchableOpacity
+                  style={styles.button}
+                  onPress={verifyResetCode}
+                >
+                  <Text style={styles.buttonText}>Verify Code</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity onPress={toggleResetForm}>
+                  <Text style={styles.loginText}>Cancel Reset Password</Text>
+                </TouchableOpacity>
+              </View>
+            ) : (
+              <View>
+                <Text style={styles.header}>Set New Password</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Enter new password"
+                  secureTextEntry
+                  value={newPassword}
+                  onChangeText={setNewPassword}
+                />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Confirm new password"
+                  secureTextEntry
+                  value={confirmNewPassword}
+                  onChangeText={setConfirmNewPassword}
+                />
+                <TouchableOpacity style={styles.button} onPress={resetPassword}>
+                  <Text style={styles.buttonText}>Reset Password</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+          </>
+        )}
+
         <TouchableOpacity onPress={() => navigation.navigate("Signup")}>
           <Text style={styles.loginText}>
             Don't have an account? <Text style={styles.loginLink}>Sign Up</Text>
           </Text>
         </TouchableOpacity>
-        <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
       </View>
     </View>
   );
@@ -130,6 +296,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     color: "#007BFF",
     fontWeight: "bold",
+    textDecorationLine: "underline",
   },
 });
 

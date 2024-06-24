@@ -1,21 +1,43 @@
 require("dotenv").config();
 const express = require("express");
 const adminRoutes = require("./routes/adminRoutes");
-const authRoutes = require("./routes/authRoutes");
+const authRoutes = require("./Routes/authRoutes");
 const explorerRoutes = require("./routes/explorerRoutes");
 const businessRoutes = require("./routes/businessRoutes");
 const db = require("./database/index");
 const app = express();
+const transporter = require("./resetCode"); // Import your nodemailer configuration
 
 app.use(express.json());
 
 app.use("/admin", adminRoutes);
-app.use("/auth", authRoutes);
+app.use("/auth", authRoutes); 
 app.use("/explorer", explorerRoutes);
 app.use("/business", businessRoutes);
 
-const PORT = process.env.PORT ;
+// Route to send email using Nodemailer
+app.post("/send-email", async (req, res) => {
+  try {
+    const { to, subject, text } = req.body;
+
+    // Send mail with defined transport object
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to,
+      subject,
+      text,
+    });
+
+    console.log("Email sent successfully");
+    res.status(200).send("Email sent successfully");
+  } catch (error) {
+    console.error("Error sending email:", error);
+    res.status(500).json({ error: "Failed to send email" });
+  }
+});
+
+const PORT = process.env.PORT 
 
 app.listen(PORT, () => {
-  console.log(`Server listening at http://${process.env.DB_HOST}:${process.env.PORT}`); 
+  console.log(`Server listening at http://${process.env.DB_HOST}:${PORT}`);
 });

@@ -1,83 +1,85 @@
-const { DataTypes } = require('sequelize');
+const { DataTypes } = require("sequelize");
 
 module.exports = (sequelize) => {
-  return sequelize.define('Explorer', {
+  return sequelize.define("Explorer", {
     idexplorer: {
       type: DataTypes.INTEGER,
       primaryKey: true,
-      autoIncrement: true
+      autoIncrement: true,
     },
-    username:{
+    username: {
       type: DataTypes.STRING,
       allowNull: false,
-      unique:true
+      unique: true,
     },
     firstname: {
       type: DataTypes.STRING,
-      allowNull: true
+      allowNull: true,
     },
     lastname: {
       type: DataTypes.STRING,
-      allowNull: true
+      allowNull: true,
     },
- 
     email: {
       type: DataTypes.STRING,
       allowNull: false,
-      unique:true
+      unique: true,
     },
     password: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: false,
     },
     description: {
       type: DataTypes.STRING,
-      allowNull: true
+      allowNull: true,
     },
     image: {
       type: DataTypes.STRING,
-      allowNull: true
+      allowNull: true,
     },
     badge: {
       type: DataTypes.STRING,
-      allowNull: true
+      allowNull: true,
     },
     numOfPosts: {
       type: DataTypes.INTEGER,
       allowNull: true,
-      defaultValue: 0 
+      defaultValue: 0,
     },
     numOfVisits: {
       type: DataTypes.INTEGER,
       allowNull: true,
-      defaultValue: 0 
+      defaultValue: 0,
     },
     coins: {
       type: DataTypes.INTEGER,
       allowNull: true,
-      defaultValue: 0 
-    },    
-    mobileNum:{
+      defaultValue: 0,
+    },
+    mobileNum: {
       type: DataTypes.INTEGER,
-      allowNull: true
+      allowNull: true,
     },
     numOfReviews: {
       type: DataTypes.INTEGER,
       allowNull: true,
-      defaultValue: 0 
+      defaultValue: 0,
     },
     long: {
       type: DataTypes.DECIMAL,
-      allowNull: true
+      allowNull: true,
     },
     latt: {
       type: DataTypes.DECIMAL,
-      allowNull: true
+      allowNull: true,
     },
-    location:{
+    location: {
       type: DataTypes.STRING,
-      allowNull: true
-    }
-   
+      allowNull: true,
+    },
+    resetCode: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
   });
 };
