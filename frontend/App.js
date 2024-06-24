@@ -12,6 +12,7 @@ import Intro1 from './screens/Intro1';
 import Intro2 from './screens/Intro2';
 import Intro3 from './screens/Intro3';
 import CategoriesScreen from './screens/CategoriesScreen';
+import DiscoverScreen from './screens/DiscoverScreen';
 
 enableScreens();
 
@@ -34,6 +35,7 @@ function MainNavigator() {
       <Tab.Screen name="LoginScreen" component={LoginScreen} options={{ tabBarLabel: () => null }} />
       <Tab.Screen name="Signup" component={SignupScreen} options={{ tabBarLabel: () => null }} />
       <Tab.Screen name="Categories" component={CategoriesScreen} options={{ tabBarLabel: () => null }} />
+      <Tab.Screen name="Discover" component={DiscoverScreen} options={{ tabBarLabel: () => null }} />
 
     </Tab.Navigator>
   );

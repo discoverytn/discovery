@@ -25,7 +25,7 @@ const LoginScreen = () => {
   const handleLogin = async () => {
     try {
       const payload = { email, password };
-      const endpoint = `http://${process.env.DB_HOST}:${PORT}/auth/login`;
+      const endpoint = `http://192.168.1.19:3000/auth/login`;
 
       const response = await axios.post(endpoint, payload);
 
@@ -54,7 +54,7 @@ const LoginScreen = () => {
 
   const sendResetCode = async () => {
     try {
-      const endpoint = `http://${process.env.DB_HOST}:${PORT}/auth/send-reset-code`;
+      const endpoint = `http://192.168.1.19:3000/auth/send-reset-code`;
       const payload = { email: resetEmail };
 
       const response = await axios.post(endpoint, payload);
@@ -79,7 +79,7 @@ const LoginScreen = () => {
 
   const verifyResetCode = async () => {
     try {
-      const endpoint = `http://${process.env.DB_HOST}:${PORT}/auth/verify-code`;
+      const endpoint = `http://192.168.1.19:3000/auth/verify-code`;
       const payload = { email: resetEmail, code: resetCode };
 
       const response = await axios.post(endpoint, payload);
@@ -109,7 +109,7 @@ const LoginScreen = () => {
     }
 
     try {
-      const endpoint = `http://${process.env.DB_HOST}:${PORT}/auth/reset-password`;
+      const endpoint = `http://192.168.1.19:3000/auth/reset-password`;
       const payload = { email: resetEmail, newPassword };
 
       const response = await axios.post(endpoint, payload);
