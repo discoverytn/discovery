@@ -29,10 +29,10 @@ const SignupScreen = () => {
       let payload;
 
       if (role === "explorer") {
-        endpoint = "http://192.168.1.19:3000/auth/register/explorer";
+        endpoint = `http://localhost:3000/auth/register/explorer`;
         payload = { username: name, email, password };
       } else if (role === "business") {
-        endpoint = "http://192.168.1.19:3000/auth/register/business";
+        endpoint = `http://192.168.1.19:3000/auth/register/business`;
         const formData = new FormData();
         formData.append("username", name);
         formData.append("email", email);

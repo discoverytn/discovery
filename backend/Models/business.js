@@ -1,95 +1,99 @@
-const { DataTypes } = require('sequelize');
+const { DataTypes } = require("sequelize");
 
 module.exports = (sequelize) => {
-  return sequelize.define('Business', {
+  return sequelize.define("Business", {
     idbusiness: {
       type: DataTypes.INTEGER,
       primaryKey: true,
-      autoIncrement: true
+      autoIncrement: true,
     },
-    username:{
+    username: {
       type: DataTypes.STRING,
       allowNull: false,
-      unique:true
+      unique: true,
     },
     firstname: {
       type: DataTypes.STRING,
-      allowNull: true
+      allowNull: true,
     },
     lastname: {
       type: DataTypes.STRING,
-      allowNull: true
+      allowNull: true,
     },
 
     email: {
       type: DataTypes.STRING,
       allowNull: false,
-      unique:true
+      unique: true,
     },
     password: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: false,
     },
     location: {
       type: DataTypes.STRING,
-      allowNull: true
+      allowNull: true,
     },
     description: {
       type: DataTypes.STRING,
-      allowNull: true
+      allowNull: true,
     },
     image: {
       type: DataTypes.STRING,
-      allowNull: true
+      allowNull: true,
     },
     badge: {
       type: DataTypes.STRING,
-      allowNull: true
+      allowNull: true,
     },
     numOfPosts: {
       type: DataTypes.INTEGER,
-      allowNull: true
+      allowNull: true,
     },
     mobileNum: {
       type: DataTypes.INTEGER,
-      allowNull: true
+      allowNull: true,
     },
     numOfReviews: {
       type: DataTypes.INTEGER,
       allowNull: true,
-      defaultValue: 0 
+      defaultValue: 0,
     },
     businessName: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: false,
     },
     businessDesc: {
       type: DataTypes.STRING,
-      allowNull: true
+      allowNull: true,
     },
     businessImg: {
       type: DataTypes.STRING,
-      allowNull: true
+      allowNull: true,
     },
     BOid: {
       type: DataTypes.INTEGER,
-      allowNull: false
+      allowNull: false,
     },
     credImg: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: false,
     },
     long: {
       type: DataTypes.DECIMAL,
-      allowNull: true
+      allowNull: true,
     },
     latt: {
       type: DataTypes.DECIMAL,
-      allowNull: true
+      allowNull: true,
     },
-    location:{
+    location: {
       type: DataTypes.STRING,
-      allowNull: true
-    }
+      allowNull: true,
+    },
+    resetCode: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
   });
 };
