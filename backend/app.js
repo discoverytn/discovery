@@ -6,7 +6,7 @@ const explorerRoutes = require("./routes/explorerRoutes");
 const businessRoutes = require("./routes/businessRoutes");
 const db = require("./database/index");
 const app = express();
-const transporter = require("./resetCode"); // Import your nodemailer configuration
+const transporter = require("./resetCode"); 
 
 app.use(express.json());
 
