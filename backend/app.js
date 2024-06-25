@@ -6,7 +6,7 @@ const explorerRoutes = require("./routes/explorerRoutes");
 const businessRoutes = require("./routes/businessRoutes");
 const db = require("./database/index");
 const app = express();
-const transporter = require("./resetCode"); // Import your nodemailer configuration
+const transporter = require("./resetCode"); 
 
 app.use(express.json());
 
@@ -15,12 +15,10 @@ app.use("/auth", authRoutes);
 app.use("/explorer", explorerRoutes);
 app.use("/business", businessRoutes);
 
-// Route to send email using Nodemailer
 app.post("/send-email", async (req, res) => {
   try {
     const { to, subject, text } = req.body;
 
-    // Send mail with defined transport object
     await transporter.sendMail({
       from: process.env.EMAIL_USER,
       to,

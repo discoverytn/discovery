@@ -13,6 +13,9 @@ import Intro2 from './screens/Intro2';
 import Intro3 from './screens/Intro3';
 import CategoriesScreen from './screens/CategoriesScreen';
 import DiscoverScreen from './screens/DiscoverScreen';
+import FavoritesScreen from './screens/FavoritesScreen';
+import ScheduleEventScreen from './screens/ScheduleEventScreen';
+import EventListScreen from './screens/EventListScreen';
 
 enableScreens();
 
@@ -25,7 +28,7 @@ function MainNavigator() {
         tabBarVisible: false, // this is deprecated but keeping it for older versions when testing
         swipeEnabled: true,
         headerShown: false,
-        tabBarStyle: { display: 'none' }, // This also hides the tab bar
+        tabBarStyle: { display: 'none' }, // This hides the tab bar Testing purposes
       }}
     >
       <Tab.Screen name="Home" component={HomeScreen} options={{ tabBarLabel: () => null }} />
@@ -36,7 +39,9 @@ function MainNavigator() {
       <Tab.Screen name="Signup" component={SignupScreen} options={{ tabBarLabel: () => null }} />
       <Tab.Screen name="Categories" component={CategoriesScreen} options={{ tabBarLabel: () => null }} />
       <Tab.Screen name="Discover" component={DiscoverScreen} options={{ tabBarLabel: () => null }} />
-
+      <Tab.Screen name="Favorites" component={FavoritesScreen} options={{ tabBarLabel: () => null }} />
+      <Tab.Screen name="SceduleEvent" component={ScheduleEventScreen} options={{ tabBarLabel: () => null }} />
+      <Tab.Screen name="EventList" component={EventListScreen} options={{ tabBarLabel: () => null }} />
     </Tab.Navigator>
   );
 }
