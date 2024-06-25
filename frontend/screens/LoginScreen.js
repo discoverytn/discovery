@@ -6,7 +6,7 @@ import axios from "axios";
 
 const LoginScreen = () => {
   const navigation = useNavigation();
-  const { loginAction, token } = useAuth(); // Accessing loginAction and token from AuthContext
+  const { loginAction, token } = useAuth();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -54,7 +54,7 @@ const LoginScreen = () => {
       console.error("Send reset code error:", error);
       Alert.alert(
         "Failed to Send Code",
-        "An error occurred. Please try again later."
+        "An error occurred. Please try again ."
       );
     }
   };
@@ -76,7 +76,7 @@ const LoginScreen = () => {
       console.error("Verify reset code error:", error);
       Alert.alert(
         "Failed to Verify Code",
-        "An error occurred. Please try again later."
+        "An error occurred. Please try again."
       );
     }
   };
@@ -108,19 +108,21 @@ const LoginScreen = () => {
         setNewPassword("");
         setConfirmNewPassword("");
       } else {
-        Alert.alert("Failed to Reset Password", "Please try again later.");
+        if (response.data.error === "SamePasswordError") {
+          Alert.alert("Same Password Error", response.data.message);
+        } else {
+          Alert.alert("Failed to Reset Password", "Please try again later.");
+        }
       }
     } catch (error) {
       console.error("Reset password error:", error);
-      if (error.response) {
-        console.error("Server responded with:", error.response.data);
-      }
       Alert.alert(
         "Failed to Reset Password",
-        "An error occurred. Please try again later."
+        "Old password cannot be new password !"
       );
     }
   };
+
   const toggleResetForm = () => {
     setShowResetForm(!showResetForm);
     setShowNewPasswordForm(false);
