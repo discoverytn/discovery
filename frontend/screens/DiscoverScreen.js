@@ -1,7 +1,8 @@
-
 import React, { useState } from 'react';
-import { View, Text, Image, FlatList, StyleSheet } from 'react-native';
+import { View, Text, Image, FlatList, StyleSheet, Dimensions, TouchableOpacity } from 'react-native';
 import Rating from './Rating';
+
+const { width } = Dimensions.get('window'); // get the window width to style the page easier
 
 const categories = [
   {
@@ -9,7 +10,8 @@ const categories = [
     name: 'Nature',
     posts: [
       { id: '1', name: 'Niladri Reservoir', location: 'Tekergat, Sunamgnj', image: require('../assets/nature.jpg') },
-      { id: '2', name: 'Casa Las Tortugas', location: 'Av Damero, Mexico', image: require('../assets/nature.jpg') }
+      { id: '2', name: 'Casa Las Tortugas', location: 'Av Damero, Mexico', image: require('../assets/nature.jpg') },
+      { id: '10', name: 'Casa Las Tortugas', location: 'Av Damero, Mexico', image: require('../assets/nature.jpg') }
     ]
   },
   {
@@ -30,7 +32,7 @@ const categories = [
   },
 ];
 
-const DiscoverScreen = () => {
+const DiscoverScreen = ({ navigation }) => {
   const [postRatings, setPostRatings] = useState({});
 
   const handleRating = (postId, rating) => {
@@ -78,7 +80,13 @@ const DiscoverScreen = () => {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <Image source={require('../assets/left-arrow.jpg')} style={styles.icon} />
+        </TouchableOpacity>
         <Text style={styles.headerText}>Discover</Text>
+        <TouchableOpacity onPress={() => {/* Add your notification logic */}}>
+          <Image source={require('../assets/notification.jpg')} style={styles.icon} />
+        </TouchableOpacity>
       </View>
       <Text style={styles.subheaderText}>All Explored Places</Text>
       <FlatList
@@ -99,20 +107,27 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   header: {
-    backgroundColor: '#FFFFFF',
-    paddingVertical: 20,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 10,
+  },
+  icon: {
+    width: 30,
+    height: 30,
+    marginTop:50
   },
   headerText: {
     color: '#000',
     fontSize: 20,
     fontWeight: 'bold',
+    marginTop:50
   },
   subheaderText: {
     textAlign: 'center',
     fontSize: 16,
-    marginBottom: 10,
+    marginBottom: 13,
+    marginTop:20
   },
   categoriesContainer: {
     flexDirection: 'column',
@@ -127,21 +142,22 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   postContainer: {
-    width: 250,
-    marginRight: 20,
+    width: (width - 60) / 2, // adjusted width dynamically based on window width
+    marginRight: 40,
     backgroundColor: '#f8f8f8',
     borderRadius: 10,
     padding: 10,
+    marginLeft: -20,
   },
   postImage: {
     width: '100%',
-    height: 150,
+    height: 120, 
     borderRadius: 10,
   },
   postName: {
-    fontSize: 16,
+    fontSize: 16, 
     fontWeight: 'bold',
-    marginTop: 10,
+    marginTop: 8,
   },
   locationContainer: {
     flexDirection: 'row',
@@ -149,13 +165,14 @@ const styles = StyleSheet.create({
     marginTop: 5,
   },
   locationIcon: {
-    width: 14,
-    height: 14,
+    width: 12, 
+    height: 12, 
     marginRight: 5,
   },
   postLocation: {
-    fontSize: 14,
+    fontSize: 12, 
     color: '#666',
+    fontWeight: 'bold',
   },
   flatListContainer: {
     paddingLeft: 20,
