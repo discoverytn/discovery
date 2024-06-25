@@ -15,6 +15,9 @@ import Intro3 from './screens/Intro3';
 import CategoriesScreen from './screens/CategoriesScreen';
 import DiscoverScreen from './screens/DiscoverScreen';
 import ExplorerAddPostScreen from "./screens/ExplorerAddPostScreen";
+import FavoritesScreen from './screens/FavoritesScreen';
+import ScheduleEventScreen from './screens/ScheduleEventScreen';
+import EventListScreen from './screens/EventListScreen';
 
 enableScreens();
 
@@ -39,6 +42,9 @@ function MainNavigator() {
       <Tab.Screen name="Signup" component={SignupScreen} options={{ tabBarLabel: () => null }} />
       <Tab.Screen name="Categories" component={CategoriesScreen} options={{ tabBarLabel: () => null }} />
       <Tab.Screen name="Discover" component={DiscoverScreen} options={{ tabBarLabel: () => null }} />
+      <Tab.Screen name="Favorites" component={FavoritesScreen} options={{ tabBarLabel: () => null }} />
+      <Tab.Screen name="SceduleEvent" component={ScheduleEventScreen} options={{ tabBarLabel: () => null }} />
+      <Tab.Screen name="EventList" component={EventListScreen} options={{ tabBarLabel: () => null }} />
     </Tab.Navigator>
   );
 }
