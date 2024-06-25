@@ -29,7 +29,7 @@ const SignupScreen = () => {
       let payload;
 
       if (role === "explorer") {
-        endpoint = `http://localhost:3000/auth/register/explorer`;
+        endpoint = `http://192.168.1.19:3000/auth/register/explorer`;
         payload = { username: name, email, password };
       } else if (role === "business") {
         endpoint = `http://192.168.1.19:3000/auth/register/business`;
@@ -53,7 +53,7 @@ const SignupScreen = () => {
       const response = await axios.post(endpoint, payload);
       console.log("Signup successful", response.data);
       Alert.alert("Signup Successful", "You have successfully signed up!", [
-        { onPress: () => navigation.navigate("LoginScreen") },
+        { onPress: () => navigation.navigate("Categories") },
       ]);
     } catch (error) {
       console.error("signup error", error);
