@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 import axios from "axios";
 import { Alert } from "react-native";
 import * as SecureStore from "expo-secure-store";
+import {jwtDecode} from "jwt-decode";
 
 const AuthContext = createContext({
   token: "",
@@ -43,6 +44,28 @@ const AuthProvider = ({ children }) => {
       console.error("Error retrieving data:", error);
     }
   };
+
+  useEffect(() => {
+    
+    if (token) {
+      try {
+        console.log('Token:', token); 
+        const decodedToken = jwtDecode(token);
+        console.log('Decoded Token:', decodedToken);
+
+        
+        if ('id' in decodedToken) {
+          const idValue = decodedToken['id']; 
+          setExplorer((prev) => ({ ...prev, id: idValue })); 
+          console.log('Explorer ID:', idValue);
+        } else {
+          console.error('ID not found in decoded token');
+        }
+      } catch (error) {
+        console.error('Error decoding token:', error);
+      }
+    }
+  }, [token]);
 
   const loginAction = async (data) => {
     try {
