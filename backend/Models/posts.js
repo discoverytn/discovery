@@ -33,7 +33,7 @@ module.exports = (sequelize) => {
     },
     image1: {
       type: DataTypes.STRING,
-      allowNull: false // Required field
+      allowNull: true // Required field
     },
     image2: {
       type: DataTypes.STRING,
