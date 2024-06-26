@@ -1,7 +1,7 @@
 const db = require('../database/index');
 const Posts = db.Posts;
 
-// Create a post associated with explorer_idexplorer
+
 const ExplorerCreatePost = async (req, res) => {
   const { title, description, hashtags, location, long, latt, image1, image2, image3, image4, category, explorer_idexplorer } = req.body;
 
@@ -28,7 +28,7 @@ const ExplorerCreatePost = async (req, res) => {
   }
 };
 
-// Create a post associated with business_idbusiness
+
 const BusinessCreatePost = async (req, res) => {
   const { title, description, hashtags, location, long, latt, image1, image2, image3, image4, category, business_idbusiness } = req.body;
 
@@ -55,7 +55,7 @@ const BusinessCreatePost = async (req, res) => {
   }
 };
 
-// Update a post associated with explorer_idexplorer
+
 const ExplorerUpdatePost = async (req, res) => {
   const { id } = req.params;
   const { title, description, hashtags, location, long, latt, image1, image2, image3, image4, category } = req.body;
@@ -88,7 +88,7 @@ const ExplorerUpdatePost = async (req, res) => {
   }
 };
 
-// Update a post associated with business_idbusiness
+
 const BusinessUpdatePost = async (req, res) => {
   const { id } = req.params;
   const { title, description, hashtags, location, long, latt, image1, image2, image3, image4, category } = req.body;
@@ -121,7 +121,7 @@ const BusinessUpdatePost = async (req, res) => {
   }
 };
 
-// Delete a post associated with explorer_idexplorer
+
 const ExplorerDeletePost = async (req, res) => {
   const { id } = req.params;
 
@@ -140,7 +140,7 @@ const ExplorerDeletePost = async (req, res) => {
   }
 };
 
-// Delete a post associated with business_idbusiness
+
 const BusinessDeletePost = async (req, res) => {
   const { id } = req.params;
 

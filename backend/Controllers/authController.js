@@ -32,7 +32,14 @@ const registerExplorer = async (req, res) => {
       email,
       password: hashedPassword,
     });
-    res.status(201).json(newExplorer);
+
+    const token = jwt.sign(
+      { id: newExplorer.idexplorer, email: newExplorer.email, role: "explorer" },
+      process.env.JWT_SECRET,
+      { expiresIn: "1h" }
+    );
+
+    res.status(201).json({ token });
   } catch (error) {
     console.error("Register explorer error:", error);
     res.status(500).json({ error: error.message });
@@ -58,7 +65,14 @@ const registerBO = async (req, res) => {
       BOid,
       credImg,
     });
-    res.status(201).json(newBusiness);
+
+    const token = jwt.sign(
+      { id: newBusiness.idbusiness, email: newBusiness.email, role: "business" },
+      process.env.JWT_SECRET,
+      { expiresIn: "1h" }
+    );
+
+    res.status(201).json({ token });
   } catch (error) {
     console.error("Register business owner error:", error);
     res.status(500).json({ error: error.message });
@@ -73,6 +87,7 @@ const login = async (req, res) => {
     }
 
     let user = await db.Explorer.findOne({ where: { email } });
+
     if (!user) {
       user = await db.Business.findOne({ where: { email } });
     }
@@ -95,11 +110,21 @@ const login = async (req, res) => {
       role = "explorer";
     } else if (user instanceof db.Business) {
       role = "business";
+    } else {
+      return res.status(500).json(role);
+    }
+
+    let id;
+    if (user instanceof db.Explorer) {
+      id = user.idexplorer;
+    } else if (user instanceof db.Business) {
+      id = user.idbusiness;
     }
 
     const token = jwt.sign(
-      { id: user.id, email: user.email, role },
-      process.env.JWT_SECRET
+      { id, email: user.email, role },
+      process.env.JWT_SECRET,
+      { expiresIn: "1h" }
     );
 
     res.json({ token });
