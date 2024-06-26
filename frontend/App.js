@@ -1,4 +1,3 @@
-
 import 'react-native-gesture-handler';
 import React from 'react';
 import { StatusBar } from 'expo-status-bar';
@@ -19,6 +18,7 @@ import FavoritesScreen from './screens/FavoritesScreen';
 import ScheduleEventScreen from './screens/ScheduleEventScreen';
 import EventListScreen from './screens/EventListScreen';
 
+
 enableScreens();
 
 const Tab = createMaterialTopTabNavigator();
@@ -27,24 +27,23 @@ function MainNavigator() {
   return (
     <Tab.Navigator
       screenOptions={{
-        tabBarVisible: false,
         swipeEnabled: true,
         headerShown: false,
         tabBarStyle: { display: 'none' },
       }}
     >
-      <Tab.Screen name="ExplorerAddPostScreen" component={ExplorerAddPostScreen} options={{ tabBarLabel: () => null }} />
       <Tab.Screen name="Home" component={HomeScreen} options={{ tabBarLabel: () => null }} />
       <Tab.Screen name="Intro1" component={Intro1} options={{ tabBarLabel: () => null }} />
       <Tab.Screen name="Intro2" component={Intro2} options={{ tabBarLabel: () => null }} />
       <Tab.Screen name="Intro3" component={Intro3} options={{ tabBarLabel: () => null }} />
-      <Tab.Screen name="LoginScreen" component={LoginScreen} options={{ tabBarLabel: () => null }} />
+      <Tab.Screen name="Login" component={LoginScreen} options={{ tabBarLabel: () => null }} />
       <Tab.Screen name="Signup" component={SignupScreen} options={{ tabBarLabel: () => null }} />
       <Tab.Screen name="Categories" component={CategoriesScreen} options={{ tabBarLabel: () => null }} />
       <Tab.Screen name="Discover" component={DiscoverScreen} options={{ tabBarLabel: () => null }} />
       <Tab.Screen name="Favorites" component={FavoritesScreen} options={{ tabBarLabel: () => null }} />
-      <Tab.Screen name="SceduleEvent" component={ScheduleEventScreen} options={{ tabBarLabel: () => null }} />
+      <Tab.Screen name="ScheduleEvent" component={ScheduleEventScreen} options={{ tabBarLabel: () => null }} />
       <Tab.Screen name="EventList" component={EventListScreen} options={{ tabBarLabel: () => null }} />
+      <Tab.Screen name="ExplorerAddPostScreen" component={ExplorerAddPostScreen} options={{ tabBarLabel: () => null }} />
     </Tab.Navigator>
   );
 }
@@ -54,8 +53,8 @@ export default function App() {
     <NavigationContainer>
       <AuthProvider>
         <MainNavigator />
+        <StatusBar style="auto" />
       </AuthProvider>
-      <StatusBar style="auto" />
     </NavigationContainer>
   );
 }

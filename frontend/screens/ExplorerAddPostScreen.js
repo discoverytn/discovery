@@ -1,12 +1,12 @@
-import React, { useState, useContext } from 'react';
+import React, { useState } from 'react';
 import { StyleSheet, Text, TextInput, TouchableOpacity, View, Alert, FlatList, Image } from 'react-native';
 import axios from 'axios';
 import { Picker } from '@react-native-picker/picker';
 import * as ImagePicker from 'expo-image-picker';
-import { AuthContext } from "../context/AuthContext";
+import { useAuth } from "../context/AuthContext"; 
 
 const ExplorerAddPostScreen = () => {
-  const { explorerId } = useContext(AuthContext);
+  const { explorerId } = useAuth(); 
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -33,7 +33,7 @@ const ExplorerAddPostScreen = () => {
     };
 
     try {
-      const response = await axios.post('http://localhost:3000/posts/explorer/add', payload);
+      const response = await axios.post('http://192.168.1.19:3000/posts/explorer/add', payload);
       if (response.status === 201) {
         Alert.alert('Success', 'Post created successfully');
         clearFields();
@@ -80,7 +80,6 @@ const ExplorerAddPostScreen = () => {
     NewImages.splice(index, 1);
     setImages(NewImages);
   };
-  
 
   const renderImageItem = ({ item, index }) => (
     <View style={styles.imageContainer}>
@@ -111,7 +110,7 @@ const ExplorerAddPostScreen = () => {
 
       <TextInput
         style={styles.input}
-        placeholder="Hashtags (Please seperate with comma)"
+        placeholder="Hashtags (Please separate with comma)"
         value={hashtags}
         onChangeText={setHashtags}
       />

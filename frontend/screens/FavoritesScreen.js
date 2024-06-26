@@ -1,5 +1,3 @@
-// FavoritesScreen.js
-
 import React, { useState } from 'react';
 import { View, Text, Image, TouchableOpacity, FlatList, StyleSheet, ImageBackground } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
