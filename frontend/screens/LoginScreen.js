@@ -1,5 +1,12 @@
 import React, { useState } from "react";
-import { StyleSheet, Text, TextInput, TouchableOpacity, View, Alert } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+  Alert,
+} from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { useAuth } from "../context/AuthContext";
 import axios from "axios";
@@ -19,14 +26,14 @@ const LoginScreen = () => {
 
   const handleLogin = async () => {
     try {
-      const { token: authToken } = await loginAction({ email, password }); // Ensure loginAction returns an object with token
-      console.log('Token after login:', authToken);
+      const { token: authToken } = await loginAction({ email, password }); 
+      console.log("Token after login:", authToken);
 
-      // Navigate to 'Categories' screen if token exists
+      
       if (authToken) {
-        navigation.navigate('Categories');
+        navigation.navigate("Categories");
       } else {
-        Alert.alert('Login Failed', 'Token not received');
+        Alert.alert("Login Failed", "Token not received");
       }
     } catch (error) {
       console.error("Login error:", error);

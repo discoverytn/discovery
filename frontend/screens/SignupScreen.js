@@ -1,19 +1,16 @@
+
+
 import React, { useState } from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  Alert,
-} from "react-native";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import { useNavigation } from "@react-navigation/native";
+import { useAuth } from "../context/AuthContext"; 
 import axios from "axios";
 import * as ImagePicker from "expo-image-picker";
 
 const SignupScreen = () => {
   const navigation = useNavigation();
+  const { signupAction } = useAuth();
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -25,14 +22,11 @@ const SignupScreen = () => {
 
   const SignUp = async () => {
     try {
-      let endpoint;
       let payload;
 
       if (role === "explorer") {
-        endpoint = `http://192.168.1.19:3000/auth/register/explorer`;
-        payload = { username: name, email, password };
+        payload = { username: name, email, password, role };
       } else if (role === "business") {
-        endpoint = `http://192.168.1.19:3000/auth/register/business`;
         const formData = new FormData();
         formData.append("username", name);
         formData.append("email", email);
@@ -50,8 +44,8 @@ const SignupScreen = () => {
         return Alert.alert("Please select a role to sign up");
       }
 
-      const response = await axios.post(endpoint, payload);
-      console.log("Signup successful", response.data);
+      const response = await signupAction(payload);
+      console.log("Signup successful", response);
       Alert.alert("Signup Successful", "You have successfully signed up!", [
         { onPress: () => navigation.navigate("Categories") },
       ]);
@@ -62,7 +56,6 @@ const SignupScreen = () => {
   };
 
   const SelectImage = async () => {
-    /// allow access to phone library
     try {
       const result = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
@@ -72,17 +65,16 @@ const SignupScreen = () => {
       }
 
       const pickerResult = await ImagePicker.launchImageLibraryAsync({
-        /// edit image before uploading (crop or adjusting size ...)
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: false,
       });
-      /// if the user didnt cancel the choosing operation
+
       if (!pickerResult.cancelled) {
         setCredImg(pickerResult);
       }
     } catch (error) {
       console.error("ImagePicker Error:", error);
-      alert("an error occurred while choosing an image.");
+      alert("An error occurred while choosing an image.");
     }
   };
 
@@ -93,14 +85,12 @@ const SignupScreen = () => {
         uri: imageData.uri,
       });
       formData.append("upload_preset", "discovery");
-      /// cloudinary test in console
-      console.log("ghghgh:", formData);
 
       const response = await axios.post(
         "https://api.cloudinary.com/v1_1/dflixnywo/upload",
         formData
       );
-      console.log("successful upload to Cloudinary :", response.data);
+      console.log("Successful upload to Cloudinary:", response.data);
       return response.data;
     } catch (error) {
       console.error("Cloudinary Upload Error:", error);
