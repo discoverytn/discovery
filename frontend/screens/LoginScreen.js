@@ -27,9 +27,7 @@ const LoginScreen = () => {
   const handleLogin = async () => {
     try {
       const { token: authToken } = await loginAction({ email, password }); 
-      console.log("Token after login:", authToken);
 
-      
       if (authToken) {
         navigation.navigate("Categories");
       } else {
@@ -61,7 +59,7 @@ const LoginScreen = () => {
       console.error("Send reset code error:", error);
       Alert.alert(
         "Failed to Send Code",
-        "An error occurred. Please try again ."
+        "An error occurred. Please try again."
       );
     }
   };

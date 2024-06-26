@@ -1,13 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, TextInput, TouchableOpacity, View, Alert, FlatList, Image } from 'react-native';
 import axios from 'axios';
 import { Picker } from '@react-native-picker/picker';
 import * as ImagePicker from 'expo-image-picker';
-import { useAuth } from "../context/AuthContext"; 
+import { useAuth } from '../context/AuthContext'; 
 
 const ExplorerAddPostScreen = () => {
-  const { explorerId } = useAuth(); 
-
+  const { explorer } = useAuth(); 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [hashtags, setHashtags] = useState('');
@@ -16,8 +15,19 @@ const ExplorerAddPostScreen = () => {
   const [latt, setLatt] = useState('');
   const [images, setImages] = useState([]);
   const [category, setCategory] = useState('');
+  const [explorerId, setExplorerId] = useState('');
 
-  const Submit = async () => {
+  useEffect(() => {
+    
+    if (explorer.id) {
+      setExplorerId(explorer.id); 
+      console.log('Explorer ID set from context:', explorer.id);
+    } else {
+      console.log('Explorer ID not found in context');
+    }
+  }, [explorer]);
+
+  const handleSubmit = async () => {
     const Hashtags = hashtags.split(',').map(hashtag => hashtag.trim());
 
     const payload = {
@@ -27,13 +37,15 @@ const ExplorerAddPostScreen = () => {
       location,
       long: parseFloat(long),
       latt: parseFloat(latt),
-      images,
       category,
-      explorerId,
+      explorer_idexplorer: explorerId, 
     };
+
+    console.log('Payload:', payload); 
 
     try {
       const response = await axios.post('http://192.168.1.8:3000/posts/explorer/add', payload);
+
       if (response.status === 201) {
         Alert.alert('Success', 'Post created successfully');
         clearFields();
@@ -53,10 +65,11 @@ const ExplorerAddPostScreen = () => {
     setLocation('');
     setLong('');
     setLatt('');
-    setImages([]);
     setCategory('');
+    setImages([]);
   };
 
+  
   const selectImage = async () => {
     try {
       let result = await ImagePicker.launchImageLibraryAsync({
@@ -75,12 +88,14 @@ const ExplorerAddPostScreen = () => {
     }
   };
 
+  
   const removeImage = (index) => {
-    const NewImages = [...images];
-    NewImages.splice(index, 1);
-    setImages(NewImages);
+    const newImages = [...images];
+    newImages.splice(index, 1);
+    setImages(newImages);
   };
 
+  
   const renderImageItem = ({ item, index }) => (
     <View style={styles.imageContainer}>
       <Image source={{ uri: item.uri }} style={styles.image} />
@@ -93,81 +108,65 @@ const ExplorerAddPostScreen = () => {
   return (
     <View style={styles.container}>
       <Text style={styles.header}>Create a New Post</Text>
-
       <TextInput
         style={styles.input}
         placeholder="Title"
         value={title}
         onChangeText={setTitle}
       />
-
       <TextInput
         style={styles.input}
         placeholder="Description"
         value={description}
         onChangeText={setDescription}
       />
-
       <TextInput
         style={styles.input}
-        placeholder="Hashtags (Please separate with comma)"
+        placeholder="Hashtags (comma separated)"
         value={hashtags}
         onChangeText={setHashtags}
       />
-
       <TextInput
         style={styles.input}
         placeholder="Location"
         value={location}
         onChangeText={setLocation}
       />
-
-      <View style={styles.locationContainer}>
-        <TextInput
-          style={[styles.input, styles.halfInput]}
-          placeholder="Longitude"
-          value={long}
-          onChangeText={setLong}
-        />
-
-        <TextInput
-          style={[styles.input, styles.halfInput]}
-          placeholder="Latitude"
-          value={latt}
-          onChangeText={setLatt}
-        />
-      </View>
-
-      <Text style={styles.label}>Category</Text>
-      <View style={styles.pickerContainer}>
-        <Picker
-          selectedValue={category}
-          onValueChange={itemValue => setCategory(itemValue)}
-          style={styles.picker}
-        >
-          <Picker.Item label="Restaurant" value="Restaurant" />
-          <Picker.Item label="Coffee shop" value="Coffee shop" />
-          <Picker.Item label="Nature" value="Nature" />
-          <Picker.Item label="Art" value="Art" />
-          <Picker.Item label="Camping" value="Camping" />
-          <Picker.Item label="Workout" value="Workout" />
-          <Picker.Item label="Cycling" value="Cycling" />
-        </Picker>
-      </View>
-
-      <Text style={styles.label}>Images</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="Longitude"
+        value={long}
+        onChangeText={setLong}
+        keyboardType="numeric"
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Latitude"
+        value={latt}
+        onChangeText={setLatt}
+        keyboardType="numeric"
+      />
+      <Picker
+        selectedValue={category}
+        onValueChange={(itemValue) => setCategory(itemValue)}
+        style={styles.picker}
+      >
+        <Picker.Item label="Select Category" value="" />
+        <Picker.Item label="Adventure" value="adventure" />
+        <Picker.Item label="Nature" value="nature" />
+        <Picker.Item label="Culture" value="culture" />
+        {/* Add more categories as needed */}
+      </Picker>
+      <TouchableOpacity style={styles.button} onPress={selectImage}>
+        <Text style={styles.buttonText}>Select Image</Text>
+      </TouchableOpacity>
       <FlatList
         data={images}
         renderItem={renderImageItem}
         keyExtractor={(item, index) => index.toString()}
         horizontal
-        style={styles.imageList}
       />
-      <TouchableOpacity style={styles.addButton} onPress={selectImage}>
-        <Text style={styles.addButtonText}>+ Add Image</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.button} onPress={Submit}>
+      <TouchableOpacity style={styles.button} onPress={handleSubmit}>
         <Text style={styles.buttonText}>Submit Post</Text>
       </TouchableOpacity>
     </View>
@@ -178,100 +177,52 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: '#fff',
   },
   header: {
     fontSize: 24,
     fontWeight: 'bold',
-    textAlign: 'center',
     marginBottom: 20,
   },
   input: {
+    height: 40,
+    borderColor: 'gray',
     borderWidth: 1,
-    borderColor: '#ddd',
-    padding: 10,
-    fontSize: 18,
-    borderRadius: 6,
-    marginBottom: 20,
-  },
-  label: {
-    fontSize: 18,
-    fontWeight: 'bold',
     marginBottom: 10,
-  },
-  pickerContainer: {
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 6,
-    marginBottom: 20,
-    marginLeft: 'auto',
-    marginRight: 'auto',
-    width: '80%',
+    paddingHorizontal: 10,
   },
   picker: {
     height: 50,
     width: '100%',
-    fontSize: 18,
+    marginBottom: 10,
   },
-  placeholderText: {
-    fontSize: 18,
-    color: '#000000',
-    textAlign: 'center',
+  button: {
+    backgroundColor: 'blue',
+    padding: 10,
+    alignItems: 'center',
+    marginBottom: 10,
   },
-  locationContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  halfInput: {
-    flex: 1,
-    marginRight: 10,
-  },
-  imageList: {
-    marginBottom: 20,
+  buttonText: {
+    color: 'white',
+    fontSize: 16,
   },
   imageContainer: {
-    marginRight: 10,
     position: 'relative',
+    marginRight: 10,
   },
   image: {
     width: 100,
     height: 100,
-    borderRadius: 10,
   },
   removeImageButton: {
     position: 'absolute',
-    top: 5,
-    right: 5,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    borderRadius: 10,
+    top: 0,
+    right: 0,
+    backgroundColor: 'red',
     padding: 5,
   },
   removeImageText: {
-    color: '#fff',
-    fontWeight: 'bold',
-  },
-  addButton: {
-    backgroundColor: '#ddd',
-    padding: 10,
-    borderRadius: 6,
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  addButtonText: {
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  button: {
-    backgroundColor: '#00aacc',
-    padding: 15,
-    borderRadius: 6,
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
+    color: 'white',
+    fontSize: 12,
   },
 });
 

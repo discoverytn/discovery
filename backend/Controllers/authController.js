@@ -79,6 +79,7 @@ const registerBO = async (req, res) => {
   }
 };
 
+
 const login = async (req, res) => {
   const { email, password } = req.body;
   try {
@@ -104,21 +105,19 @@ const login = async (req, res) => {
     }
 
     let role;
+    let id; // Define id variable to store the user's ID
+
     if (user instanceof db.Admin) {
       role = "admin";
+      id = user.idadmin;
     } else if (user instanceof db.Explorer) {
       role = "explorer";
+      id = user.idexplorer; // Accessing the explorer's ID
     } else if (user instanceof db.Business) {
       role = "business";
+      id = user.idbusiness; // Accessing the business's ID
     } else {
-      return res.status(500).json(role);
-    }
-
-    let id;
-    if (user instanceof db.Explorer) {
-      id = user.idexplorer;
-    } else if (user instanceof db.Business) {
-      id = user.idbusiness;
+      return res.status(500).json({ error: "Unknown user type" });
     }
 
     const token = jwt.sign(
