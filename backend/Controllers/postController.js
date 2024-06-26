@@ -1,7 +1,6 @@
 const db = require('../database/index');
 const Posts = db.Posts;
 
-
 const ExplorerCreatePost = async (req, res) => {
   const { title, description, hashtags, location, long, latt, image1, image2, image3, image4, category, explorer_idexplorer } = req.body;
 
@@ -9,7 +8,7 @@ const ExplorerCreatePost = async (req, res) => {
     const post = await Posts.create({
       title,
       description,
-      hashtags,
+      hashtags: hashtagsToString(hashtags),
       location,
       long,
       latt,
@@ -28,7 +27,6 @@ const ExplorerCreatePost = async (req, res) => {
   }
 };
 
-
 const BusinessCreatePost = async (req, res) => {
   const { title, description, hashtags, location, long, latt, image1, image2, image3, image4, category, business_idbusiness } = req.body;
 
@@ -36,7 +34,7 @@ const BusinessCreatePost = async (req, res) => {
     const post = await Posts.create({
       title,
       description,
-      hashtags,
+      hashtags: hashtagsToString(hashtags),
       location,
       long,
       latt,
@@ -55,7 +53,6 @@ const BusinessCreatePost = async (req, res) => {
   }
 };
 
-
 const ExplorerUpdatePost = async (req, res) => {
   const { id } = req.params;
   const { title, description, hashtags, location, long, latt, image1, image2, image3, image4, category } = req.body;
@@ -66,14 +63,14 @@ const ExplorerUpdatePost = async (req, res) => {
     if (post && post.explorer_idexplorer !== null) {
       post.title = title;
       post.description = description;
-      post.hashtags = hashtags;
+      post.hashtags = hashtagsToString(hashtags);
       post.location = location;
       post.long = long;
       post.latt = latt;
-      post.image1 = image1;
-      post.image2 = image2;
-      post.image3 = image3;
-      post.image4 = image4;
+      post.image1 = image1 || post.image1; 
+      post.image2 = image2 || post.image2;
+      post.image3 = image3 || post.image3;
+      post.image4 = image4 || post.image4;
       post.category = category;
 
       await post.save();
@@ -88,7 +85,6 @@ const ExplorerUpdatePost = async (req, res) => {
   }
 };
 
-
 const BusinessUpdatePost = async (req, res) => {
   const { id } = req.params;
   const { title, description, hashtags, location, long, latt, image1, image2, image3, image4, category } = req.body;
@@ -99,14 +95,14 @@ const BusinessUpdatePost = async (req, res) => {
     if (post && post.business_idbusiness !== null) {
       post.title = title;
       post.description = description;
-      post.hashtags = hashtags;
+      post.hashtags = hashtagsToString(hashtags);
       post.location = location;
       post.long = long;
       post.latt = latt;
-      post.image1 = image1;
-      post.image2 = image2;
-      post.image3 = image3;
-      post.image4 = image4;
+      post.image1 = image1 || post.image1; 
+      post.image2 = image2 || post.image2;
+      post.image3 = image3 || post.image3;
+      post.image4 = image4 || post.image4;
       post.category = category;
 
       await post.save();
@@ -120,7 +116,6 @@ const BusinessUpdatePost = async (req, res) => {
     res.status(500).json({ error: "Failed to update business post" });
   }
 };
-
 
 const ExplorerDeletePost = async (req, res) => {
   const { id } = req.params;
@@ -140,7 +135,6 @@ const ExplorerDeletePost = async (req, res) => {
   }
 };
 
-
 const BusinessDeletePost = async (req, res) => {
   const { id } = req.params;
 
@@ -158,6 +152,10 @@ const BusinessDeletePost = async (req, res) => {
     res.status(500).json({ error: "Failed to delete business post" });
   }
 };
+
+function hashtagsToString(hashtags) {
+  return Array.isArray(hashtags) ? hashtags.join(', ') : hashtags;
+}
 
 module.exports = {
   ExplorerCreatePost,

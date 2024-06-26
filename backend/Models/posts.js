@@ -33,19 +33,19 @@ module.exports = (sequelize) => {
     },
     image1: {
       type: DataTypes.STRING,
-      allowNull: true // Required field
+      allowNull: false 
     },
     image2: {
       type: DataTypes.STRING,
-      allowNull: true // Optional field
+      allowNull: true 
     },
     image3: {
       type: DataTypes.STRING,
-      allowNull: true // Optional field
+      allowNull: true 
     },
     image4: {
       type: DataTypes.STRING,
-      allowNull: true // Optional field
+      allowNull: true 
     },
     category: {
       type: DataTypes.STRING,

@@ -32,7 +32,7 @@ const ScheduleEventScreen = ({ navigation }) => {
       endDate,
     };
 
-    // testing
+   
     console.log('Event Data:', eventData);
     Alert.alert('Event Posted', 'Your event has been posted successfully!');
   };
