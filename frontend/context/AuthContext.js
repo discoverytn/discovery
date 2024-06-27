@@ -110,7 +110,7 @@ const AuthProvider = ({ children }) => {
         const { token } = response.data;
         Alert.alert("Success", "Signup successful!");
   
-        // Handle storing data and navigation logic as needed
+        
   
         return { token };
       } else {

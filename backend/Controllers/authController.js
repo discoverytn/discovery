@@ -104,17 +104,17 @@ const login = async (req, res) => {
     }
 
     let role;
-    let id; // Define id variable to store the user's ID
+    let id; 
 
     if (user instanceof db.Admin) {
       role = "admin";
       id = user.idadmin;
     } else if (user instanceof db.Explorer) {
       role = "explorer";
-      id = user.idexplorer; // Accessing the explorer's ID
+      id = user.idexplorer; 
     } else if (user instanceof db.Business) {
       role = "business";
-      id = user.idbusiness; // Accessing the business's ID
+      id = user.idbusiness; 
     } else {
       return res.status(500).json({ error: "Unknown user type" });
     }
