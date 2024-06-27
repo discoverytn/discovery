@@ -1,51 +1,36 @@
-import React, { useState, useEffect } from "react";
-import {
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-  Alert,
-  FlatList,
-  Image,
-} from "react-native";
-import axios from "axios";
-import { Picker } from "@react-native-picker/picker";
-import * as ImagePicker from "expo-image-picker";
-import { useAuth } from "../context/AuthContext";
+import React, { useState, useEffect } from 'react';
+import { StyleSheet, Text, TextInput, TouchableOpacity, View, Alert, FlatList, Image } from 'react-native';
+import axios from 'axios';
+import { Picker } from '@react-native-picker/picker';
+import * as ImagePicker from 'expo-image-picker';
+import { useAuth } from '../context/AuthContext';
 
-const CLOUDINARY_UPLOAD_PRESET = "discovery";
-const CLOUDINARY_UPLOAD_URL =
-  "https://api.cloudinary.com/v1_1/dflixnywo/image/upload";
+const CLOUDINARY_UPLOAD_PRESET = 'discovery'; 
+const CLOUDINARY_UPLOAD_URL = 'https://api.cloudinary.com/v1_1/dflixnywo/image/upload';
 
 const ExplorerAddPostScreen = () => {
   const { explorer } = useAuth();
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [hashtags, setHashtags] = useState("");
-  const [location, setLocation] = useState("");
-  const [long, setLong] = useState("");
-  const [latt, setLatt] = useState("");
-  const [images, setImages] = useState({
-    image1: null,
-    image2: null,
-    image3: null,
-    image4: null,
-  });
-  const [category, setCategory] = useState("");
-  const [explorerId, setExplorerId] = useState("");
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [hashtags, setHashtags] = useState('');
+  const [location, setLocation] = useState('');
+  const [long, setLong] = useState('');
+  const [latt, setLatt] = useState('');
+  const [images, setImages] = useState({ image1: null, image2: null, image3: null, image4: null });
+  const [category, setCategory] = useState('');
+  const [explorerId, setExplorerId] = useState('');
 
   useEffect(() => {
     if (explorer && explorer.id) {
       setExplorerId(explorer.id);
-      console.log("Explorer ID set from context:", explorer.id);
+      console.log('Explorer ID set from context:', explorer.id);
     } else {
-      console.log("Explorer ID not found in context");
+      console.log('Explorer ID not found in context');
     }
   }, [explorer]);
 
   const handleSubmit = async () => {
-    const Hashtags = hashtags.split(",").map((hashtag) => hashtag.trim());
+    const Hashtags = hashtags.split(',').map(hashtag => hashtag.trim());
 
     const payload = {
       title,
@@ -62,34 +47,31 @@ const ExplorerAddPostScreen = () => {
       image4: images.image4?.url,
     };
 
-    console.log("Payload:", payload);
+    console.log('Payload:', payload);
 
     try {
-      const response = await axios.post(
-        "http://192.168.1.8:3000/posts/explorer/add",
-        payload
-      );
+      const response = await axios.post('http://192.168.1.8:3000/posts/explorer/add', payload);
 
       if (response.status === 201) {
-        Alert.alert("Success", "Post created successfully");
+        Alert.alert('Success', 'Post created successfully');
         clearFields();
       } else {
-        Alert.alert("Error", "Failed to create post");
+        Alert.alert('Error', 'Failed to create post');
       }
     } catch (error) {
-      console.error("Post creation error:", error);
-      Alert.alert("Error", "An error occurred while creating the post");
+      console.error('Post creation error:', error);
+      Alert.alert('Error', 'An error occurred while creating the post');
     }
   };
 
   const clearFields = () => {
-    setTitle("");
-    setDescription("");
-    setHashtags("");
-    setLocation("");
-    setLong("");
-    setLatt("");
-    setCategory("");
+    setTitle('');
+    setDescription('');
+    setHashtags('');
+    setLocation('');
+    setLong('');
+    setLatt('');
+    setCategory('');
     setImages({ image1: null, image2: null, image3: null, image4: null });
   };
 
@@ -102,15 +84,15 @@ const ExplorerAddPostScreen = () => {
         quality: 1,
       });
 
-      console.log("ImagePicker result:", result);
+      console.log('ImagePicker result:', result);
 
       if (!result.cancelled) {
-        const source = { uri: result.assets[0].uri };
-        console.log("Selected image URI:", source.uri);
+        const source = { uri: result.assets[0].uri }; 
+        console.log('Selected image URI:', source.uri);
         uploadImage(source.uri, imageKey);
       }
     } catch (error) {
-      console.error("ImagePicker Error: ", error);
+      console.error('ImagePicker Error: ', error);
     }
   };
 
@@ -119,24 +101,24 @@ const ExplorerAddPostScreen = () => {
     formData.append("file", {
       uri,
       type: "image/jpeg",
-      name: "upload.jpg",
+      name: uri.split("/").pop(),
     });
     formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
-
+  
     try {
       const response = await axios.post(CLOUDINARY_UPLOAD_URL, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
       });
-
+  
       console.log("Upload response:", response);
-
+  
       if (response.status === 200) {
         const imageUrl = response.data.secure_url;
         setImages((prevImages) => ({
           ...prevImages,
-          [imageKey]: { url: imageUrl },
+          [imageKey]: { url: imageUrl }, // Update the image state with image URL
         }));
       } else {
         Alert.alert("Error", "Failed to upload image");
@@ -146,11 +128,12 @@ const ExplorerAddPostScreen = () => {
       Alert.alert("Error", "An error occurred while uploading the image");
     }
   };
+  
 
   const removeImage = (imageKey) => {
-    setImages((prevImages) => ({
+    setImages(prevImages => ({
       ...prevImages,
-      [imageKey]: null,
+      [imageKey]: null
     }));
   };
 
@@ -159,21 +142,13 @@ const ExplorerAddPostScreen = () => {
       {image && (
         <>
           <Image source={{ uri: image.url }} style={styles.image} />
-          <TouchableOpacity
-            onPress={() => removeImage(imageKey)}
-            style={styles.removeImageButton}
-          >
+          <TouchableOpacity onPress={() => removeImage(imageKey)} style={styles.removeImageButton}>
             <Text style={styles.removeImageText}>X</Text>
           </TouchableOpacity>
         </>
       )}
-      <TouchableOpacity
-        style={styles.selectImageButton}
-        onPress={() => selectImage(imageKey)}
-      >
-        <Text style={styles.buttonText}>
-          Select Image {imageKey.replace("image", "")}
-        </Text>
+      <TouchableOpacity style={styles.selectImageButton} onPress={() => selectImage(imageKey)}>
+        <Text style={styles.buttonText}>Select Image {imageKey.replace('image', '')}</Text>
       </TouchableOpacity>
     </View>
   );
@@ -224,6 +199,8 @@ const ExplorerAddPostScreen = () => {
         onValueChange={(itemValue) => setCategory(itemValue)}
         style={styles.picker}
       >
+       
+
         <Picker.Item label="Restaurant" value="Restaurant" />
         <Picker.Item label="Coffe Shop" value="Coffe Shop" />
         <Picker.Item label="Nature" value="nature" />
@@ -231,9 +208,11 @@ const ExplorerAddPostScreen = () => {
         <Picker.Item label="Camping" value="Camping" />
         <Picker.Item label="Workout" value="Workout" />
         <Picker.Item label="Cycling" value="Cycling" />
+        
+       
       </Picker>
       <View style={styles.imagesContainer}>
-        {Object.keys(images).map((key) => renderImageItem(images[key], key))}
+        {Object.keys(images).map(key => renderImageItem(images[key], key))}
       </View>
       <TouchableOpacity style={styles.button} onPress={handleSubmit}>
         <Text style={styles.buttonText}>Submit Post</Text>
@@ -249,38 +228,38 @@ const styles = StyleSheet.create({
   },
   header: {
     fontSize: 24,
-    fontWeight: "bold",
+    fontWeight: 'bold',
     marginBottom: 20,
   },
   input: {
     height: 40,
-    borderColor: "gray",
+    borderColor: 'gray',
     borderWidth: 1,
     marginBottom: 10,
     paddingHorizontal: 10,
   },
   picker: {
     height: 50,
-    width: "100%",
+    width: '100%',
     marginBottom: 10,
   },
   button: {
-    backgroundColor: "blue",
+    backgroundColor: 'blue',
     padding: 10,
-    alignItems: "center",
+    alignItems: 'center',
     marginBottom: 10,
   },
   buttonText: {
-    color: "white",
+    color: 'white',
     fontSize: 16,
   },
   imagesContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     marginBottom: 20,
   },
   imageContainer: {
-    position: "relative",
+    position: 'relative',
     marginBottom: 10,
   },
   image: {
@@ -289,20 +268,20 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   removeImageButton: {
-    position: "absolute",
+    position: 'absolute',
     top: 0,
     right: 0,
-    backgroundColor: "red",
+    backgroundColor: 'red',
     padding: 5,
   },
   removeImageText: {
-    color: "white",
+    color: 'white',
     fontSize: 12,
   },
   selectImageButton: {
-    backgroundColor: "green",
+    backgroundColor: 'green',
     padding: 10,
-    alignItems: "center",
+    alignItems: 'center',
   },
 });
 

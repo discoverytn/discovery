@@ -32,7 +32,7 @@ const SignupScreen = () => {
       let payload;
 
       if (role === "explorer") {
-        payload = { username: name, email, password, role }; 
+        payload = { username: name, email, password, role };
       } else if (role === "business") {
         payload = {
           username: name,
@@ -51,7 +51,6 @@ const SignupScreen = () => {
 
       const { token } = await signupAction(payload);
 
-      
       console.log("Signup successful with token:", token);
       Alert.alert("Signup Successful", "You have successfully signed up!");
       clearFields();
@@ -82,12 +81,13 @@ const SignupScreen = () => {
       console.log("ImagePicker result:", result);
   
       if (!result.cancelled) {
-        const source = { uri: result.assets[0].uri }; 
+        const source = { uri: result.assets[0].uri };
         console.log("Selected image URI:", source.uri);
         uploadImage(source.uri);
       }
     } catch (error) {
       console.error("ImagePicker Error: ", error);
+      Alert.alert("ImagePicker Error", "Failed to pick an image. Please try again.");
     }
   };
   
@@ -97,22 +97,22 @@ const SignupScreen = () => {
     formData.append("file", {
       uri,
       type: "image/jpeg",
-      name: "upload.jpg",
+      name: uri.split("/").pop(), // Use the actual filename from the URI
     });
     formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
-
+  
     try {
       const response = await axios.post(CLOUDINARY_UPLOAD_URL, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
       });
-
+  
       console.log("Upload response:", response);
-
+  
       if (response.status === 200) {
         const imageUrl = response.data.secure_url;
-        setCredImg({ uri: imageUrl });
+        setCredImg({ uri: imageUrl }); 
       } else {
         Alert.alert("Error", "Failed to upload image");
       }
@@ -121,6 +121,7 @@ const SignupScreen = () => {
       Alert.alert("Error", "An error occurred while uploading the image");
     }
   };
+  
 
   const removeImage = () => {
     setCredImg(null);
