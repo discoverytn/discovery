@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, TextInput, TouchableOpacity, View, Alert, FlatList, Image } from 'react-native';
+import { StyleSheet, Text, TextInput, TouchableOpacity, View, Alert, Image, ScrollView } from 'react-native';
 import axios from 'axios';
 import { Picker } from '@react-native-picker/picker';
 import * as ImagePicker from 'expo-image-picker';
@@ -50,7 +50,7 @@ const ExplorerAddPostScreen = () => {
     console.log('Payload:', payload);
 
     try {
-      const response = await axios.post('http://192.168.1.19:3000/posts/explorer/add', payload);
+      const response = await axios.post('http://192.168.1.8:3000/posts/explorer/add', payload);
 
       if (response.status === 201) {
         Alert.alert('Success', 'Post created successfully');
@@ -118,7 +118,7 @@ const ExplorerAddPostScreen = () => {
         const imageUrl = response.data.secure_url;
         setImages((prevImages) => ({
           ...prevImages,
-          [imageKey]: { url: imageUrl }, // Update the image state with image URL
+          [imageKey]: { url: imageUrl },
         }));
       } else {
         Alert.alert("Error", "Failed to upload image");
@@ -148,140 +148,163 @@ const ExplorerAddPostScreen = () => {
         </>
       )}
       <TouchableOpacity style={styles.selectImageButton} onPress={() => selectImage(imageKey)}>
-        <Text style={styles.buttonText}>Select Image {imageKey.replace('image', '')}</Text>
+        <Text style={styles.selectImageButtonText}>Select Image {imageKey.replace('image', '')}</Text>
       </TouchableOpacity>
     </View>
   );
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.header}>Create a New Post</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Title"
-        value={title}
-        onChangeText={setTitle}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Description"
-        value={description}
-        onChangeText={setDescription}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Hashtags (comma separated)"
-        value={hashtags}
-        onChangeText={setHashtags}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Location"
-        value={location}
-        onChangeText={setLocation}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Longitude"
-        value={long}
-        onChangeText={setLong}
-        keyboardType="numeric"
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Latitude"
-        value={latt}
-        onChangeText={setLatt}
-        keyboardType="numeric"
-      />
-      <Picker
-        selectedValue={category}
-        onValueChange={(itemValue) => setCategory(itemValue)}
-        style={styles.picker}
-      >
-       
-
-        <Picker.Item label="Restaurant" value="Restaurant" />
-        <Picker.Item label="Coffe Shop" value="Coffe Shop" />
-        <Picker.Item label="Nature" value="nature" />
-        <Picker.Item label="Art" value="Art" />
-        <Picker.Item label="Camping" value="Camping" />
-        <Picker.Item label="Workout" value="Workout" />
-        <Picker.Item label="Cycling" value="Cycling" />
-        
-       
-      </Picker>
-      <View style={styles.imagesContainer}>
-        {Object.keys(images).map(key => renderImageItem(images[key], key))}
+    <ScrollView contentContainerStyle={styles.scrollContainer}>
+      <View style={styles.container}>
+        <Text style={styles.header}>Create a New Post</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Title"
+          value={title}
+          onChangeText={setTitle}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Description"
+          value={description}
+          onChangeText={setDescription}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Hashtags (comma separated)"
+          value={hashtags}
+          onChangeText={setHashtags}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Location"
+          value={location}
+          onChangeText={setLocation}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Longitude"
+          value={long}
+          onChangeText={setLong}
+          keyboardType="numeric"
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Latitude"
+          value={latt}
+          onChangeText={setLatt}
+          keyboardType="numeric"
+        />
+        <Picker
+          selectedValue={category}
+          onValueChange={(itemValue) => setCategory(itemValue)}
+          style={styles.picker}
+        >
+          <Picker.Item label="Restaurant" value="Restaurant" />
+          <Picker.Item label="Coffe Shop" value="Coffe Shop" />
+          <Picker.Item label="Nature" value="Nature" />
+          <Picker.Item label="Art" value="Art" />
+          <Picker.Item label="Camping" value="Camping" />
+          <Picker.Item label="Workout" value="Workout" />
+          <Picker.Item label="Cycling" value="Cycling" />
+        </Picker>
+        <View style={styles.imagesContainer}>
+          {Object.keys(images).map(key => renderImageItem(images[key], key))}
+        </View>
+        <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+          <Text style={styles.buttonText}>Submit Post</Text>
+        </TouchableOpacity>
       </View>
-      <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-        <Text style={styles.buttonText}>Submit Post</Text>
-      </TouchableOpacity>
-    </View>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
+  scrollContainer: {
+    flexGrow: 1,
+    paddingVertical: 20,
+  },
   container: {
     flex: 1,
     padding: 20,
+    backgroundColor: '#f9f9f9',
   },
   header: {
-    fontSize: 24,
+    fontSize: 26,
     fontWeight: 'bold',
+    color: '#333',
     marginBottom: 20,
+    textAlign: 'center',
   },
   input: {
-    height: 40,
-    borderColor: 'gray',
+    height: 50,
+    borderColor: '#ddd',
     borderWidth: 1,
-    marginBottom: 10,
-    paddingHorizontal: 10,
+    borderRadius: 8,
+    marginBottom: 15,
+    paddingHorizontal: 15,
+    backgroundColor: '#fff',
   },
   picker: {
     height: 50,
     width: '100%',
-    marginBottom: 10,
+    marginBottom: 15,
+    borderColor: '#ddd',
+    borderWidth: 1,
+    borderRadius: 8,
+    backgroundColor: '#fff',
   },
   button: {
-    backgroundColor: 'blue',
-    padding: 10,
+    backgroundColor: '#007BFF',
+    padding: 15,
+    borderRadius: 8,
     alignItems: 'center',
-    marginBottom: 10,
   },
   buttonText: {
-    color: 'white',
-    fontSize: 16,
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: 'bold',
   },
   imagesContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    flexWrap: 'wrap',
     marginBottom: 20,
   },
   imageContainer: {
+    width: '48%',
     position: 'relative',
-    marginBottom: 10,
+    marginBottom: 15,
   },
   image: {
-    width: 100,
-    height: 100,
-    marginBottom: 5,
+    width: '100%',
+    height: 150,
+    borderRadius: 8,
   },
   removeImageButton: {
     position: 'absolute',
-    top: 0,
-    right: 0,
-    backgroundColor: 'red',
+    top: 10,
+    right: 10,
+    backgroundColor: 'rgba(255, 0, 0, 0.7)',
     padding: 5,
+    borderRadius: 15,
+    zIndex: 1,
   },
   removeImageText: {
-    color: 'white',
-    fontSize: 12,
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: 'bold',
   },
   selectImageButton: {
-    backgroundColor: 'green',
+    backgroundColor: '#28A745',
     padding: 10,
+    borderRadius: 8,
     alignItems: 'center',
+  },
+  selectImageButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
 

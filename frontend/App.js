@@ -18,6 +18,7 @@ import FavoritesScreen from './screens/FavoritesScreen';
 import ScheduleEventScreen from './screens/ScheduleEventScreen';
 import EventListScreen from './screens/EventListScreen';
 import MainScreen from './screens/MainScreen';
+import OnepostScreen from './screens/Onepost';
 
 
 
@@ -36,7 +37,7 @@ function MainNavigator() {
         tabBarStyle: { display: 'none' },
       }}
     >
-     
+     <Tab.Screen name="Onepost" component={OnepostScreen} options={{ tabBarLabel: () => null }} />
       <Tab.Screen name="Main" component={MainScreen} options={{ tabBarLabel: () => null }} />
       <Tab.Screen name="Home" component={HomeScreen} options={{ tabBarLabel: () => null }} />
       <Tab.Screen name="Intro1" component={Intro1} options={{ tabBarLabel: () => null }} />
