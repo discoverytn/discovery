@@ -72,7 +72,7 @@ const AuthProvider = ({ children }) => {
   const loginAction = async (data) => {
     try {
       const response = await axios.post(
-        "http://192.168.1.8:3000/auth/login",
+        "http://192.168.1.19:3000/auth/login",
         data
       );
 
@@ -103,21 +103,20 @@ const AuthProvider = ({ children }) => {
   };
 
   const signupAction = async (data) => {
+    console.log('Signup Data:', data);
+
     try {
-      const endpoint = "http://192.168.1.8:3000/auth/register/business";
+      const endpoint =
+        data.role === "explorer"
+          ? "http://192.168.1.19:3000/auth/register/explorer"
+          : "http://192.168.1.19:3000/auth/register/business";
+
       const response = await axios.post(endpoint, data);
-  
+
       if (response.status === 201) {
-        const { token, id, username, email } = response.data;
+        const { token } = response.data;
         Alert.alert("Success", "Signup successful!");
-  
-        
-        setBusiness({ id, username, email });
-        setToken(token);
-  
-        await storeData("business", { id, username, email });
-        await storeData("token", token);
-  
+
         return { token };
       } else {
         console.error("Unexpected response:", response);
