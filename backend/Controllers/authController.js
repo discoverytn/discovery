@@ -47,13 +47,11 @@ const registerExplorer = async (req, res) => {
 };
 
 const registerBO = async (req, res) => {
-  const { email, username, password, businessName, BOid, credImg } = req.body;
+  const { email, username, password, businessName, BOid, credImg, category } = req.body; // include category
   try {
     const isUnique = await uniqueChecker(username, email);
     if (!isUnique) {
-      return res
-        .status(400)
-        .json({ error: "Username or email already exists" });
+      return res.status(400).json({ error: "Username or email already exists" });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -64,10 +62,11 @@ const registerBO = async (req, res) => {
       businessName,
       BOid,
       credImg,
+      category, 
     });
 
     const token = jwt.sign(
-      { id: newBusiness.idbusiness, email: newBusiness.email, role: "business" },
+      { id: newBusiness.idbusiness, email: newBusiness.email, role: "business", category: newBusiness.category },
       process.env.JWT_SECRET,
       { expiresIn: "1h" }
     );
@@ -78,7 +77,6 @@ const registerBO = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
-
 const login = async (req, res) => {
   const { email, password } = req.body;
   try {

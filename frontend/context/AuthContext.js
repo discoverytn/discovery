@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 import axios from "axios";
 import { Alert } from "react-native";
 import * as SecureStore from "expo-secure-store";
-import {jwtDecode} from "jwt-decode";
+import {jwtDecode} from "jwt-decode"; 
 
 const AuthContext = createContext({
   token: "",
@@ -53,8 +53,13 @@ const AuthProvider = ({ children }) => {
 
         if ('id' in decodedToken) {
           const idValue = decodedToken['id'];
-          setExplorer((prev) => ({ ...prev, id: idValue }));
-          console.log('Explorer ID:', idValue);
+          if (decodedToken.role === 'explorer') {
+            setExplorer((prev) => ({ ...prev, id: idValue }));
+            console.log('Explorer ID:', idValue);
+          } else if (decodedToken.role === 'business') {
+            setBusiness((prev) => ({ ...prev, id: idValue }));
+            console.log('Business ID:', idValue);
+          }
         } else {
           console.error('ID not found in decoded token');
         }
@@ -67,7 +72,7 @@ const AuthProvider = ({ children }) => {
   const loginAction = async (data) => {
     try {
       const response = await axios.post(
-        "http://192.168.1.19:3000/auth/login",
+        "http://192.168.1.8:3000/auth/login",
         data
       );
 
@@ -99,18 +104,19 @@ const AuthProvider = ({ children }) => {
 
   const signupAction = async (data) => {
     try {
-      const endpoint =
-        data.role === "explorer"
-          ? "http://192.168.1.19:3000/auth/register/explorer"
-          : "http://192.168.1.19:3000/auth/register/business";
-  
+      const endpoint = "http://192.168.1.8:3000/auth/register/business";
       const response = await axios.post(endpoint, data);
   
       if (response.status === 201) {
-        const { token } = response.data;
+        const { token, id, username, email } = response.data;
         Alert.alert("Success", "Signup successful!");
   
         
+        setBusiness({ id, username, email });
+        setToken(token);
+  
+        await storeData("business", { id, username, email });
+        await storeData("token", token);
   
         return { token };
       } else {
