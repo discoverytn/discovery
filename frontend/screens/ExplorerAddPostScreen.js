@@ -3,24 +3,26 @@ import { StyleSheet, Text, TextInput, TouchableOpacity, View, Alert, FlatList, I
 import axios from 'axios';
 import { Picker } from '@react-native-picker/picker';
 import * as ImagePicker from 'expo-image-picker';
-import { useAuth } from '../context/AuthContext'; 
+import { useAuth } from '../context/AuthContext';
+
+const CLOUDINARY_UPLOAD_PRESET = 'discovery'; 
+const CLOUDINARY_UPLOAD_URL = 'https://api.cloudinary.com/v1_1/dflixnywo/image/upload';
 
 const ExplorerAddPostScreen = () => {
-  const { explorer } = useAuth(); 
+  const { explorer } = useAuth();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [hashtags, setHashtags] = useState('');
   const [location, setLocation] = useState('');
   const [long, setLong] = useState('');
   const [latt, setLatt] = useState('');
-  const [images, setImages] = useState([]);
+  const [images, setImages] = useState({ image1: null, image2: null, image3: null, image4: null });
   const [category, setCategory] = useState('');
   const [explorerId, setExplorerId] = useState('');
 
   useEffect(() => {
-    
-    if (explorer &&explorer.id) {
-      setExplorerId(explorer.id); 
+    if (explorer && explorer.id) {
+      setExplorerId(explorer.id);
       console.log('Explorer ID set from context:', explorer.id);
     } else {
       console.log('Explorer ID not found in context');
@@ -38,13 +40,17 @@ const ExplorerAddPostScreen = () => {
       long: parseFloat(long),
       latt: parseFloat(latt),
       category,
-      explorer_idexplorer: explorerId, 
+      explorer_idexplorer: explorerId,
+      image1: images.image1?.url,
+      image2: images.image2?.url,
+      image3: images.image3?.url,
+      image4: images.image4?.url,
     };
 
-    console.log('Payload:', payload); 
+    console.log('Payload:', payload);
 
     try {
-      const response = await axios.post('http://localhost:3000/posts/explorer/add',payload);
+      const response = await axios.post('http://192.168.1.19:3000/posts/explorer/add', payload);
 
       if (response.status === 201) {
         Alert.alert('Success', 'Post created successfully');
@@ -66,11 +72,10 @@ const ExplorerAddPostScreen = () => {
     setLong('');
     setLatt('');
     setCategory('');
-    setImages([]);
+    setImages({ image1: null, image2: null, image3: null, image4: null });
   };
 
-  
-  const selectImage = async () => {
+  const selectImage = async (imageKey) => {
     try {
       let result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -79,28 +84,71 @@ const ExplorerAddPostScreen = () => {
         quality: 1,
       });
 
+      console.log('ImagePicker result:', result);
+
       if (!result.cancelled) {
-        const source = { uri: result.uri };
-        setImages([...images, source]);
+        const source = { uri: result.assets[0].uri }; 
+        console.log('Selected image URI:', source.uri);
+        uploadImage(source.uri, imageKey);
       }
     } catch (error) {
       console.error('ImagePicker Error: ', error);
     }
   };
 
+  const uploadImage = async (uri, imageKey) => {
+    const formData = new FormData();
+    formData.append("file", {
+      uri,
+      type: "image/jpeg",
+      name: uri.split("/").pop(),
+    });
+    formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
   
-  const removeImage = (index) => {
-    const newImages = [...images];
-    newImages.splice(index, 1);
-    setImages(newImages);
+    try {
+      const response = await axios.post(CLOUDINARY_UPLOAD_URL, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+  
+      console.log("Upload response:", response);
+  
+      if (response.status === 200) {
+        const imageUrl = response.data.secure_url;
+        setImages((prevImages) => ({
+          ...prevImages,
+          [imageKey]: { url: imageUrl }, // Update the image state with image URL
+        }));
+      } else {
+        Alert.alert("Error", "Failed to upload image");
+      }
+    } catch (error) {
+      console.error("Image upload error:", error);
+      Alert.alert("Error", "An error occurred while uploading the image");
+    }
+  };
+  
+
+  const removeImage = (imageKey) => {
+    setImages(prevImages => ({
+      ...prevImages,
+      [imageKey]: null
+    }));
   };
 
-  
-  const renderImageItem = ({ item, index }) => (
-    <View style={styles.imageContainer}>
-      <Image source={{ uri: item.uri }} style={styles.image} />
-      <TouchableOpacity onPress={() => removeImage(index)} style={styles.removeImageButton}>
-        <Text style={styles.removeImageText}>X</Text>
+  const renderImageItem = (image, imageKey) => (
+    <View style={styles.imageContainer} key={imageKey}>
+      {image && (
+        <>
+          <Image source={{ uri: image.url }} style={styles.image} />
+          <TouchableOpacity onPress={() => removeImage(imageKey)} style={styles.removeImageButton}>
+            <Text style={styles.removeImageText}>X</Text>
+          </TouchableOpacity>
+        </>
+      )}
+      <TouchableOpacity style={styles.selectImageButton} onPress={() => selectImage(imageKey)}>
+        <Text style={styles.buttonText}>Select Image {imageKey.replace('image', '')}</Text>
       </TouchableOpacity>
     </View>
   );
@@ -151,21 +199,21 @@ const ExplorerAddPostScreen = () => {
         onValueChange={(itemValue) => setCategory(itemValue)}
         style={styles.picker}
       >
-        <Picker.Item label="Select Category" value="" />
-        <Picker.Item label="Adventure" value="adventure" />
+       
+
+        <Picker.Item label="Restaurant" value="Restaurant" />
+        <Picker.Item label="Coffe Shop" value="Coffe Shop" />
         <Picker.Item label="Nature" value="nature" />
-        <Picker.Item label="Culture" value="culture" />
-        {/* Add more categories as needed */}
+        <Picker.Item label="Art" value="Art" />
+        <Picker.Item label="Camping" value="Camping" />
+        <Picker.Item label="Workout" value="Workout" />
+        <Picker.Item label="Cycling" value="Cycling" />
+        
+       
       </Picker>
-      <TouchableOpacity style={styles.button} onPress={selectImage}>
-        <Text style={styles.buttonText}>Select Image</Text>
-      </TouchableOpacity>
-      <FlatList
-        data={images}
-        renderItem={renderImageItem}
-        keyExtractor={(item, index) => index.toString()}
-        horizontal
-      />
+      <View style={styles.imagesContainer}>
+        {Object.keys(images).map(key => renderImageItem(images[key], key))}
+      </View>
       <TouchableOpacity style={styles.button} onPress={handleSubmit}>
         <Text style={styles.buttonText}>Submit Post</Text>
       </TouchableOpacity>
@@ -205,13 +253,19 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 16,
   },
+  imagesContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 20,
+  },
   imageContainer: {
     position: 'relative',
-    marginRight: 10,
+    marginBottom: 10,
   },
   image: {
     width: 100,
     height: 100,
+    marginBottom: 5,
   },
   removeImageButton: {
     position: 'absolute',
@@ -223,6 +277,11 @@ const styles = StyleSheet.create({
   removeImageText: {
     color: 'white',
     fontSize: 12,
+  },
+  selectImageButton: {
+    backgroundColor: 'green',
+    padding: 10,
+    alignItems: 'center',
   },
 });
 

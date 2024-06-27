@@ -1,15 +1,24 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from "react-native";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  Alert,
+  Image,
+} from "react-native";
 import { Picker } from "@react-native-picker/picker";
-import { useNavigation } from "@react-navigation/native";
-import { useAuth } from "../context/AuthContext"; 
-import axios from "axios";
+import { useAuth } from "../context/AuthContext";
 import * as ImagePicker from "expo-image-picker";
+import axios from "axios";
+
+const CLOUDINARY_UPLOAD_PRESET = "discovery";
+const CLOUDINARY_UPLOAD_URL =
+  "https://api.cloudinary.com/v1_1/dflixnywo/image/upload";
 
 const SignupScreen = () => {
-  const navigation = useNavigation();
   const { signupAction } = useAuth();
-
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -18,90 +27,129 @@ const SignupScreen = () => {
   const [BOid, setBOid] = useState("");
   const [credImg, setCredImg] = useState(null);
 
-  const SignUp = async () => {
+  const handleSubmit = async () => {
     try {
       let payload;
 
       if (role === "explorer") {
         payload = { username: name, email, password, role };
       } else if (role === "business") {
-        const formData = new FormData();
-        formData.append("username", name);
-        formData.append("email", email);
-        formData.append("password", password);
-        formData.append("businessName", businessName);
-        formData.append("BOid", BOid);
-
-        if (credImg) {
-          const cloudinaryResponse = await uploadToCloudinary(credImg);
-          formData.append("credImgUrl", cloudinaryResponse.secure_url);
-        }
-
-        payload = formData;
+        payload = {
+          username: name,
+          email,
+          password,
+          role,
+          businessName,
+          BOid,
+          credImg: credImg ? credImg.uri : null,
+        };
       } else {
         return Alert.alert("Please select a role to sign up");
       }
 
-      const response = await signupAction(payload);
-      console.log("Signup successful", response);
-      Alert.alert("Signup Successful", "You have successfully signed up!", [
-        { onPress: () => navigation.navigate("Categories") },
-      ]);
+      console.log("Signup Payload:", payload);
+
+      const { token } = await signupAction(payload);
+
+      console.log("Signup successful with token:", token);
+      Alert.alert("Signup Successful", "You have successfully signed up!");
+      clearFields();
     } catch (error) {
-      console.error("signup error", error);
-      Alert.alert("Signup Failed");
+      console.error("Signup error:", error);
+      Alert.alert("Signup Failed", "Failed to signup, please try again");
     }
   };
 
-  const SelectImage = async () => {
+  const clearFields = () => {
+    setName("");
+    setEmail("");
+    setPassword("");
+    setBusinessName("");
+    setBOid("");
+    setCredImg(null);
+  };
+
+  const selectImage = async () => {
     try {
-      const result = await ImagePicker.requestMediaLibraryPermissionsAsync();
-
-      if (!result.granted) {
-        alert("Permission to access camera roll is required!");
-        return;
-      }
-
-      const pickerResult = await ImagePicker.launchImageLibraryAsync({
+      let result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: false,
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 1,
       });
-
-      if (!pickerResult.cancelled) {
-        setCredImg(pickerResult);
+  
+      console.log("ImagePicker result:", result);
+  
+      if (!result.cancelled) {
+        const source = { uri: result.assets[0].uri };
+        console.log("Selected image URI:", source.uri);
+        uploadImage(source.uri);
       }
     } catch (error) {
-      console.error("ImagePicker Error:", error);
-      alert("An error occurred while choosing an image.");
+      console.error("ImagePicker Error: ", error);
+      Alert.alert("ImagePicker Error", "Failed to pick an image. Please try again.");
     }
   };
+  
 
-  const uploadToCloudinary = async (imageData) => {
+  const uploadImage = async (uri) => {
+    const formData = new FormData();
+    formData.append("file", {
+      uri,
+      type: "image/jpeg",
+      name: uri.split("/").pop(), 
+    });
+    formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+  
     try {
-      const formData = new FormData();
-      formData.append("file", {
-        uri: imageData.uri,
+      const response = await axios.post(CLOUDINARY_UPLOAD_URL, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
       });
-      formData.append("upload_preset", "discovery");
-
-      const response = await axios.post(
-        "https://api.cloudinary.com/v1_1/dflixnywo/upload",
-        formData
-      );
-      console.log("Successful upload to Cloudinary:", response.data);
-      return response.data;
+  
+      console.log("Upload response:", response);
+  
+      if (response.status === 200) {
+        const imageUrl = response.data.secure_url;
+        setCredImg({ uri: imageUrl }); 
+      } else {
+        Alert.alert("Error", "Failed to upload image");
+      }
     } catch (error) {
-      console.error("Cloudinary Upload Error:", error);
-      throw new Error("Failed to upload image to Cloudinary");
+      console.error("Image upload error:", error);
+      Alert.alert("Error", "An error occurred while uploading the image");
     }
   };
+  
+
+  const removeImage = () => {
+    setCredImg(null);
+  };
+
+  const renderImageItem = () => (
+    <View style={styles.imageContainer}>
+      {credImg && (
+        <>
+          <Image
+            source={{ uri: credImg.uri }}
+            style={styles.selectedImage}
+            resizeMode="cover"
+          />
+          <TouchableOpacity onPress={removeImage} style={styles.removeImageButton}>
+            <Text style={styles.removeImageText}>X</Text>
+          </TouchableOpacity>
+        </>
+      )}
+      <TouchableOpacity style={styles.selectImageButton} onPress={selectImage}>
+        <Text style={styles.buttonText}>Select Business Image</Text>
+      </TouchableOpacity>
+    </View>
+  );
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Sign up now</Text>
-      <Text style={styles.subHeader}>
-        Please fill the details and create an account
-      </Text>
+      <Text style={styles.header}>Sign up</Text>
       <TextInput
         style={styles.input}
         placeholder="Name"
@@ -121,8 +169,14 @@ const SignupScreen = () => {
         value={password}
         onChangeText={setPassword}
       />
-      <Text style={styles.passwordNote}>Password must be 8 characters</Text>
-
+      <Picker
+        selectedValue={role}
+        style={styles.input}
+        onValueChange={(itemValue) => setRole(itemValue)}
+      >
+        <Picker.Item label="Explorer" value="explorer" />
+        <Picker.Item label="Business" value="business" />
+      </Picker>
       {role === "business" && (
         <>
           <TextInput
@@ -133,41 +187,16 @@ const SignupScreen = () => {
           />
           <TextInput
             style={styles.input}
-            placeholder="Business ID"
+            placeholder="Business Organization ID (BOid)"
             value={BOid}
             onChangeText={setBOid}
           />
-          <TouchableOpacity style={styles.input} onPress={SelectImage}>
-            <Text style={styles.buttonText}>Select Business Image</Text>
-          </TouchableOpacity>
+          {renderImageItem()}
         </>
       )}
-
-      <View style={styles.pickerContainer}>
-        <Picker
-          selectedValue={role}
-          style={styles.picker}
-          onValueChange={(itemValue) => setRole(itemValue)}
-        >
-          <Picker.Item label="Select Role" value="" />
-          <Picker.Item label="Explorer" value="explorer" />
-          <Picker.Item label="Business Owner" value="business" />
-        </Picker>
-      </View>
-
-      <TouchableOpacity style={styles.button} onPress={SignUp}>
+      <TouchableOpacity style={styles.button} onPress={handleSubmit}>
         <Text style={styles.buttonText}>Sign Up</Text>
       </TouchableOpacity>
-
-      <Text style={styles.loginText}>
-        Already have an account?{" "}
-        <Text
-          style={styles.loginLink}
-          onPress={() => navigation.navigate("LoginScreen")}
-        >
-          Login
-        </Text>
-      </Text>
     </View>
   );
 };
@@ -176,66 +205,66 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: "center",
-    padding: 20,
+    alignItems: "center",
     backgroundColor: "#fff",
+    paddingHorizontal: 20,
   },
   header: {
     fontSize: 24,
-    fontWeight: "bold",
-    textAlign: "center",
-    marginBottom: 20,
-  },
-  subHeader: {
-    fontSize: 14,
-    textAlign: "center",
     marginBottom: 20,
   },
   input: {
-    borderWidth: 1,
-    borderColor: "#ddd",
-    padding: 10,
-    fontSize: 18,
-    borderRadius: 6,
-    marginBottom: 20,
-  },
-  passwordNote: {
-    fontSize: 12,
-    color: "#888",
-    marginBottom: 20,
-    textAlign: "center",
-  },
-  pickerContainer: {
-    borderWidth: 1,
-    borderColor: "#00aacc",
-    borderRadius: 6,
-    marginBottom: 38,
-    backgroundColor: "#fff",
-  },
-  picker: {
-    height: 50,
     width: "100%",
+    height: 40,
+    borderColor: "#ccc",
+    borderWidth: 1,
+    borderRadius: 5,
     paddingHorizontal: 10,
+    marginBottom: 10,
   },
   button: {
-    backgroundColor: "#00aacc",
-    padding: 15,
-    borderRadius: 6,
+    backgroundColor: "#007BFF",
+    padding: 10,
+    borderRadius: 5,
+    width: "100%",
     alignItems: "center",
-    marginBottom: 20,
+    marginTop: 20,
   },
   buttonText: {
     color: "#fff",
-    fontSize: 18,
-    fontWeight: "bold",
-  },
-  loginText: {
-    textAlign: "center",
-    marginBottom: 20,
     fontSize: 16,
   },
-  loginLink: {
-    color: "#007BFF",
-    fontWeight: "bold",
+  imageContainer: {
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  selectImageButton: {
+    backgroundColor: "#007BFF",
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+    marginTop: 10,
+  },
+  removeImageButton: {
+    position: "absolute",
+    top: 10,
+    right: 10,
+    backgroundColor: "rgba(255, 0, 0, 0.7)",
+    borderRadius: 15,
+    width: 30,
+    height: 30,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  removeImageText: {
+    color: "#fff",
+    fontSize: 16,
+  },
+  selectedImage: {
+    width: 200,
+    height: 200,
+    borderRadius: 10,
+    marginBottom: 10,
   },
 });
 

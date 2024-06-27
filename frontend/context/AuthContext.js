@@ -46,17 +46,14 @@ const AuthProvider = ({ children }) => {
   };
 
   useEffect(() => {
-    
     if (token) {
       try {
-        console.log('Token:', token); 
         const decodedToken = jwtDecode(token);
         console.log('Decoded Token:', decodedToken);
 
-        
         if ('id' in decodedToken) {
-          const idValue = decodedToken['id']; 
-          setExplorer((prev) => ({ ...prev, id: idValue })); 
+          const idValue = decodedToken['id'];
+          setExplorer((prev) => ({ ...prev, id: idValue }));
           console.log('Explorer ID:', idValue);
         } else {
           console.error('ID not found in decoded token');
@@ -106,32 +103,31 @@ const AuthProvider = ({ children }) => {
         data.role === "explorer"
           ? "http://192.168.1.19:3000/auth/register/explorer"
           : "http://192.168.1.19:3000/auth/register/business";
-
+  
       const response = await axios.post(endpoint, data);
-
+  
       if (response.status === 201) {
         const { token } = response.data;
-        Alert.alert("Success", response.data.message);
-
-        if (data.role === "business") {
-          setBusiness(response.data.business);
-          await storeData("business", response.data.business);
-        } else if (data.role === "explorer") {
-          setExplorer(response.data.explorer);
-          await storeData("explorer", response.data.explorer);
-        }
-
-        setToken(token);
-        await storeData("token", token);
-
+        Alert.alert("Success", "Signup successful!");
+  
+        
+  
         return { token };
+      } else {
+        console.error("Unexpected response:", response);
+        throw new Error("Unexpected response from server");
       }
-    } catch (err) {
-      console.error(err);
-      Alert.alert("Error", err.response?.data?.message || "Signup failed!");
-      throw err;
+    } catch (error) {
+      console.error("Signup error:", error);
+      let errorMessage = "Failed to signup!";
+      if (error.response && error.response.data && error.response.data.error) {
+        errorMessage = error.response.data.error;
+      }
+      Alert.alert("Signup Failed", errorMessage);
+      throw error;
     }
   };
+  
 
   const logOut = async () => {
     try {
