@@ -26,6 +26,7 @@ const SignupScreen = () => {
   const [businessName, setBusinessName] = useState("");
   const [BOid, setBOid] = useState("");
   const [credImg, setCredImg] = useState(null);
+  const [category, setCategory] = useState("Restaurant"); 
 
   const handleSubmit = async () => {
     try {
@@ -41,6 +42,7 @@ const SignupScreen = () => {
           role,
           businessName,
           BOid,
+          category,
           credImg: credImg ? credImg.uri : null,
         };
       } else {
@@ -67,6 +69,7 @@ const SignupScreen = () => {
     setBusinessName("");
     setBOid("");
     setCredImg(null);
+    setCategory("Restaurant"); // Reset category to default
   };
 
   const selectImage = async () => {
@@ -77,9 +80,9 @@ const SignupScreen = () => {
         aspect: [4, 3],
         quality: 1,
       });
-  
+
       console.log("ImagePicker result:", result);
-  
+
       if (!result.cancelled) {
         const source = { uri: result.assets[0].uri };
         console.log("Selected image URI:", source.uri);
@@ -87,32 +90,34 @@ const SignupScreen = () => {
       }
     } catch (error) {
       console.error("ImagePicker Error: ", error);
-      Alert.alert("ImagePicker Error", "Failed to pick an image. Please try again.");
+      Alert.alert(
+        "ImagePicker Error",
+        "Failed to pick an image. Please try again."
+      );
     }
   };
-  
 
   const uploadImage = async (uri) => {
     const formData = new FormData();
     formData.append("file", {
       uri,
       type: "image/jpeg",
-      name: uri.split("/").pop(), // Use the actual filename from the URI
+      name: uri.split("/").pop(),
     });
     formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
-  
+
     try {
       const response = await axios.post(CLOUDINARY_UPLOAD_URL, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
       });
-  
+
       console.log("Upload response:", response);
-  
+
       if (response.status === 200) {
         const imageUrl = response.data.secure_url;
-        setCredImg({ uri: imageUrl }); 
+        setCredImg({ uri: imageUrl });
       } else {
         Alert.alert("Error", "Failed to upload image");
       }
@@ -121,7 +126,6 @@ const SignupScreen = () => {
       Alert.alert("Error", "An error occurred while uploading the image");
     }
   };
-  
 
   const removeImage = () => {
     setCredImg(null);
@@ -191,6 +195,19 @@ const SignupScreen = () => {
             value={BOid}
             onChangeText={setBOid}
           />
+          <Picker
+            selectedValue={category}
+            style={styles.input}
+            onValueChange={(itemValue) => setCategory(itemValue)}
+          >
+            <Picker.Item label="Restaurant" value="Restaurant" />
+            <Picker.Item label="Coffee Shop" value="Coffee Shop" />
+            <Picker.Item label="Nature" value="Nature" />
+            <Picker.Item label="Art" value="Art" />
+            <Picker.Item label="Camping" value="Camping" />
+            <Picker.Item label="Workout" value="Workout" />
+            <Picker.Item label="Cycling" value="Cycling" />
+          </Picker>
           {renderImageItem()}
         </>
       )}

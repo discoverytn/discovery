@@ -1,18 +1,15 @@
 const db = require('../database/index');
 
-
 const getAllUsers = async (req, res) => {
   try {
     const explorers = await db.Explorer.findAll();
     const businesses = await db.Business.findAll();
-
-    res.json({explorers,businesses});
+    res.json({ explorers, businesses });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: error.message });
   }
 };
-
 
 const getUserByEmail = async (req, res) => {
   const { email } = req.params;
@@ -34,7 +31,6 @@ const getUserByEmail = async (req, res) => {
   }
 };
 
-// Delete user by email
 const deleteUser = async (req, res) => {
   const { email } = req.params;
   try {
@@ -60,17 +56,14 @@ const deleteUser = async (req, res) => {
   }
 };
 
-// Edit user role
 const editUserRole = async (req, res) => {
   const { email, currentRole, newRole } = req.body;
   try {
     let user;
 
     if (newRole === "business") {
-
       user = await db.Explorer.findOne({ where: { email } });
       if (user) {
-
         await db.Business.create({
           firstname: user.firstname,
           lastname: user.lastname,
@@ -87,17 +80,12 @@ const editUserRole = async (req, res) => {
           businessImg: user.businessImg,
           long: user.long,
           latt: user.latt
-
-
         });
-
         await user.destroy();
-        console.log("user has been changed from explorer to business owner successfully");
+        console.log("User has been changed from explorer to business owner successfully");
       } else {
-
-        console.log("user not found in explorer table");
+        console.log("User not found in explorer table");
       }
-
     } else if (newRole === "explorer") {
       user = await db.Business.findOne({ where: { email } });
       if (user) {
@@ -116,45 +104,56 @@ const editUserRole = async (req, res) => {
           numOfReviews: user.numOfReviews,
           long: user.long,
           latt: user.latt
-        
         });
         await user.destroy();
-        console.log("user has been changed from business owner to explorer successfully");
+        console.log("User has been changed from business owner to explorer successfully");
       } else {
-        console.log("user not found in business table");
+        console.log("User not found in business table");
       }
     }
     if (!user) {
-      return res.status(404).json({ error: "user not found" });
+      return res.status(404).json({ error: "User not found" });
     }
-
-    res.status(200).json({ message: "role updated successfully" });
+    res.status(200).json({ message: "Role updated successfully" });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.status(500).json({ error: error.message });
   }
-}
-
-const getAllBO = (req, res) => {
-  db.Business.findAll()
-    .then((result) => {
-      res.send(result);
-    })
-    .catch((error) => {
-      console.error("find all business owners error:", error);
-      res.status(500).send(error);
-    });
 };
 
-const getAllExplorers = (req, res) => {
-  db.Explorer.findAll()
-    .then((result) => {
-      res.send(result);
-    })
-    .catch((error) => {
-      console.error("find all explorers error:", error);
-      res.status(500).send(error);
-    });
+const getAllBO = async (req, res) => {
+  try {
+    const businessOwners = await db.Business.findAll();
+    res.json(businessOwners);
+  } catch (error) {
+    console.error("Find all business owners error:", error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const getAllExplorers = async (req, res) => {
+  try {
+    const explorers = await db.Explorer.findAll();
+    res.json(explorers);
+  } catch (error) {
+    console.error("Find all explorers error:", error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const getBusinessById = async (req, res) => {
+  const { businessId } = req.params;
+
+  try {
+    const business = await db.Business.findByPk(businessId);
+    if (!business) {
+      return res.status(404).json({ error: 'Business not found' });
+    }
+    res.json(business);
+  } catch (error) {
+    console.error('Error fetching business by ID:', error);
+    res.status(500).json({ error: error.message });
+  }
 };
 
 module.exports = {
@@ -163,5 +162,6 @@ module.exports = {
   deleteUser,
   editUserRole,
   getAllBO,
-  getAllExplorers
+  getAllExplorers,
+  getBusinessById
 };
