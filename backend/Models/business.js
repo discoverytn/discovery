@@ -20,7 +20,6 @@ module.exports = (sequelize) => {
       type: DataTypes.STRING,
       allowNull: true,
     },
-
     email: {
       type: DataTypes.STRING,
       allowNull: false,
@@ -85,10 +84,6 @@ module.exports = (sequelize) => {
     },
     latt: {
       type: DataTypes.DECIMAL,
-      allowNull: true,
-    },
-    location: {
-      type: DataTypes.STRING,
       allowNull: true,
     },
     resetCode: {

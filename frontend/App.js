@@ -33,6 +33,8 @@ function MainNavigator() {
         tabBarStyle: { display: 'none' },
       }}
     >
+      <Tab.Screen name="ExplorerAddPostScreen" component={ExplorerAddPostScreen} options={{ tabBarLabel: () => null }} />
+      <Tab.Screen name="LoginScreen" component={LoginScreen} options={{ tabBarLabel: () => null }} />
       <Tab.Screen name="Main" component={MainScreen} options={{ tabBarLabel: () => null }} />
       <Tab.Screen name="Home" component={HomeScreen} options={{ tabBarLabel: () => null }} />
       <Tab.Screen name="Intro1" component={Intro1} options={{ tabBarLabel: () => null }} />
@@ -44,7 +46,7 @@ function MainNavigator() {
       <Tab.Screen name="Favorites" component={FavoritesScreen} options={{ tabBarLabel: () => null }} />
       <Tab.Screen name="ScheduleEvent" component={ScheduleEventScreen} options={{ tabBarLabel: () => null }} />
       <Tab.Screen name="EventList" component={EventListScreen} options={{ tabBarLabel: () => null }} />
-      <Tab.Screen name="ExplorerAddPostScreen" component={ExplorerAddPostScreen} options={{ tabBarLabel: () => null }} />
+      
       
 
     </Tab.Navigator>
