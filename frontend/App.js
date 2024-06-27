@@ -20,6 +20,9 @@ import EventListScreen from './screens/EventListScreen';
 import MainScreen from './screens/MainScreen';
 
 
+
+
+
 enableScreens();
 
 const Tab = createMaterialTopTabNavigator();
@@ -33,11 +36,13 @@ function MainNavigator() {
         tabBarStyle: { display: 'none' },
       }}
     >
+     
       <Tab.Screen name="Main" component={MainScreen} options={{ tabBarLabel: () => null }} />
       <Tab.Screen name="Home" component={HomeScreen} options={{ tabBarLabel: () => null }} />
       <Tab.Screen name="Intro1" component={Intro1} options={{ tabBarLabel: () => null }} />
       <Tab.Screen name="Intro2" component={Intro2} options={{ tabBarLabel: () => null }} />
       <Tab.Screen name="Intro3" component={Intro3} options={{ tabBarLabel: () => null }} />
+      <Tab.Screen name="Login" component={LoginScreen} options={{ tabBarLabel: () => null }} />
       <Tab.Screen name="Signup" component={SignupScreen} options={{ tabBarLabel: () => null }} />
       <Tab.Screen name="Categories" component={CategoriesScreen} options={{ tabBarLabel: () => null }} />
       <Tab.Screen name="Discover" component={DiscoverScreen} options={{ tabBarLabel: () => null }} />
@@ -45,7 +50,7 @@ function MainNavigator() {
       <Tab.Screen name="ScheduleEvent" component={ScheduleEventScreen} options={{ tabBarLabel: () => null }} />
       <Tab.Screen name="EventList" component={EventListScreen} options={{ tabBarLabel: () => null }} />
       <Tab.Screen name="ExplorerAddPostScreen" component={ExplorerAddPostScreen} options={{ tabBarLabel: () => null }} />
-      
+     
 
     </Tab.Navigator>
   );
