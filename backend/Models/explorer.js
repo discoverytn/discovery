@@ -65,15 +65,11 @@ module.exports = (sequelize) => {
       allowNull: true,
       defaultValue: 0,
     },
-    long: {
-      type: DataTypes.DECIMAL,
+    governorate: {
+      type: DataTypes.STRING,
       allowNull: true,
     },
-    latt: {
-      type: DataTypes.DECIMAL,
-      allowNull: true,
-    },
-    location: {
+    municipality: {
       type: DataTypes.STRING,
       allowNull: true,
     },
