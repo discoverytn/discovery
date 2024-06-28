@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, Image, TouchableOpacity, FlatList, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faPersonWalkingLuggage } from '@fortawesome/free-solid-svg-icons';
+import CustomModal from './CustomModal'; // Adjust the path as per your project structure
 
 const events = [
   { id: 1, name: 'Bouselem', location: 'location.jpg', startDate: '16 July', endDate: '28 July', price: 'Free', image: require('../assets/eljem.jpg') },
@@ -14,6 +15,9 @@ const events = [
 
 const EventListScreen = () => {
   const navigation = useNavigation();
+  const [showModal, setShowModal] = useState(false);
+
+  const toggleModal = () => setShowModal(!showModal);
 
   const renderItem = ({ item }) => (
     <View style={styles.eventItem}>
@@ -25,7 +29,7 @@ const EventListScreen = () => {
         </View>
         <View style={styles.priceAndIconRow}>
           <Text style={styles.eventPrice}>{item.price}</Text>
-          <TouchableOpacity style={styles.routeButton}>
+          <TouchableOpacity style={styles.routeButton} onPress={toggleModal}>
             <FontAwesomeIcon icon={faPersonWalkingLuggage} size={25} color="#007BFF" />
           </TouchableOpacity>
         </View>
@@ -57,6 +61,11 @@ const EventListScreen = () => {
         renderItem={renderItem}
         keyExtractor={(item) => item.id.toString()}
         contentContainerStyle={styles.eventsContainer}
+      />
+      <CustomModal
+        visible={showModal}
+        onClose={toggleModal}
+        message="Event request was sent ! "
       />
     </View>
   );
@@ -148,7 +157,7 @@ const styles = StyleSheet.create({
      // Adjust flex to take available space
   },
   routeButton: {
-    marginRight:135 // Adjust margin left for spacing
+    marginRight: 135, // Adjust margin left for spacing
   },
   eventDateRow: {
     flexDirection: 'row',
