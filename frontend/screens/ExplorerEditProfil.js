@@ -14,7 +14,7 @@ const governorateOptions = [
   'Gafsa', 'Sfax', 'Gabès', 'Médenine', 'Tozeur', 'Kebili', 'Tataouine'
 ];
 
-const ExplorerEditProfileScreen = () => {
+const ExplorerEditProfil = () => {
   const { explorer, setExplorer } = useAuth();
   const [firstname, setFirstname] = useState('');
   const [lastname, setLastname] = useState('');
@@ -69,7 +69,7 @@ const ExplorerEditProfileScreen = () => {
     }
 
     try {
-      const response = await axios.put(`http://192.168.1.8:3000/explorer/${explorer.id}/edit`, payload);
+      const response = await axios.put(`http://192.168.1.19:3000/explorer/${explorer.id}/edit`, payload);
 
       if (response.status === 200) {
         setExplorer(response.data);
@@ -359,4 +359,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ExplorerEditProfileScreen;
+export default ExplorerEditProfil;
