@@ -1,6 +1,8 @@
 import React from 'react';
 import { View, Text, Image, TouchableOpacity, FlatList, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { faPersonWalkingLuggage } from '@fortawesome/free-solid-svg-icons';
 
 const events = [
   { id: 1, name: 'Bouselem', location: 'location.jpg', startDate: '16 July', endDate: '28 July', price: 'Free', image: require('../assets/eljem.jpg') },
@@ -21,7 +23,12 @@ const EventListScreen = () => {
           <Text style={styles.eventName}>{item.name}</Text>
           <Image source={require('../assets/location.jpg')} style={styles.locationIcon} />
         </View>
-        <Text style={styles.eventPrice}>{item.price}</Text>
+        <View style={styles.priceAndIconRow}>
+          <Text style={styles.eventPrice}>{item.price}</Text>
+          <TouchableOpacity style={styles.routeButton}>
+            <FontAwesomeIcon icon={faPersonWalkingLuggage} size={25} color="#007BFF" />
+          </TouchableOpacity>
+        </View>
         <View style={styles.eventDateRow}>
           <Image source={require('../assets/date.jpg')} style={styles.dateIcon} />
           <Text style={styles.eventDates}>{item.startDate} - {item.endDate}</Text>
@@ -44,7 +51,7 @@ const EventListScreen = () => {
         </TouchableOpacity>
         <Text style={styles.headerText}>Event Lists</Text>
       </View>
-      <Text style={styles.subHeaderText}>All Popular Events</Text>
+      <Text style={styles.subHeaderText}>Available Events</Text>
       <FlatList
         data={events}
         renderItem={renderItem}
@@ -70,13 +77,13 @@ const styles = StyleSheet.create({
   icon: {
     width: 30,
     height: 30,
-    marginTop: 20, 
+    marginTop: 20,
   },
   headerText: {
     fontSize: 24,
     fontWeight: 'bold',
     marginLeft: 100,
-    marginTop: 20, 
+    marginTop: 20,
   },
   subHeaderText: {
     fontSize: 20,
@@ -108,6 +115,7 @@ const styles = StyleSheet.create({
   eventDetails: {
     flex: 1,
     padding: 10,
+    justifyContent: 'space-between', // Ensure proper spacing
   },
   eventTitleRow: {
     flexDirection: 'row',
@@ -122,6 +130,12 @@ const styles = StyleSheet.create({
     width: 20,
     height: 20,
   },
+  priceAndIconRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 5, // Add margin bottom for spacing
+  },
   eventPrice: {
     fontSize: 14,
     color: '#007BFF',
@@ -131,6 +145,10 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     alignSelf: 'flex-start',
     marginTop: 5,
+     // Adjust flex to take available space
+  },
+  routeButton: {
+    marginRight:135 // Adjust margin left for spacing
   },
   eventDateRow: {
     flexDirection: 'row',
