@@ -8,6 +8,7 @@ const AuthContext = createContext({
   token: "",
   explorer: {},
   business: {},
+  setExplorer: () => {},
   loginAction: () => {},
   signupAction: () => {},
   logOut: () => {},
@@ -50,15 +51,15 @@ const AuthProvider = ({ children }) => {
       try {
         const decodedToken = jwtDecode(token);
         console.log('Decoded Token:', decodedToken);
-
+  
         if ('id' in decodedToken) {
           const idValue = decodedToken['id'];
           if (decodedToken.role === 'explorer') {
             setExplorer((prev) => ({ ...prev, id: idValue }));
-            console.log('Explorer ID:', idValue);
+            console.log('Explorer ID set from context:', idValue);
           } else if (decodedToken.role === 'business') {
             setBusiness((prev) => ({ ...prev, id: idValue }));
-            console.log('Business ID:', idValue);
+            console.log('Business ID set from context:', idValue);
           }
         } else {
           console.error('ID not found in decoded token');
@@ -72,7 +73,7 @@ const AuthProvider = ({ children }) => {
   const loginAction = async (data) => {
     try {
       const response = await axios.post(
-        "http://192.168.1.19:3000/auth/login",
+        "http://192.168.1.8:3000/auth/login",
         data
       );
 
@@ -108,8 +109,8 @@ const AuthProvider = ({ children }) => {
     try {
       const endpoint =
         data.role === "explorer"
-          ? "http://192.168.1.19:3000/auth/register/explorer"
-          : "http://192.168.1.19:3000/auth/register/business";
+          ? "http://192.168.1.8:3000/auth/register/explorer"
+          : "http://192.168.1.8:3000/auth/register/business";
 
       const response = await axios.post(endpoint, data);
 
@@ -151,7 +152,7 @@ const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider
-      value={{ token, explorer, business, loginAction, signupAction, logOut }}
+      value={{ token, explorer, business, loginAction, signupAction,setExplorer, logOut }}
     >
       {children}
     </AuthContext.Provider>
