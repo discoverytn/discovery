@@ -3,7 +3,7 @@ import { View, Text, Image, TouchableOpacity, FlatList, StyleSheet } from 'react
 import { useNavigation } from '@react-navigation/native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faPersonWalkingLuggage } from '@fortawesome/free-solid-svg-icons';
-import CustomModal from './CustomModal'; // Adjust the path as per your project structure
+import CustomModal from './CustomModal'; 
 
 const events = [
   { id: 1, name: 'Bouselem', location: 'location.jpg', startDate: '16 July', endDate: '28 July', price: 'Free', image: require('../assets/eljem.jpg') },
