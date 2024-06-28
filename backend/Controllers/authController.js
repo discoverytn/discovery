@@ -47,7 +47,7 @@ const registerExplorer = async (req, res) => {
 };
 
 const registerBO = async (req, res) => {
-  const { email, username, password, businessName, BOid, credImg, category } = req.body; // include category
+  const { email, username, password, businessName, BOid, credImg, category } = req.body; 
   try {
     const isUnique = await uniqueChecker(username, email);
     if (!isUnique) {
