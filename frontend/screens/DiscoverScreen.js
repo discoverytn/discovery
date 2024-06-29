@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, Image, FlatList, StyleSheet, Dimensions, TouchableOpacity, ScrollView } from 'react-native';
 import Rating from './Rating';
+import { useNavigation } from '@react-navigation/native';
 
-const { width } = Dimensions.get('window'); 
+const { width } = Dimensions.get('window');
 
-const DiscoverScreen = ({ navigation }) => {
+const DiscoverScreen = () => {
+  const navigation = useNavigation();
   const [postRatings, setPostRatings] = useState({});
   const [categories, setCategories] = useState([]);
 
@@ -38,6 +40,10 @@ const DiscoverScreen = ({ navigation }) => {
         name: post.title,
         location: post.location,
         image: { uri: post.image1 },
+        description: post.description,
+        image2: post.image2 ? { uri: post.image2 } : null,
+        image3: post.image3 ? { uri: post.image3 } : null,
+        image4: post.image4 ? { uri: post.image4 } : null,
       });
     });
 
@@ -59,8 +65,12 @@ const DiscoverScreen = ({ navigation }) => {
     const postId = item.id.toString();
     const selectedRating = postRatings[postId] || 0;
 
+    const navigateToPost = () => {
+      navigation.navigate('Onepost', { post: item });
+    };
+
     return (
-      <ScrollView style={styles.postContainer}>
+      <TouchableOpacity onPress={navigateToPost} style={styles.postContainer}>
         <Image source={item.image} style={styles.postImage} />
         <Text style={styles.postName}>{item.name}</Text>
         <View style={styles.locationContainer}>
@@ -68,7 +78,7 @@ const DiscoverScreen = ({ navigation }) => {
           <Text style={styles.postLocation}>{item.location}</Text>
         </View>
         <Rating postId={postId} selectedRating={selectedRating} onRate={(rating) => handleRating(postId, rating)} />
-      </ScrollView>
+      </TouchableOpacity>
     );
   };
 

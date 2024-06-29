@@ -1,71 +1,83 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faHeart, faPaperPlane, faCloudSunRain, faStar, faTrash, faEdit } from '@fortawesome/free-solid-svg-icons';
 
-const OnepostScreen = () => {
-  const mainImage = require('../assets/onep.jpg');
-  const [selectedImage, setSelectedImage] = useState(mainImage);
+const OnepostScreen = ({ route }) => {
+  const { postId } = route.params;
+  const [postDetails, setPostDetails] = useState(null);
   const [showFullDescription, setShowFullDescription] = useState(false);
   const [showMoreReviews, setShowMoreReviews] = useState(false);
-  const scrollViewRef = useRef(null);
 
-  const description = "this place was recommended to me by one of my friends, after i you get there the locals will help guide you , it's one of the best natural places i got to visit and had a blast on my time there";
-  const shortDescription = description.slice(0, 100) + '...';
+  useEffect(() => {
+    fetchPostDetails();
+  }, []);
 
-  const handleSeeMorePress = () => {
-    setShowMoreReviews(!showMoreReviews);
-  
-    if (!showMoreReviews && scrollViewRef.current) {
-      scrollViewRef.current.scrollToEnd({ animated: true });
+  const fetchPostDetails = async () => {
+    try {
+      const response = await fetch(`http://192.168.1.19:3000/posts/onepost/${postId}`);
+      const postData = await response.json();
+      setPostDetails(postData);
+    } catch (error) {
+      console.error('Error fetching post details:', error);
     }
   };
 
+  const handleSeeMorePress = () => {
+    setShowFullDescription(!showFullDescription);
+  };
+
+  if (!postDetails) {
+    return (
+      <View style={styles.loadingContainer}>
+        <Text>Loading...</Text>
+      </View>
+    );
+  }
+
+  const { title, description, location, image1, image2, image3, image4 } = postDetails;
+
+  const mainImage = { uri: image1 };
+  const images = [
+    
+    { source: { uri: image2 } },
+    { source: { uri: image3 } },
+    { source: { uri: image4 } },
+  ];
+
+  const shortDescription = description.slice(0, 100) + '...';
+
   return (
-    <ScrollView style={styles.container} ref={scrollViewRef}>
+    <ScrollView style={styles.container}>
       <View style={styles.imageContainer}>
-        <Image source={selectedImage} style={styles.mainImage} />
+        <Image source={mainImage} style={styles.mainImage} />
         <View style={styles.iconsContainer}>
           <FontAwesomeIcon icon={faHeart} style={styles.icon} size={26} />
-          <FontAwesomeIcon icon={faPaperPlane} style={styles.icon1} size={26} />
+          <FontAwesomeIcon icon={faPaperPlane} style={styles.icon} size={26} />
         </View>
         <View style={styles.thumbnailContainer}>
-          <TouchableOpacity onPress={() => setSelectedImage(require('../assets/cycling.jpg'))}>
-            <Image source={require('../assets/cycling.jpg')} style={styles.thumbnail} />
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => setSelectedImage(require('../assets/eljem.jpg'))}>
-            <Image source={require('../assets/eljem.jpg')} style={styles.thumbnail} />
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => setSelectedImage(require('../assets/kairouen1.jpg'))}>
-            <Image source={require('../assets/kairouen1.jpg')} style={styles.thumbnail} />
-          </TouchableOpacity>
-          {selectedImage !== mainImage && (
-            <TouchableOpacity onPress={() => setSelectedImage(mainImage)}>
-              <Image source={mainImage} style={styles.thumbnail} />
+          {images.map((img, index) => (
+            <TouchableOpacity key={index} onPress={() => setSelectedImage(img.source)}>
+              <Image source={img.source} style={styles.thumbnail} />
             </TouchableOpacity>
-          )}
+          ))}
         </View>
       </View>
       <View style={styles.detailsContainer}>
-        <Text style={styles.title}>Nefza</Text>
+        <Text style={styles.title}>{title}</Text>
         <View style={styles.infoRow}>
           <View style={styles.infoItem}>
             <Image source={require('../assets/location.jpg')} style={styles.infoIcon} />
-            <Text style={styles.infoText}>Location</Text>
+            <Text style={styles.infoText}>{location}</Text>
           </View>
           <View style={styles.infoItem}>
-            <FontAwesomeIcon icon={faCloudSunRain} style={styles.weatherIcon} size={32}/>
+            <FontAwesomeIcon icon={faCloudSunRain} style={styles.weatherIcon} size={32} />
             <Text style={styles.infoText}>25°C</Text>
-          </View>
-          <View style={styles.infoItem}>
-            <View style={styles.eventIconContainer}>
-              <Image source={require('../assets/calender.jpg')} style={styles.eventIcon} />
-            </View>
           </View>
         </View>
         <Text style={styles.subtitle}>About Destination</Text>
         <Text style={styles.description}>{showFullDescription ? description : shortDescription}</Text>
-        <TouchableOpacity onPress={() => setShowFullDescription(!showFullDescription)}>
+        <TouchableOpacity onPress={handleSeeMorePress}>
           <Text style={styles.readMore}>{showFullDescription ? 'Read Less' : 'Read More'}</Text>
         </TouchableOpacity>
         <View style={styles.ratingRow}>
@@ -83,7 +95,7 @@ const OnepostScreen = () => {
           <FontAwesomeIcon icon={faTrash} style={styles.userIcon} />
           <FontAwesomeIcon icon={faEdit} style={styles.userIcon} />
         </View>
-        <TouchableOpacity style={styles.seeMoreButton} onPress={handleSeeMorePress}>
+        <TouchableOpacity style={styles.seeMoreButton} onPress={() => setShowMoreReviews(!showMoreReviews)}>
           <Text style={styles.seeMoreText}>{showMoreReviews ? 'Hide reviews' : 'See more reviews'}</Text>
         </TouchableOpacity>
         {showMoreReviews && (
@@ -116,6 +128,11 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
   },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   imageContainer: {
     position: 'relative',
   },
@@ -134,11 +151,6 @@ const styles = StyleSheet.create({
   },
   icon: {
     color: '#DB81B6',
-    marginBottom: 12,
-    marginTop:11
-  },
-  icon1: {
-    color: '#2ac00a',
     marginBottom: 12,
   },
   thumbnailContainer: {
@@ -181,24 +193,10 @@ const styles = StyleSheet.create({
   infoText: {
     fontSize: 16,
     color: 'grey',
-    marginRight:5,
-    fontStyle:'italic'
   },
   weatherIcon: {
-   
     color: 'blue',
     marginRight: 8,
-    marginLeft:-22
-  },
-  eventIconContainer: {
-    padding: 5,
-    borderWidth: 1,
-    borderColor: 'grey',
-    borderRadius: 10,
-  },
-  eventIcon: {
-    width: 35,
-    height: 35,
   },
   subtitle: {
     fontSize: 18,
@@ -265,7 +263,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 20,
   },
-
   seeMoreText: {
     color: 'grey',
   },
