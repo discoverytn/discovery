@@ -20,8 +20,8 @@ import EventListScreen from './screens/EventListScreen';
 import MainScreen from './screens/MainScreen';
 import OnepostScreen from './screens/Onepost';
 import BusinessddPostScreen from "./screens/BusinessAddPostScreen"
-import ExplorerEditProfil from "./screens/ExplorerEditProfil"
 import explorerProfil from "./screens/explorerProfil"
+import ExplorerEditProfileScreen from './screens/ExplorerEditProfilScreen';
 
 
 
@@ -42,7 +42,7 @@ function MainNavigator() {
     >
       <Tab.Screen name="explorerProfil" component={explorerProfil} options={{ tabBarLabel: () => null }} />
       <Tab.Screen name="Login" component={LoginScreen} options={{ tabBarLabel: () => null }} />
-      <Tab.Screen name="ExplorerEditProfil" component={ExplorerEditProfil} options={{ tabBarLabel: () => null }} />
+      <Tab.Screen name="ExplorerEditProfil" component={ExplorerEditProfileScreen} options={{ tabBarLabel: () => null }} />
      <Tab.Screen name="Onepost" component={OnepostScreen} options={{ tabBarLabel: () => null }} />
      <Tab.Screen name="BusinessddPostScreen" component={BusinessddPostScreen} options={{ tabBarLabel: () => null }} />
      <Tab.Screen name="Signup" component={SignupScreen} options={{ tabBarLabel: () => null }} />

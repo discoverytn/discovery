@@ -14,8 +14,9 @@ const governorateOptions = [
   'Gafsa', 'Sfax', 'Gabès', 'Médenine', 'Tozeur', 'Kebili', 'Tataouine'
 ];
 
-const ExplorerEditProfil = () => {
+const ExplorerEditProfileScreen = () => {
   const { explorer, setExplorer } = useAuth();
+  const [explorerId, setExplorerId] = useState(null);
   const [firstname, setFirstname] = useState('');
   const [lastname, setLastname] = useState('');
   const [description, setDescription] = useState('');
@@ -32,13 +33,11 @@ const ExplorerEditProfil = () => {
 
   useEffect(() => {
     if (explorer) {
-      setFirstname(explorer.firstname || '');
-      setLastname(explorer.lastname || '');
-      setDescription(explorer.description || '');
-      setGovernorate(explorer.governorate || '');
-      setMunicipality(explorer.municipality || '');
-      setMobileNum(explorer.mobileNum || '');
-      setImage(explorer.image || null);
+      console.log('Explorer object:', explorer);  // Log the explorer object for debugging
+      if (explorer.id) {
+        setExplorerId(explorer.id);
+        console.log('Explorer ID set:', explorer.id);
+      }
     }
   }, [explorer]);
 
@@ -53,23 +52,25 @@ const ExplorerEditProfil = () => {
   const handleConfirmPassword = async () => {
     setModalVisible(false);
 
+    console.log("Explorer ID:", explorerId); // Log the explorer ID to verify it
+
     const payload = {
-      firstname: firstname.trim(),
-      lastname: lastname.trim(),
-      description: description.trim(),
-      governorate: governorate.trim(),
-      municipality: municipality.trim(),
-      mobileNum: mobileNum.trim(),
+      firstname: firstname,
+      lastname: lastname,
+      description: description,
+      governorate: governorate,
+      municipality: municipality,
+      mobileNum: mobileNum,
       image,
-      currentPassword: currentPassword.trim(),
+      currentPassword: currentPassword,
     };
 
     if (newPassword) {
-      payload.newPassword = newPassword.trim();
+      payload.newPassword = newPassword;
     }
 
     try {
-      const response = await axios.put(`http://192.168.1.19:3000/explorer/${explorer.id}/edit`, payload);
+      const response = await axios.put(`http://192.168.1.19:3000/explorer/${explorerId}/edit`, payload);
 
       if (response.status === 200) {
         setExplorer(response.data);
@@ -80,15 +81,12 @@ const ExplorerEditProfil = () => {
     } catch (error) {
       console.error('Error updating profile:', error);
       if (error.response) {
-       
         console.error('Server responded with:', error.response.data);
         Alert.alert('Error', 'Failed to update profile: Server error');
       } else if (error.request) {
-        
         console.error('No response received:', error.request);
         Alert.alert('Error', 'Failed to update profile: No response');
       } else {
-        
         console.error('Error setting up the request:', error.message);
         Alert.alert('Error', 'Failed to update profile: Request setup error');
       }
@@ -233,28 +231,30 @@ const ExplorerEditProfil = () => {
         />
       </View>
       <TextInput
-        style={[styles.input, { keyboardType: 'numeric' }]}
+        style={styles.input}
         placeholder="Mobile Number"
         value={mobileNum}
         onChangeText={setMobileNum}
+        keyboardType="numeric"
       />
 
       <TouchableOpacity onPress={() => setShowPasswordFields(!showPasswordFields)}>
         <Text style={styles.changePasswordText}>Click here to change your password</Text>
       </TouchableOpacity>
+
       {showPasswordFields && (
         <>
           <TextInput
             style={styles.input}
+            placeholder="Enter new password"
             secureTextEntry
-            placeholder="Enter your new password"
             value={newPassword}
             onChangeText={setNewPassword}
           />
           <TextInput
             style={styles.input}
+            placeholder="Confirm new password"
             secureTextEntry
-            placeholder="Confirm your new password"
             value={confirmNewPassword}
             onChangeText={setConfirmNewPassword}
           />
@@ -270,11 +270,11 @@ const ExplorerEditProfil = () => {
 
 const styles = StyleSheet.create({
   container: {
+    flexGrow: 1,
     padding: 20,
     backgroundColor: '#fff',
   },
   header: {
-    alignItems: 'center',
     marginBottom: 20,
   },
   headerText: {
@@ -286,63 +286,62 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   profileImagePicker: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: '#ccc',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#f0f0f0',
   },
   profileImage: {
-    width: '100%',
-    height: '100%',
-    borderRadius: 60,
+    width: 100,
+    height: 100,
+    borderRadius: 50,
   },
   profileImageText: {
-    textAlign: 'center',
-    color: '#888',
+    color: '#fff',
   },
   input: {
+    height: 40,
     borderColor: '#ccc',
     borderWidth: 1,
-    padding: 10,
     borderRadius: 5,
-    marginBottom: 15,
+    marginBottom: 10,
+    paddingLeft: 10,
+  },
+  button: {
+    backgroundColor: '#007bff',
+    paddingVertical: 10,
+    borderRadius: 5,
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 16,
+  },
+  changePasswordText: {
+    color: '#007bff',
+    marginBottom: 10,
   },
   locationContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    marginBottom: 10,
   },
   picker: {
     flex: 1,
-    marginRight: 10,
+    marginRight: 5,
   },
   municipalityInput: {
     flex: 1,
-  },
-  changePasswordText: {
-    color: '#007bff',
-    textAlign: 'center',
-    marginBottom: 15,
-  },
-  button: {
-    backgroundColor: '#007bff',
-    padding: 15,
-    borderRadius: 5,
-    alignItems: 'center',
-  },
-  buttonText: {
-    color: '#fff',
-    fontWeight: 'bold',
-  },
-  cancelButton: {
-    backgroundColor: '#ff4444',
-    marginTop: 10,
+    marginLeft: 5,
   },
   modalView: {
+    margin: 20,
     backgroundColor: 'white',
-    padding: 20,
-    borderRadius: 10,
+    borderRadius: 20,
+    padding: 35,
     alignItems: 'center',
     shadowColor: '#000',
     shadowOffset: {
@@ -357,6 +356,9 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     textAlign: 'center',
   },
+  cancelButton: {
+    backgroundColor: 'red',
+  },
 });
 
-export default ExplorerEditProfil;
+export default ExplorerEditProfileScreen;
