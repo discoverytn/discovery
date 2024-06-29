@@ -189,7 +189,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "#E5F4FF",
     padding: 10,
-    borderRadius: 8,
+    borderRadius: 9,
     marginTop: 15,
   },
   avatar: {
