@@ -20,7 +20,7 @@ module.exports = {
       firstname,
       lastname,
       description,
-      businessDescription,
+      businessDesc,
       governorate,
       municipality,
       businessLocation,
@@ -43,7 +43,7 @@ module.exports = {
       business.firstname = firstname;
       business.lastname = lastname;
       business.description = description;
-      business.businessDescription = businessDescription;
+      business.businessDesc = businessDesc;
       business.governorate = governorate;
       business.municipality = municipality;
       business.businessLocation = businessLocation;

@@ -70,7 +70,7 @@ const ExplorerProfile = () => {
   };
 
   const navigateToEditProfile = () => {
-    navigation.navigate('ExplorerEditProfil');
+    navigation.navigate('ExplorerEditProfilScreen');
   };
 
   const handleLogout = () => {

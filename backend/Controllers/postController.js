@@ -157,6 +157,16 @@ function hashtagsToString(hashtags) {
   return Array.isArray(hashtags) ? hashtags.join(', ') : hashtags;
 }
 
+const getAllPosts = async (req, res) => {
+  try {
+    const posts = await Posts.findAll();
+    res.status(200).json(posts);
+  } catch (error) {
+    console.error("Error fetching posts:", error);
+    res.status(500).json({ error: "Failed to fetch posts" });
+  }
+};
+
 module.exports = {
   ExplorerCreatePost,
   BusinessCreatePost,
@@ -164,4 +174,5 @@ module.exports = {
   BusinessUpdatePost,
   ExplorerDeletePost,
   BusinessDeletePost,
+  getAllPosts,
 };

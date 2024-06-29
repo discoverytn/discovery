@@ -21,7 +21,7 @@ const BusinessEditProfileScreen = () => {
   const [lastname, setLastname] = useState('');
   const [businessName, setBusinessName] = useState('');
   const [description, setDescription] = useState('');
-  const [businessDescription, setBusinessDescription] = useState('');
+  const [businessDesc, setbusinessDesc] = useState('');
   const [governorate, setGovernorate] = useState('');
   const [municipality, setMunicipality] = useState('');
   const [businessLocation, setBusinessLocation] = useState('');
@@ -46,7 +46,7 @@ const BusinessEditProfileScreen = () => {
       setLastname(business.lastname || '');
       setBusinessName(business.businessName || '');
       setDescription(business.description || '');
-      setBusinessDescription(business.businessDescription || '');
+      setbusinessDesc(business.businessDesc || '');
       setGovernorate(business.governorate || '');
       setMunicipality(business.municipality || '');
       setBusinessLocation(business.businessLocation || '');
@@ -71,7 +71,7 @@ const BusinessEditProfileScreen = () => {
       firstname: firstname,
       lastname: lastname,
       description: description,
-      businessDescription: businessDescription,
+      businessDesc: businessDesc,
       governorate: governorate,
       municipality: municipality,
       businessLocation: businessLocation,
@@ -87,7 +87,7 @@ const BusinessEditProfileScreen = () => {
     }
 
     try {
-      const response = await axios.put(`http://192.168.1.8:3000/business/${businessId}/edit`, payload);
+      const response = await axios.put(`http://192.168.1.19:3000/business/${businessId}/edit`, payload);
 
       if (response.status === 200) {
         Alert.alert('Success', 'Profile updated successfully');
@@ -239,8 +239,8 @@ const BusinessEditProfileScreen = () => {
       <TextInput
         style={styles.input}
         placeholder="Business Description"
-        value={businessDescription}
-        onChangeText={setBusinessDescription}
+        value={businessDesc}
+        onChangeText={setbusinessDesc}
         multiline
         numberOfLines={4}
       />
