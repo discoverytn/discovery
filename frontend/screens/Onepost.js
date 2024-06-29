@@ -1,70 +1,74 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faHeart, faPaperPlane, faCloudSunRain, faStar, faTrash, faEdit } from '@fortawesome/free-solid-svg-icons';
 
 const OnepostScreen = ({ route }) => {
-  const { postId } = route.params;
-  const [postDetails, setPostDetails] = useState(null);
+  const { postId, postDetails } = route.params;
+
+  const {
+    name,
+    location,
+    image,
+    image2,
+    image3,
+    image4,
+    description,
+  } = postDetails;
+
+  const mainImage = image.uri;
+  const [selectedImage, setSelectedImage] = useState(mainImage);
   const [showFullDescription, setShowFullDescription] = useState(false);
   const [showMoreReviews, setShowMoreReviews] = useState(false);
-
-  useEffect(() => {
-    fetchPostDetails();
-  }, []);
-
-  const fetchPostDetails = async () => {
-    try {
-      const response = await fetch(`http://192.168.1.19:3000/posts/onepost/${postId}`);
-      const postData = await response.json();
-      setPostDetails(postData);
-    } catch (error) {
-      console.error('Error fetching post details:', error);
-    }
-  };
-
-  const handleSeeMorePress = () => {
-    setShowFullDescription(!showFullDescription);
-  };
-
-  if (!postDetails) {
-    return (
-      <View style={styles.loadingContainer}>
-        <Text>Loading...</Text>
-      </View>
-    );
-  }
-
-  const { title, description, location, image1, image2, image3, image4 } = postDetails;
-
-  const mainImage = { uri: image1 };
-  const images = [
-    
-    { source: { uri: image2 } },
-    { source: { uri: image3 } },
-    { source: { uri: image4 } },
-  ];
+  const scrollViewRef = useRef(null);
 
   const shortDescription = description.slice(0, 100) + '...';
 
+  useEffect(() => {
+    setSelectedImage(mainImage);
+  }, [mainImage]);
+
+  const handleSeeMorePress = () => {
+    setShowMoreReviews(!showMoreReviews);
+
+    if (!showMoreReviews && scrollViewRef.current) {
+      scrollViewRef.current.scrollToEnd({ animated: true });
+    }
+  };
+
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView style={styles.container} ref={scrollViewRef}>
       <View style={styles.imageContainer}>
-        <Image source={mainImage} style={styles.mainImage} />
+        <Image source={{ uri: selectedImage }} style={styles.mainImage} />
         <View style={styles.iconsContainer}>
           <FontAwesomeIcon icon={faHeart} style={styles.icon} size={26} />
-          <FontAwesomeIcon icon={faPaperPlane} style={styles.icon} size={26} />
+          <FontAwesomeIcon icon={faPaperPlane} style={styles.icon1} size={26} />
         </View>
         <View style={styles.thumbnailContainer}>
-          {images.map((img, index) => (
-            <TouchableOpacity key={index} onPress={() => setSelectedImage(img.source)}>
-              <Image source={img.source} style={styles.thumbnail} />
+          {image2 && (
+            <TouchableOpacity onPress={() => setSelectedImage(image2.uri)}>
+              <Image source={{ uri: image2.uri }} style={styles.thumbnail} />
             </TouchableOpacity>
-          ))}
+          )}
+          {image3 && (
+            <TouchableOpacity onPress={() => setSelectedImage(image3.uri)}>
+              <Image source={{ uri: image3.uri }} style={styles.thumbnail} />
+            </TouchableOpacity>
+          )}
+          {image4 && (
+            <TouchableOpacity onPress={() => setSelectedImage(image4.uri)}>
+              <Image source={{ uri: image4.uri }} style={styles.thumbnail} />
+            </TouchableOpacity>
+          )}
+          {selectedImage !== mainImage && (
+            <TouchableOpacity onPress={() => setSelectedImage(mainImage)}>
+              <Image source={{ uri: mainImage }} style={styles.thumbnail} />
+            </TouchableOpacity>
+          )}
         </View>
       </View>
       <View style={styles.detailsContainer}>
-        <Text style={styles.title}>{title}</Text>
+        <Text style={styles.title}>{name}</Text>
         <View style={styles.infoRow}>
           <View style={styles.infoItem}>
             <Image source={require('../assets/location.jpg')} style={styles.infoIcon} />
@@ -74,10 +78,15 @@ const OnepostScreen = ({ route }) => {
             <FontAwesomeIcon icon={faCloudSunRain} style={styles.weatherIcon} size={32} />
             <Text style={styles.infoText}>25°C</Text>
           </View>
+          <View style={styles.infoItem}>
+            <View style={styles.eventIconContainer}>
+              <Image source={require('../assets/calender.jpg')} style={styles.eventIcon} />
+            </View>
+          </View>
         </View>
         <Text style={styles.subtitle}>About Destination</Text>
         <Text style={styles.description}>{showFullDescription ? description : shortDescription}</Text>
-        <TouchableOpacity onPress={handleSeeMorePress}>
+        <TouchableOpacity onPress={() => setShowFullDescription(!showFullDescription)}>
           <Text style={styles.readMore}>{showFullDescription ? 'Read Less' : 'Read More'}</Text>
         </TouchableOpacity>
         <View style={styles.ratingRow}>
@@ -95,7 +104,7 @@ const OnepostScreen = ({ route }) => {
           <FontAwesomeIcon icon={faTrash} style={styles.userIcon} />
           <FontAwesomeIcon icon={faEdit} style={styles.userIcon} />
         </View>
-        <TouchableOpacity style={styles.seeMoreButton} onPress={() => setShowMoreReviews(!showMoreReviews)}>
+        <TouchableOpacity style={styles.seeMoreButton} onPress={handleSeeMorePress}>
           <Text style={styles.seeMoreText}>{showMoreReviews ? 'Hide reviews' : 'See more reviews'}</Text>
         </TouchableOpacity>
         {showMoreReviews && (
@@ -128,11 +137,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
   },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
   imageContainer: {
     position: 'relative',
   },
@@ -151,6 +155,11 @@ const styles = StyleSheet.create({
   },
   icon: {
     color: '#DB81B6',
+    marginBottom: 12,
+    marginTop: 11,
+  },
+  icon1: {
+    color: '#2ac00a',
     marginBottom: 12,
   },
   thumbnailContainer: {
@@ -193,10 +202,22 @@ const styles = StyleSheet.create({
   infoText: {
     fontSize: 16,
     color: 'grey',
+    marginRight: 5,
+    fontStyle: 'italic',
   },
   weatherIcon: {
     color: 'blue',
     marginRight: 8,
+  },
+  eventIconContainer: {
+    padding: 5,
+    borderWidth: 1,
+    borderColor: 'grey',
+    borderRadius: 10,
+  },
+  eventIcon: {
+    width: 35,
+    height: 35,
   },
   subtitle: {
     fontSize: 18,

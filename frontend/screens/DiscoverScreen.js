@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, Image, FlatList, StyleSheet, Dimensions, TouchableOpacity, ScrollView } from 'react-native';
 import Rating from './Rating';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 
 const { width } = Dimensions.get('window');
 
@@ -10,16 +10,17 @@ const DiscoverScreen = () => {
   const [postRatings, setPostRatings] = useState({});
   const [categories, setCategories] = useState([]);
 
-  useEffect(() => {
-    fetchPosts();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      fetchPosts();
+    }, [])
+  );
 
   const fetchPosts = async () => {
     try {
-      const response = await fetch('http://192.168.1.8:3000/posts/allposts');
+      const response = await fetch('http://192.168.1.19:3000/posts/allposts');
       const posts = await response.json();
 
-      // Categorize posts
       const categorizedPosts = categorizePosts(posts);
 
       setCategories(categorizedPosts);
@@ -61,16 +62,18 @@ const DiscoverScreen = () => {
     }));
   };
 
+  const navigateToPost = (postId, postDetails) => {
+    console.log('Navigating to post ID:', postId);
+    console.log('Post details:', postDetails);
+    navigation.navigate('Onepost', { postId, postDetails });
+  };
+
   const renderPostItem = ({ item }) => {
     const postId = item.id.toString();
     const selectedRating = postRatings[postId] || 0;
 
-    const navigateToPost = () => {
-      navigation.navigate('Onepost', { post: item });
-    };
-
     return (
-      <TouchableOpacity onPress={navigateToPost} style={styles.postContainer}>
+      <TouchableOpacity onPress={() => navigateToPost(postId, item)} style={styles.postContainer}>
         <Image source={item.image} style={styles.postImage} />
         <Text style={styles.postName}>{item.name}</Text>
         <View style={styles.locationContainer}>
@@ -97,13 +100,13 @@ const DiscoverScreen = () => {
   );
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Image source={require('../assets/left-arrow.jpg')} style={styles.icon} />
         </TouchableOpacity>
         <Text style={styles.headerText}>Discover</Text>
-        <TouchableOpacity onPress={() => {/* Add your notification logic */ }}>
+        <TouchableOpacity onPress={() => {/* ps : i will add notification for later */ }}>
           <Image source={require('../assets/notification.jpg')} style={styles.icon} />
         </TouchableOpacity>
       </View>
@@ -114,7 +117,7 @@ const DiscoverScreen = () => {
         keyExtractor={(category) => category.id.toString()}
         contentContainerStyle={styles.categoriesContainer}
       />
-    </View>
+    </ScrollView>
   );
 };
 
@@ -161,7 +164,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   postContainer: {
-    width: (width - 60) / 2, // adjusted width dynamically based on window width
+    width: (width - 60) / 2, 
     marginRight: 40,
     backgroundColor: '#f8f8f8',
     borderRadius: 10,
