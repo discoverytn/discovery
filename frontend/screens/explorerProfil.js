@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, View, Image, TouchableOpacity, FlatList } from 'react-native';
+import { StyleSheet, Text, View, Image, TouchableOpacity, FlatList, Alert } from 'react-native';
 import axios from 'axios';
 import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../context/AuthContext';
@@ -16,7 +16,7 @@ const ExplorerProfile = () => {
   useEffect(() => {
     const fetchExplorerData = async () => {
       try {
-        const response = await axios.get(`http://192.168.1.19:3000/explorer/${explorer.id}`);
+        const response = await axios.get(`http://192.168.1.8:3000/explorer/${explorer.id}`);
         if (response.status === 200) {
           setExplorer(response.data);
           setNumPosts(response.data.Posts?.length || 0);
@@ -38,10 +38,10 @@ const ExplorerProfile = () => {
   useEffect(() => {
     const fetchExplorerPosts = async () => {
       try {
-        const response = await axios.get(`http://192.168.1.19:3000/explorer/${explorer.id}/posts`);
+        const response = await axios.get(`http://192.168.1.8:3000/explorer/${explorer.id}/posts`);
         if (response.status === 200) {
           const transformedPosts = response.data.map(post => ({
-            id: post.id,
+            id: post.idposts,
             title: post.title,
             description: post.description,
             image1: post.image1
@@ -70,7 +70,7 @@ const ExplorerProfile = () => {
   };
 
   const navigateToEditProfile = () => {
-    navigation.navigate('ExplorerEditProfilScreen');
+    navigation.navigate('ExplorerEditProfileScreen');
   };
 
   const handleLogout = () => {
@@ -78,6 +78,29 @@ const ExplorerProfile = () => {
     navigation.navigate('Login');
   };
 
+  const deleteExplorerPost = async (postId, token) => {
+    try {
+      const response = await fetch(`http://192.168.1.8:3000/posts/explorer/delete/${postId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      const data = await response.json();
+      if (response.ok) {
+        console.log(data);
+        alert('Explorer post deleted successfully');
+      } else {
+        console.error('Error:', data);
+        alert(`Error: ${data.message}`);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert(`Error: ${error.message}`);
+    }
+  };
+  
   if (!explorer) {
     return (
       <View style={styles.container}>
@@ -91,6 +114,9 @@ const ExplorerProfile = () => {
       <Image source={{ uri: item.image1 }} style={styles.postImage} />
       <Text style={styles.postTitle}>{item.title}</Text>
       <Text style={styles.postDescription}>{item.description}</Text>
+      <TouchableOpacity style={styles.deleteButton} onPress={() => deleteExplorerPost(item.id)}>
+        <Text style={styles.deleteButtonText}>Delete</Text>
+      </TouchableOpacity>
     </View>
   );
 
@@ -156,13 +182,13 @@ const ExplorerProfile = () => {
         </TouchableOpacity>
       </View>
       {activeTab === 'Posts' && (
-        <FlatList
-          data={posts}
-          keyExtractor={(item, index) => item.id ? item.id.toString() : index.toString()}
-          renderItem={renderPostItem}
-          numColumns={2}
-          contentContainerStyle={styles.postsContainer}
-        />
+       <FlatList
+       data={posts}
+       keyExtractor={(item, index) => item.id ? item.id.toString() : index.toString()}
+       renderItem={renderPostItem}
+       numColumns={2}
+       contentContainerStyle={styles.postsContainer}
+     />
       )}
     </View>
   );
@@ -230,89 +256,99 @@ const styles = StyleSheet.create({
   infoItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
     marginBottom: 10,
   },
   labelText: {
     fontSize: 16,
-    color: '#777',
     fontWeight: 'bold',
+    color: '#333',
   },
   valueText: {
     fontSize: 16,
-    color: '#333',
-  },
-  navBar: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    borderTopWidth: 1,
-    borderTopColor: '#ccc',
-    paddingTop: 10,
-    marginTop: 10,
-  },
-  navBarItem: {
-    flex: 1,
-    alignItems: 'center',
-    paddingVertical: 10,
-  },
-  activeTab: {
-    borderBottomWidth: 2,
-    borderBottomColor: '#333',
-  },
-  navBarText: {
-    fontSize: 18,
     color: '#555',
-  },
-  postsContainer: {
-    marginTop: 20,
-    paddingHorizontal: 10,
-  },
-  postItem: {
-    flex: 1,
-    backgroundColor: '#f0f0f0',
-    borderRadius: 8,
-    margin: 5,
-    padding: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  postImage: {
-    width: '100%',
-    height: 120,
-    borderRadius: 8,
-    marginBottom: 5,
-  },
-  postTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 5,
-  },
-  postDescription: {
-    fontSize: 14,
-    color: '#555',
-    textAlign: 'center',
   },
   editButton: {
-    backgroundColor: '#007bff',
-    paddingHorizontal: 20,
+    backgroundColor: '#007BFF',
+    borderRadius: 5,
     paddingVertical: 10,
-    borderRadius: 8,
-    marginTop: 10,
+    paddingHorizontal: 20,
+    marginTop: 20,
   },
   editButtonText: {
     fontSize: 16,
-    color: '#fff',
     fontWeight: 'bold',
+    color: '#fff',
+    textAlign: 'center',
   },
   logoutButton: {
     marginTop: 10,
   },
   logoutButtonText: {
     fontSize: 16,
-    color: '#dc3545',
+    color: '#007BFF',
+    textAlign: 'center',
+  },
+  navBar: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginBottom: 10,
+  },
+  navBarItem: {
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderBottomWidth: 2,
+    borderBottomColor: 'transparent',
+  },
+  activeTab: {
+    borderBottomColor: '#007BFF',
+  },
+  navBarText: {
+    fontSize: 18,
     fontWeight: 'bold',
+    color: '#333',
+  },
+  postsContainer: {
+    flexGrow: 1,
+    justifyContent: 'flex-start',
+  },
+  postItem: {
+    flex: 1,
+    margin: 10,
+    backgroundColor: '#f0f0f0',
+    borderRadius: 10,
+    overflow: 'hidden',
+  },
+  postImage: {
+    width: '100%',
+    height: 150,
+    borderTopLeftRadius: 10,
+    borderTopRightRadius: 10,
+    marginBottom: 5,
+  },
+  postTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#333',
+    paddingHorizontal: 10,
+    marginTop: 5,
+  },
+  postDescription: {
+    fontSize: 14,
+    color: '#555',
+    paddingHorizontal: 10,
+    marginBottom: 10,
+  },
+  deleteButton: {
+    backgroundColor: '#dc3545',
+    padding: 10,
+    alignItems: 'center',
+    borderBottomLeftRadius: 10,
+    borderBottomRightRadius: 10,
+  },
+  deleteButtonText: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#fff',
   },
   errorText: {
     fontSize: 18,
