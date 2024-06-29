@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { View, Text, Image, FlatList, StyleSheet, Dimensions, TouchableOpacity } from 'react-native';
-import Rating from './Rating';
+import Rating from './Rating'
 
 const { width } = Dimensions.get('window'); // get the window width to style the page easier
 
-const categories = [
+const categories = [ 
   {
     id: 1,
     name: 'Nature',
