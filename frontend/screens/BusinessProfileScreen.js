@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, View, Image, TouchableOpacity, FlatList ,ScrollView} from 'react-native';
+import { StyleSheet, Text, View, Image, TouchableOpacity, FlatList, ScrollView, Alert } from 'react-native';
 import axios from 'axios';
 import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../context/AuthContext';
@@ -16,11 +16,11 @@ const BusinessProfileScreen = () => {
   useEffect(() => {
     const fetchBusinessData = async () => {
       try {
-        const response = await axios.get(`http://192.168.1.19:3000/business/${business.id}`);
+        const response = await axios.get(`http://192.168.1.8:3000/business/${business.id}`);
         if (response.status === 200) {
           setBusiness(response.data);
           setNumPosts(response.data.Posts?.length || 0);
-          setNumEvents(response.data.Events?.length || 0); 
+          setNumEvents(response.data.Events?.length || 0);
         } else {
           console.error('Failed to fetch business data');
         }
@@ -37,7 +37,7 @@ const BusinessProfileScreen = () => {
   useEffect(() => {
     const fetchBusinessPosts = async () => {
       try {
-        const response = await axios.get(`http://192.168.1.19:3000/business/${business.id}/posts`);
+        const response = await axios.get(`http://192.168.1.8:3000/business/${business.id}/posts`);
         if (response.status === 200) {
           const transformedPosts = response.data.map(post => ({
             id: post.id,
@@ -61,7 +61,7 @@ const BusinessProfileScreen = () => {
 
     const fetchBusinessEvents = async () => {
       try {
-        const response = await axios.get(`http://192.168.1.19:3000/business/${business.id}/events`);
+        const response = await axios.get(`http://192.168.1.8:3000/business/${business.id}/events`);
         if (response.status === 200) {
           const transformedEvents = response.data.map(event => ({
             id: event.id,
@@ -104,19 +104,38 @@ const BusinessProfileScreen = () => {
     navigation.navigate('Login');
   };
 
-  if (!business) {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.errorText}>Business data not available</Text>
-      </View>
-    );
-  }
+  const deleteBusinessPost = async (postId, token) => {
+    try {
+      const response = await fetch(`http://192.168.1.8:3000/posts/explorer/delete/${postId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      const data = await response.json();
+      if (response.ok) {
+        console.log(data);
+        alert('Explorer post deleted successfully');
+      } else {
+        console.error('Error:', data);
+        alert(`Error: ${data.message}`);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert(`Error: ${error.message}`);
+    }
+  };
+  
 
   const renderPostItem = ({ item }) => (
     <View style={styles.postItem}>
       <Image source={{ uri: item.image1 }} style={styles.postImage} />
       <Text style={styles.postTitle}>{item.title}</Text>
       <Text style={styles.postDescription}>{item.description}</Text>
+      <TouchableOpacity style={styles.deleteButton} onPress={() => deleteBusinessPost(item.id)}>
+        <Text style={styles.deleteButtonText}>Delete</Text>
+      </TouchableOpacity>
     </View>
   );
 
@@ -135,7 +154,7 @@ const BusinessProfileScreen = () => {
         <Text style={styles.nameText}>{`${business.firstname} ${business.lastname}`}</Text>
         <Image source={{ uri: business.image }} style={styles.profileImage} />
         <Text style={styles.usernameText}>{business.username}</Text>
-        <Text style={styles.descriptionText}>{business.description}</Text> 
+        <Text style={styles.descriptionText}>{business.description}</Text>
         <View style={styles.statsContainer}>
           <View style={styles.statBox}>
             <Text style={styles.statLabel}>Posts</Text>
@@ -195,13 +214,13 @@ const BusinessProfileScreen = () => {
         </TouchableOpacity>
       </View>
       {activeTab === 'Business' && (
-        <FlatList
-          data={posts}
-          keyExtractor={(item, index) => item.id ? item.id.toString() : index.toString()}
-          renderItem={renderPostItem}
-          numColumns={2}
-          contentContainerStyle={styles.postsContainer}
-        />
+       <FlatList
+       data={posts}
+       keyExtractor={(item, index) => item.id ? item.id.toString() : index.toString()}
+       renderItem={renderPostItem}
+       numColumns={2}
+       contentContainerStyle={styles.postsContainer}
+     />
       )}
       {activeTab === 'Events' && (
         <FlatList
@@ -219,133 +238,124 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
-    padding: 20,
   },
   profileContainer: {
     alignItems: 'center',
-    marginBottom: 20,
+    paddingVertical: 20,
   },
   profileImage: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
+    width: 100,
+    height: 100,
+    borderRadius: 50,
     marginBottom: 10,
   },
   nameText: {
-    fontSize: 24,
+    fontSize: 18,
     fontWeight: 'bold',
-    textAlign: 'center',
-    color: '#333',
     marginBottom: 5,
   },
   usernameText: {
     fontSize: 16,
-    color: '#555',
     marginBottom: 5,
   },
   descriptionText: {
-    fontSize: 16,
     textAlign: 'center',
-    color: '#555',
-    lineHeight: 22,
+    paddingHorizontal: 20,
     marginBottom: 10,
   },
   statsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    alignItems: 'center',
+    width: '100%',
+    paddingHorizontal: 20,
     marginBottom: 10,
   },
   statBox: {
-    backgroundColor: '#f0f0f0',
-    borderRadius: 8,
-    padding: 10,
     alignItems: 'center',
-    justifyContent: 'center',
-    width: 100,
-    height: 80,
   },
   statLabel: {
-    fontSize: 14,
+    fontSize: 12,
     color: '#888',
   },
   statValue: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: 'bold',
-    marginTop: 5,
   },
   infoContainer: {
-    marginVertical: 10,
+    width: '100%',
+    paddingHorizontal: 20,
+    marginBottom: 20,
   },
   infoItem: {
     flexDirection: 'row',
-    marginBottom: 5,
+    marginBottom: 10,
   },
   labelText: {
+    width: '40%',
     fontSize: 16,
     fontWeight: 'bold',
-    marginRight: 5,
-    color: '#333',
   },
   valueText: {
+    width: '60%',
     fontSize: 16,
-    color: '#555',
   },
   additionalInfoContainer: {
+    flexDirection: 'row',
     marginBottom: 5,
+    paddingHorizontal: 20,
   },
   additionalInfoLabel: {
+    width: '40%',
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#333',
   },
   additionalInfoValue: {
+    width: '60%',
     fontSize: 16,
-    color: '#555',
-    lineHeight: 22,
   },
   editButton: {
-    backgroundColor: '#3498db',
-    padding: 10,
+    backgroundColor: '#007bff',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
     borderRadius: 5,
-    marginTop: 10,
-    width: '100%',
-    alignItems: 'center',
+    marginBottom: 10,
   },
   editButtonText: {
     color: '#fff',
+    fontWeight: 'bold',
     fontSize: 16,
+    textAlign: 'center',
   },
   logoutButton: {
-    backgroundColor: '#e74c3c',
-    padding: 10,
+    backgroundColor: '#dc3545',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
     borderRadius: 5,
-    marginTop: 10,
-    width: '100%',
-    alignItems: 'center',
+    marginBottom: 20,
   },
   logoutButtonText: {
     color: '#fff',
+    fontWeight: 'bold',
     fontSize: 16,
+    textAlign: 'center',
   },
   navBar: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    alignItems: 'center',
-    marginBottom: 10,
+    backgroundColor: '#f0f0f0',
+    paddingVertical: 10,
   },
   navBarItem: {
+    flex: 1,
+    alignItems: 'center',
     paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderBottomWidth: 2,
-    borderBottomColor: 'transparent',
   },
   activeTab: {
-    borderBottomColor: '#3498db',
+    borderBottomWidth: 2,
+    borderBottomColor: '#007bff',
   },
   navBarText: {
-    fontSize: 18,
-    color: '#555',
+    fontSize: 16,
   },
   postsContainer: {
     paddingHorizontal: 10,
@@ -353,67 +363,65 @@ const styles = StyleSheet.create({
   postItem: {
     flex: 1,
     margin: 5,
-    backgroundColor: '#f0f0f0',
     padding: 10,
-    borderRadius: 8,
-    alignItems: 'center',
+    backgroundColor: '#f0f0f0',
+    borderRadius: 5,
   },
   postImage: {
     width: '100%',
-    height: 120,
-    borderRadius: 8,
-    marginBottom: 10,
+    height: 150,
+    borderRadius: 5,
+    marginBottom: 5,
   },
   postTitle: {
     fontSize: 16,
     fontWeight: 'bold',
     marginBottom: 5,
-    color: '#333',
   },
   postDescription: {
     fontSize: 14,
-    color: '#555',
-    lineHeight: 18,
-    textAlign: 'center',
+    marginBottom: 5,
+  },
+  deleteButton: {
+    backgroundColor: '#dc3545',
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    borderRadius: 3,
+    alignSelf: 'flex-end',
+  },
+  deleteButtonText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: 'bold',
   },
   eventsContainer: {
     paddingHorizontal: 10,
   },
   eventItem: {
-    marginVertical: 10,
-    backgroundColor: '#f0f0f0',
+    flex: 1,
+    marginVertical: 5,
     padding: 10,
-    borderRadius: 8,
-    alignItems: 'center',
+    backgroundColor: '#f0f0f0',
+    borderRadius: 5,
   },
   eventImage: {
     width: '100%',
-    height: 200,
-    borderRadius: 8,
-    marginBottom: 10,
+    height: 150,
+    borderRadius: 5,
+    marginBottom: 5,
   },
   eventTitle: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: 'bold',
     marginBottom: 5,
-    color: '#333',
   },
   eventDescription: {
     fontSize: 14,
-    color: '#555',
-    lineHeight: 18,
-    textAlign: 'center',
+    marginBottom: 5,
   },
   eventDate: {
-    fontSize: 14,
+    fontSize: 12,
     color: '#888',
-    marginTop: 5,
-  },
-  errorText: {
-    fontSize: 18,
-    color: 'red',
-    textAlign: 'center',
-    marginTop: 20,
   },
 });
 

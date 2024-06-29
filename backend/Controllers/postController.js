@@ -141,17 +141,22 @@ const BusinessDeletePost = async (req, res) => {
   try {
     const post = await Posts.findOne({ where: { idposts: id } });
 
-    if (post && post.business_idbusiness !== null) {
-      await post.destroy();
-      res.status(200).json({ message: "Business post deleted successfully" });
+    if (post) {
+      if (post.business_idbusiness !== null) {
+        await post.destroy();
+        res.status(200).json({ message: "Business post deleted successfully" });
+      } else {
+        res.status(404).json({ error: "Business post not associated with a business" });
+      }
     } else {
-      res.status(404).json({ error: "Business post not found or not associated with a business" });
+      res.status(404).json({ error: "Business post not found" });
     }
   } catch (error) {
     console.error("Error deleting business post:", error);
     res.status(500).json({ error: "Failed to delete business post" });
   }
 };
+
 
 function hashtagsToString(hashtags) {
   return Array.isArray(hashtags) ? hashtags.join(', ') : hashtags;
