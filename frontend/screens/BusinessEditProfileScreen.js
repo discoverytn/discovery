@@ -14,16 +14,20 @@ const governorateOptions = [
   'Gafsa', 'Sfax', 'Gabès', 'Médenine', 'Tozeur', 'Kebili', 'Tataouine'
 ];
 
-const ExplorerEditProfileScreen = () => {
-  const { explorer, setExplorer } = useAuth();
-  const [explorerId, setExplorerId] = useState(null);
+const BusinessEditProfileScreen = () => {
+  const { business, setBusiness } = useAuth();
+  const [businessId, setBusinessId] = useState(null);
   const [firstname, setFirstname] = useState('');
   const [lastname, setLastname] = useState('');
+  const [businessName, setBusinessName] = useState('');
   const [description, setDescription] = useState('');
+  const [businessDesc, setbusinessDesc] = useState('');
   const [governorate, setGovernorate] = useState('');
   const [municipality, setMunicipality] = useState('');
+  const [businessLocation, setBusinessLocation] = useState('');
   const [mobileNum, setMobileNum] = useState('');
   const [image, setImage] = useState(null);
+  const [businessImage, setBusinessImage] = useState(null);
   const [newPassword, setNewPassword] = useState('');
   const [confirmNewPassword, setConfirmNewPassword] = useState('');
   const [currentPassword, setCurrentPassword] = useState('');
@@ -32,14 +36,25 @@ const ExplorerEditProfileScreen = () => {
   const [showPasswordFields, setShowPasswordFields] = useState(false);
 
   useEffect(() => {
-    if (explorer) {
-      console.log('Explorer object:', explorer);  
-      if (explorer.id) {
-        setExplorerId(explorer.id);
-        console.log('Explorer ID set:', explorer.id);
+    if (business) {
+      console.log('Business object:', business);  
+      if (business.id) {
+        setBusinessId(business.id);
+        console.log('Business ID set:', business.id);
       }
+      setFirstname(business.firstname || '');
+      setLastname(business.lastname || '');
+      setBusinessName(business.businessName || '');
+      setDescription(business.description || '');
+      setbusinessDesc(business.businessDesc || '');
+      setGovernorate(business.governorate || '');
+      setMunicipality(business.municipality || '');
+      setBusinessLocation(business.businessLocation || '');
+      setMobileNum(business.mobileNum || '');
+      setImage(business.image || null);
+      setBusinessImage(business.businessImage || null);
     }
-  }, [explorer]);
+  }, [business]);
 
   const handleSave = async () => {
     if (newPassword && newPassword !== confirmNewPassword) {
@@ -52,17 +67,19 @@ const ExplorerEditProfileScreen = () => {
   const handleConfirmPassword = async () => {
     setModalVisible(false);
 
-    console.log("Explorer ID:", explorerId); 
-
     const payload = {
       firstname: firstname,
       lastname: lastname,
       description: description,
+      businessDesc: businessDesc,
       governorate: governorate,
       municipality: municipality,
+      businessLocation: businessLocation,
       mobileNum: mobileNum,
-      image,
-      currentPassword: currentPassword,
+      image: image,
+      businessName: businessName,
+      businessImage: businessImage,
+      currentPassword: currentPassword, 
     };
 
     if (newPassword) {
@@ -70,11 +87,11 @@ const ExplorerEditProfileScreen = () => {
     }
 
     try {
-      const response = await axios.put(`http://192.168.1.19:3000/explorer/${explorerId}/edit`, payload);
+      const response = await axios.put(`http://192.168.1.19:3000/business/${businessId}/edit`, payload);
 
       if (response.status === 200) {
-        setExplorer(response.data);
         Alert.alert('Success', 'Profile updated successfully');
+        
       } else {
         Alert.alert('Error', 'Failed to update profile');
       }
@@ -135,6 +152,7 @@ const ExplorerEditProfileScreen = () => {
       if (response.status === 200) {
         const imageUrl = response.data.secure_url;
         setImage(imageUrl);
+        setBusinessImage(imageUrl); 
       } else {
         Alert.alert("Error", "Failed to upload image");
       }
@@ -179,13 +197,13 @@ const ExplorerEditProfileScreen = () => {
       </Modal>
 
       <View style={styles.header}>
-        <Text style={styles.headerText}>Edit Profile</Text>
+        <Text style={styles.headerText}>Business Edit Profile</Text>
       </View>
 
       <View style={styles.profileImageContainer}>
         <TouchableOpacity style={styles.profileImagePicker} onPress={selectImage}>
-          {image ? (
-            <Image source={{ uri: image }} style={styles.profileImage} />
+          {businessImage ? (
+            <Image source={{ uri: businessImage }} style={styles.profileImage} />
           ) : (
             <Text style={styles.profileImageText}>Pick a profile picture</Text>
           )}
@@ -206,9 +224,23 @@ const ExplorerEditProfileScreen = () => {
       />
       <TextInput
         style={styles.input}
+        placeholder="Business Name"
+        value={businessName}
+        onChangeText={setBusinessName}
+      />
+      <TextInput
+        style={styles.input}
         placeholder="Description"
         value={description}
         onChangeText={setDescription}
+        multiline
+        numberOfLines={4}
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Business Description"
+        value={businessDesc}
+        onChangeText={setbusinessDesc}
         multiline
         numberOfLines={4}
       />
@@ -232,36 +264,45 @@ const ExplorerEditProfileScreen = () => {
       </View>
       <TextInput
         style={styles.input}
+        placeholder="Business Location"
+        value={businessLocation}
+        onChangeText={setBusinessLocation}
+      />
+      <TextInput
+        style={styles.input}
         placeholder="Mobile Number"
         value={mobileNum}
         onChangeText={setMobileNum}
         keyboardType="numeric"
       />
-
-      <TouchableOpacity onPress={() => setShowPasswordFields(!showPasswordFields)}>
-        <Text style={styles.changePasswordText}>Click here to change your password</Text>
+      <TouchableOpacity
+        style={styles.passwordChangeLink}
+        onPress={() => setShowPasswordFields(!showPasswordFields)}
+      >
+        <Text style={styles.passwordChangeLinkText}>Click here to change your password</Text>
       </TouchableOpacity>
-
       {showPasswordFields && (
         <>
           <TextInput
             style={styles.input}
-            placeholder="Enter new password"
             secureTextEntry
+            placeholder="Enter your new password"
             value={newPassword}
             onChangeText={setNewPassword}
           />
           <TextInput
             style={styles.input}
-            placeholder="Confirm new password"
             secureTextEntry
+            placeholder="Confirm your new password"
             value={confirmNewPassword}
             onChangeText={setConfirmNewPassword}
           />
         </>
       )}
-
-      <TouchableOpacity style={styles.button} onPress={handleSave}>
+      <TouchableOpacity
+        style={styles.button}
+        onPress={handleSave}
+      >
         <Text style={styles.buttonText}>Save</Text>
       </TouchableOpacity>
     </ScrollView>
@@ -271,10 +312,13 @@ const ExplorerEditProfileScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
-    padding: 20,
-    backgroundColor: '#fff',
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 40,
   },
   header: {
+    flexDirection: 'row',
+    justifyContent: 'center',
     marginBottom: 20,
   },
   headerText: {
@@ -286,47 +330,34 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   profileImagePicker: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: '#ccc',
+    backgroundColor: '#e1e1e1',
+    width: 150,
+    height: 150,
+    borderRadius: 75,
     justifyContent: 'center',
     alignItems: 'center',
   },
   profileImage: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
+    width: 150,
+    height: 150,
+    borderRadius: 75,
   },
   profileImageText: {
-    color: '#fff',
+    fontSize: 16,
+    color: '#333',
   },
   input: {
     height: 40,
     borderColor: '#ccc',
     borderWidth: 1,
     borderRadius: 5,
-    marginBottom: 10,
-    paddingLeft: 10,
-  },
-  button: {
-    backgroundColor: '#007bff',
-    paddingVertical: 10,
-    borderRadius: 5,
-    alignItems: 'center',
-    marginTop: 10,
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 16,
-  },
-  changePasswordText: {
-    color: '#007bff',
+    paddingHorizontal: 10,
     marginBottom: 10,
   },
   locationContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
     marginBottom: 10,
   },
   picker: {
@@ -337,10 +368,27 @@ const styles = StyleSheet.create({
     flex: 1,
     marginLeft: 5,
   },
+  button: {
+    backgroundColor: '#007bff',
+    paddingVertical: 12,
+    borderRadius: 5,
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 16,
+  },
+  passwordChangeLink: {
+    marginTop: 10,
+  },
+  passwordChangeLinkText: {
+    color: 'blue',
+  },
   modalView: {
     margin: 20,
     backgroundColor: 'white',
-    borderRadius: 20,
+    borderRadius: 10,
     padding: 35,
     alignItems: 'center',
     shadowColor: '#000',
@@ -349,7 +397,7 @@ const styles = StyleSheet.create({
       height: 2,
     },
     shadowOpacity: 0.25,
-    shadowRadius: 4,
+    shadowRadius: 3.84,
     elevation: 5,
   },
   modalText: {
@@ -357,8 +405,9 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   cancelButton: {
-    backgroundColor: 'red',
+    backgroundColor: '#dc3545',
+    marginTop: 10,
   },
 });
 
-export default ExplorerEditProfileScreen;
+export default BusinessEditProfileScreen;

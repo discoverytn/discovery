@@ -1,44 +1,57 @@
-import React, { useState } from 'react';
-import { View, Text, Image, FlatList, StyleSheet, Dimensions, TouchableOpacity } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, Image, FlatList, StyleSheet, Dimensions, TouchableOpacity, ScrollView } from 'react-native';
 import Rating from './Rating';
 
-const { width } = Dimensions.get('window'); // get the window width to style the page easier
-
-const categories = [
-  {
-    id: 1,
-    name: 'Nature',
-    posts: [
-      { id: '1', name: 'Niladri Reservoir', location: 'Tekergat, Sunamgnj', image: require('../assets/nature.jpg') },
-      { id: '2', name: 'Casa Las Tortugas', location: 'Av Damero, Mexico', image: require('../assets/nature.jpg') },
-      { id: '10', name: 'Casa Las Tortugas', location: 'Av Damero, Mexico', image: require('../assets/nature.jpg') }
-    ]
-  },
-  {
-    id: 2,
-    name: 'Sites',
-    posts: [
-      { id: '3', name: 'Aonang Villa Resort', location: 'Bastola, Islampur', image: require('../assets/kairouen1.jpg') },
-      { id: '4', name: 'Rangauti Resort', location: 'Sylhet, Airport Road', image: require('../assets/djeem.jpg') }
-    ]
-  },
-  {
-    id: 3,
-    name: 'Coffe shops',
-    posts: [
-      { id: '5', name: 'Aonang Villa Resort', location: 'Bastola, Islampur', image: require('../assets/kairouen1.jpg') },
-      { id: '6', name: 'Rangauti Resort', location: 'Sylhet, Airport Road', image: require('../assets/djeem.jpg') }
-    ]
-  },
-];
+const { width } = Dimensions.get('window'); 
 
 const DiscoverScreen = ({ navigation }) => {
   const [postRatings, setPostRatings] = useState({});
+  const [categories, setCategories] = useState([]);
+
+  useEffect(() => {
+    fetchPosts();
+  }, []);
+
+  const fetchPosts = async () => {
+    try {
+      const response = await fetch('http://192.168.1.19:3000/posts/allposts');
+      const posts = await response.json();
+
+      // Categorize posts
+      const categorizedPosts = categorizePosts(posts);
+
+      setCategories(categorizedPosts);
+    } catch (error) {
+      console.error('Error fetching posts:', error);
+    }
+  };
+
+  const categorizePosts = (posts) => {
+    const categories = {};
+
+    posts.forEach((post) => {
+      if (!categories[post.category]) {
+        categories[post.category] = [];
+      }
+      categories[post.category].push({
+        id: post.idposts,
+        name: post.title,
+        location: post.location,
+        image: { uri: post.image1 },
+      });
+    });
+
+    return Object.keys(categories).map((key, index) => ({
+      id: index + 1,
+      name: key,
+      posts: categories[key],
+    }));
+  };
 
   const handleRating = (postId, rating) => {
-    setPostRatings(prevRatings => ({
+    setPostRatings((prevRatings) => ({
       ...prevRatings,
-      [postId]: rating
+      [postId]: rating,
     }));
   };
 
@@ -47,19 +60,15 @@ const DiscoverScreen = ({ navigation }) => {
     const selectedRating = postRatings[postId] || 0;
 
     return (
-      <View style={styles.postContainer}>
+      <ScrollView style={styles.postContainer}>
         <Image source={item.image} style={styles.postImage} />
         <Text style={styles.postName}>{item.name}</Text>
         <View style={styles.locationContainer}>
           <Image source={require('../assets/location.jpg')} style={styles.locationIcon} />
           <Text style={styles.postLocation}>{item.location}</Text>
         </View>
-        <Rating
-          postId={postId}
-          selectedRating={selectedRating}
-          onRate={(rating) => handleRating(postId, rating)}
-        />
-      </View>
+        <Rating postId={postId} selectedRating={selectedRating} onRate={(rating) => handleRating(postId, rating)} />
+      </ScrollView>
     );
   };
 
@@ -69,7 +78,7 @@ const DiscoverScreen = ({ navigation }) => {
       <FlatList
         data={item.posts}
         renderItem={renderPostItem}
-        keyExtractor={(post) => post.id}
+        keyExtractor={(post) => post.id.toString()}
         horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.flatListContainer}
@@ -84,7 +93,7 @@ const DiscoverScreen = ({ navigation }) => {
           <Image source={require('../assets/left-arrow.jpg')} style={styles.icon} />
         </TouchableOpacity>
         <Text style={styles.headerText}>Discover</Text>
-        <TouchableOpacity onPress={() => {/* Add your notification logic */}}>
+        <TouchableOpacity onPress={() => {/* Add your notification logic */ }}>
           <Image source={require('../assets/notification.jpg')} style={styles.icon} />
         </TouchableOpacity>
       </View>
@@ -115,19 +124,19 @@ const styles = StyleSheet.create({
   icon: {
     width: 30,
     height: 30,
-    marginTop:50
+    marginTop: 50,
   },
   headerText: {
     color: '#000',
     fontSize: 20,
     fontWeight: 'bold',
-    marginTop:50
+    marginTop: 50,
   },
   subheaderText: {
     textAlign: 'center',
     fontSize: 16,
     marginBottom: 13,
-    marginTop:20
+    marginTop: 20,
   },
   categoriesContainer: {
     flexDirection: 'column',
@@ -151,11 +160,11 @@ const styles = StyleSheet.create({
   },
   postImage: {
     width: '100%',
-    height: 120, 
+    height: 120,
     borderRadius: 10,
   },
   postName: {
-    fontSize: 16, 
+    fontSize: 16,
     fontWeight: 'bold',
     marginTop: 8,
   },
@@ -165,12 +174,12 @@ const styles = StyleSheet.create({
     marginTop: 5,
   },
   locationIcon: {
-    width: 12, 
-    height: 12, 
+    width: 12,
+    height: 12,
     marginRight: 5,
   },
   postLocation: {
-    fontSize: 12, 
+    fontSize: 12,
     color: '#666',
     fontWeight: 'bold',
   },

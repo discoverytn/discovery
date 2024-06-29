@@ -1,85 +1,97 @@
-const db = require("../database/index");
 const bcrypt = require('bcrypt');
-
+const db = require('../database/index');
 module.exports = {
-  BOEditProfile: function(req, res) {
-    db.Business.findOne({ where: { email: req.body.email } })
-      .then((business) => {
-        if (!business) {
-          return res.status(404).send("Invalid email");
-        }
-
-        bcrypt.compare(req.body.password, business.dataValues.password)
-          .then((samepassword) => {
-            if (samepassword) {
-              
-              if (req.body.newPassword) {
-               
-                bcrypt.hash(req.body.newPassword, 10)
-                  .then((hashedNewPassword) => {
-                    db.Business.update({
-                      firstname: req.body.firstname,
-                      lastname: req.body.lastname,
-                      description : req.body.description,
-                      image : req.body.image,
-                      location : req.body.location,
-                      mobileNum : req.body.mobileNum,
-                      businessName : req.body.businessName,
-                      businessDesc : req.body.businessDesc,
-                      businessImg : req.body.businessImg,
-                      long : req.body.long,
-                      latt : req.body.latt,
-                      password: hashedNewPassword
-                    }, { where: { email: req.body.email } })
-                      .then((result) => {
-                        res.send(result,"updated succesfully");
-                      })
-                      .catch((updateError) => {
-                        console.error("Update error:", updateError);
-                        res.status(500).send(updateError);
-                      });
-                  })
-                  .catch((hashError) => {
-                    console.error("Hash error:", hashError);
-                    res.status(500).send(hashError);
-                  });
-              } else {
-               
-                db.Business.update({
-                    firstname: req.body.firstname,
-                    lastname: req.body.lastname,
-                    description : req.body.description,
-                    image : req.body.image,
-                    location : req.body.location,
-                    mobileNum : req.body.mobileNum,
-                    businessName : req.body.businessName,
-                    businessDesc : req.body.businessDesc,
-                    businessImg : req.body.businessImg,
-                    long : req.body.long,
-                    latt : req.body.latt,
-                }, { where: { email: req.body.email } })
-                  .then((result) => {
-                    res.send(result);
-                  })
-                  .catch((updateError) => {
-                    console.error("Update error:", updateError);
-                    res.status(500).send(updateError);
-                  });
-              }
-            } else {
-              res.status(401).send("Invalid password");
-            }
-          })
-          .catch((compareError) => {
-            console.error("Password comparison error:", compareError);
-            res.status(500).send(compareError);
-          });
-      })
-      .catch((findError) => {
-        console.error("Find Business Owner error:", findError);
-        res.status(500).send(findError);
-      });
+  getBusinessById: async function(req, res) {
+    try {
+      const business = await db.Business.findByPk(req.params.idbusiness);
+      if (!business) {
+        return res.status(404).send("Business not found");
+      }
+      return res.status(200).json(business);
+    } catch (error) {
+      console.error("Error fetching business:", error);
+      return res.status(500).send("Failed to fetch business");
+    }
   },
 
-  
+  editBusiness: async (req, res) => {
+    const { idbusiness } = req.params;
+    const {
+      firstname,
+      lastname,
+      description,
+      businessDesc,
+      governorate,
+      municipality,
+      businessLocation,
+      mobileNum,
+      image,
+      businessName,
+      businessImage,
+      currentPassword,
+      newPassword,
+    } = req.body;
+
+    try {
+      const business = await db.Business.findByPk(idbusiness);
+
+      if (!business) {
+        return res.status(404).json({ error: 'Business not found' });
+      }
+
+      
+      business.firstname = firstname;
+      business.lastname = lastname;
+      business.description = description;
+      business.businessDesc = businessDesc;
+      business.governorate = governorate;
+      business.municipality = municipality;
+      business.businessLocation = businessLocation;
+      business.mobileNum = parseInt(mobileNum, 10); 
+      business.image = image;
+      business.businessName = businessName;
+      business.businessImage = businessImage;
+
+      
+      if (newPassword) {
+        const isMatch = await bcrypt.compare(currentPassword, business.password);
+
+        if (!isMatch) {
+          return res.status(400).json({ error: 'Current password does not match' });
+        }
+
+        const saltRounds = 10;
+        const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
+        business.password = hashedPassword;
+      }
+
+      await business.save();
+
+      return res.status(200).json({ message: 'Business updated successfully', business });
+    } catch (error) {
+      console.error('Error updating business:', error);
+      return res.status(500).json({ error: 'Internal server error' });
+    }
+  },
+
+  getBusinessPosts: async function(req, res) {
+    const { idbusiness } = req.params;
+
+    try {
+      const business = await db.Business.findByPk(idbusiness);
+      if (!business) {
+        return res.status(404).json({ error: "Business not found" });
+      }
+
+      const posts = await db.Posts.findAll({
+        where: { business_idbusiness: idbusiness },
+        order: [['createdAt', 'DESC']],
+      });
+
+      return res.status(200).json(posts);
+    } catch (error) {
+      console.error("Error fetching business posts:", error);
+      return res.status(500).json({ error: "Failed to fetch business posts" });
+    }
+  },
 };
