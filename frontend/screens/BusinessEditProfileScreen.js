@@ -14,15 +14,20 @@ const governorateOptions = [
   'Gafsa', 'Sfax', 'Gabès', 'Médenine', 'Tozeur', 'Kebili', 'Tataouine'
 ];
 
-const ExplorerEditProfileScreen = () => {
-  const { explorer, setExplorer } = useAuth();
+const BusinessEditProfileScreen = () => {
+  const { business, setBusiness } = useAuth();
+  const [businessId, setBusinessId] = useState(null);
   const [firstname, setFirstname] = useState('');
   const [lastname, setLastname] = useState('');
+  const [businessName, setBusinessName] = useState('');
   const [description, setDescription] = useState('');
+  const [businessDescription, setBusinessDescription] = useState('');
   const [governorate, setGovernorate] = useState('');
   const [municipality, setMunicipality] = useState('');
+  const [businessLocation, setBusinessLocation] = useState('');
   const [mobileNum, setMobileNum] = useState('');
   const [image, setImage] = useState(null);
+  const [businessImage, setBusinessImage] = useState(null);
   const [newPassword, setNewPassword] = useState('');
   const [confirmNewPassword, setConfirmNewPassword] = useState('');
   const [currentPassword, setCurrentPassword] = useState('');
@@ -31,16 +36,25 @@ const ExplorerEditProfileScreen = () => {
   const [showPasswordFields, setShowPasswordFields] = useState(false);
 
   useEffect(() => {
-    if (explorer) {
-      setFirstname(explorer.firstname || '');
-      setLastname(explorer.lastname || '');
-      setDescription(explorer.description || '');
-      setGovernorate(explorer.governorate || '');
-      setMunicipality(explorer.municipality || '');
-      setMobileNum(explorer.mobileNum || '');
-      setImage(explorer.image || null);
+    if (business) {
+      console.log('Business object:', business);  
+      if (business.id) {
+        setBusinessId(business.id);
+        console.log('Business ID set:', business.id);
+      }
+      setFirstname(business.firstname || '');
+      setLastname(business.lastname || '');
+      setBusinessName(business.businessName || '');
+      setDescription(business.description || '');
+      setBusinessDescription(business.businessDescription || '');
+      setGovernorate(business.governorate || '');
+      setMunicipality(business.municipality || '');
+      setBusinessLocation(business.businessLocation || '');
+      setMobileNum(business.mobileNum || '');
+      setImage(business.image || null);
+      setBusinessImage(business.businessImage || null);
     }
-  }, [explorer]);
+  }, [business]);
 
   const handleSave = async () => {
     if (newPassword && newPassword !== confirmNewPassword) {
@@ -54,41 +68,42 @@ const ExplorerEditProfileScreen = () => {
     setModalVisible(false);
 
     const payload = {
-      firstname: firstname.trim(),
-      lastname: lastname.trim(),
-      description: description.trim(),
-      governorate: governorate.trim(),
-      municipality: municipality.trim(),
-      mobileNum: mobileNum.trim(),
-      image,
-      currentPassword: currentPassword.trim(),
+      firstname: firstname,
+      lastname: lastname,
+      description: description,
+      businessDescription: businessDescription,
+      governorate: governorate,
+      municipality: municipality,
+      businessLocation: businessLocation,
+      mobileNum: mobileNum,
+      image: image,
+      businessName: businessName,
+      businessImage: businessImage,
+      currentPassword: currentPassword, 
     };
 
     if (newPassword) {
-      payload.newPassword = newPassword.trim();
+      payload.newPassword = newPassword;
     }
 
     try {
-      const response = await axios.put(`http://192.168.1.8:3000/explorer/${explorer.id}/edit`, payload);
+      const response = await axios.put(`http://192.168.1.8:3000/business/${businessId}/edit`, payload);
 
       if (response.status === 200) {
-        setExplorer(response.data);
         Alert.alert('Success', 'Profile updated successfully');
+        
       } else {
         Alert.alert('Error', 'Failed to update profile');
       }
     } catch (error) {
       console.error('Error updating profile:', error);
       if (error.response) {
-       
         console.error('Server responded with:', error.response.data);
         Alert.alert('Error', 'Failed to update profile: Server error');
       } else if (error.request) {
-        
         console.error('No response received:', error.request);
         Alert.alert('Error', 'Failed to update profile: No response');
       } else {
-        
         console.error('Error setting up the request:', error.message);
         Alert.alert('Error', 'Failed to update profile: Request setup error');
       }
@@ -137,6 +152,7 @@ const ExplorerEditProfileScreen = () => {
       if (response.status === 200) {
         const imageUrl = response.data.secure_url;
         setImage(imageUrl);
+        setBusinessImage(imageUrl); 
       } else {
         Alert.alert("Error", "Failed to upload image");
       }
@@ -181,13 +197,13 @@ const ExplorerEditProfileScreen = () => {
       </Modal>
 
       <View style={styles.header}>
-        <Text style={styles.headerText}>Edit Profile</Text>
+        <Text style={styles.headerText}>Business Edit Profile</Text>
       </View>
 
       <View style={styles.profileImageContainer}>
         <TouchableOpacity style={styles.profileImagePicker} onPress={selectImage}>
-          {image ? (
-            <Image source={{ uri: image }} style={styles.profileImage} />
+          {businessImage ? (
+            <Image source={{ uri: businessImage }} style={styles.profileImage} />
           ) : (
             <Text style={styles.profileImageText}>Pick a profile picture</Text>
           )}
@@ -208,9 +224,23 @@ const ExplorerEditProfileScreen = () => {
       />
       <TextInput
         style={styles.input}
+        placeholder="Business Name"
+        value={businessName}
+        onChangeText={setBusinessName}
+      />
+      <TextInput
+        style={styles.input}
         placeholder="Description"
         value={description}
         onChangeText={setDescription}
+        multiline
+        numberOfLines={4}
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Business Description"
+        value={businessDescription}
+        onChangeText={setBusinessDescription}
         multiline
         numberOfLines={4}
       />
@@ -233,14 +263,23 @@ const ExplorerEditProfileScreen = () => {
         />
       </View>
       <TextInput
-        style={[styles.input, { keyboardType: 'numeric' }]}
+        style={styles.input}
+        placeholder="Business Location"
+        value={businessLocation}
+        onChangeText={setBusinessLocation}
+      />
+      <TextInput
+        style={styles.input}
         placeholder="Mobile Number"
         value={mobileNum}
         onChangeText={setMobileNum}
+        keyboardType="numeric"
       />
-
-      <TouchableOpacity onPress={() => setShowPasswordFields(!showPasswordFields)}>
-        <Text style={styles.changePasswordText}>Click here to change your password</Text>
+      <TouchableOpacity
+        style={styles.passwordChangeLink}
+        onPress={() => setShowPasswordFields(!showPasswordFields)}
+      >
+        <Text style={styles.passwordChangeLinkText}>Click here to change your password</Text>
       </TouchableOpacity>
       {showPasswordFields && (
         <>
@@ -260,8 +299,10 @@ const ExplorerEditProfileScreen = () => {
           />
         </>
       )}
-
-      <TouchableOpacity style={styles.button} onPress={handleSave}>
+      <TouchableOpacity
+        style={styles.button}
+        onPress={handleSave}
+      >
         <Text style={styles.buttonText}>Save</Text>
       </TouchableOpacity>
     </ScrollView>
@@ -270,11 +311,14 @@ const ExplorerEditProfileScreen = () => {
 
 const styles = StyleSheet.create({
   container: {
-    padding: 20,
-    backgroundColor: '#fff',
+    flexGrow: 1,
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 40,
   },
   header: {
-    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
     marginBottom: 20,
   },
   headerText: {
@@ -286,63 +330,66 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   profileImagePicker: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
+    backgroundColor: '#e1e1e1',
+    width: 150,
+    height: 150,
+    borderRadius: 75,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#f0f0f0',
   },
   profileImage: {
-    width: '100%',
-    height: '100%',
-    borderRadius: 60,
+    width: 150,
+    height: 150,
+    borderRadius: 75,
   },
   profileImageText: {
-    textAlign: 'center',
-    color: '#888',
+    fontSize: 16,
+    color: '#333',
   },
   input: {
+    height: 40,
     borderColor: '#ccc',
     borderWidth: 1,
-    padding: 10,
     borderRadius: 5,
-    marginBottom: 15,
+    paddingHorizontal: 10,
+    marginBottom: 10,
   },
   locationContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10,
   },
   picker: {
     flex: 1,
-    marginRight: 10,
+    marginRight: 5,
   },
   municipalityInput: {
     flex: 1,
-  },
-  changePasswordText: {
-    color: '#007bff',
-    textAlign: 'center',
-    marginBottom: 15,
+    marginLeft: 5,
   },
   button: {
     backgroundColor: '#007bff',
-    padding: 15,
+    paddingVertical: 12,
     borderRadius: 5,
     alignItems: 'center',
+    marginTop: 10,
   },
   buttonText: {
     color: '#fff',
-    fontWeight: 'bold',
+    fontSize: 16,
   },
-  cancelButton: {
-    backgroundColor: '#ff4444',
+  passwordChangeLink: {
     marginTop: 10,
   },
+  passwordChangeLinkText: {
+    color: 'blue',
+  },
   modalView: {
+    margin: 20,
     backgroundColor: 'white',
-    padding: 20,
     borderRadius: 10,
+    padding: 35,
     alignItems: 'center',
     shadowColor: '#000',
     shadowOffset: {
@@ -350,13 +397,17 @@ const styles = StyleSheet.create({
       height: 2,
     },
     shadowOpacity: 0.25,
-    shadowRadius: 4,
+    shadowRadius: 3.84,
     elevation: 5,
   },
   modalText: {
     marginBottom: 15,
     textAlign: 'center',
   },
+  cancelButton: {
+    backgroundColor: '#dc3545',
+    marginTop: 10,
+  },
 });
 
-export default ExplorerEditProfileScreen;
+export default BusinessEditProfileScreen;

@@ -29,7 +29,11 @@ module.exports = (sequelize) => {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    location: {
+    governorate: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    municipality: {
       type: DataTypes.STRING,
       allowNull: true,
     },
@@ -90,9 +94,9 @@ module.exports = (sequelize) => {
       type: DataTypes.STRING,
       allowNull: true,
     },
-    category: { 
+    category: {
       type: DataTypes.STRING,
       allowNull: false,
-    },
+    }
   });
 };

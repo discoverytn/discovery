@@ -70,7 +70,7 @@ const BusinessAddPostScreen = () => {
     console.log('Payload:', payload);
   
     try {
-      const response = await axios.post('http://192.168.1.19:3000/posts/business/add', payload);
+      const response = await axios.post('http://192.168.1.8:3000/posts/business/add', payload);
   
       if (response.status === 201) {
         Alert.alert('Success', 'Post created successfully');

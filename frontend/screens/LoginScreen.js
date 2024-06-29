@@ -29,7 +29,7 @@ const LoginScreen = () => {
       const { token: authToken } = await loginAction({ email, password }); 
 
       if (authToken) {
-        navigation.navigate("Categories");
+        navigation.navigate("BusinessProfileScreen");
       } else {
         Alert.alert("Login Failed", "Token not received");
       }
