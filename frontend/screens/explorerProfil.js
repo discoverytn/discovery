@@ -8,9 +8,9 @@ const ExplorerProfile = () => {
   const { explorer, setExplorer, logOut } = useAuth();
   const navigation = useNavigation();
   const [activeTab, setActiveTab] = useState('Posts');
-  const [posts, setPosts] = useState([]);
-  const [numPosts, setNumPosts] = useState(0);
-  const [numLikes, setNumLikes] = useState(0);
+  const [posts, setPosts] = useState([])
+  const [numPosts, setNumPosts] = useState(0)
+  const [numLikes, setNumLikes] = useState(0)
   const [numTraveled, setNumTraveled] = useState(0);
 
   useEffect(() => {
@@ -121,7 +121,6 @@ const ExplorerProfile = () => {
           </View>
           <View style={styles.infoItem}>
             <Text style={styles.labelText}>Municipality:</Text>
-            <Text style={styles.valueText}>{explorer.municipality}</Text>
           </View>
           <View style={styles.infoItem}>
             <Text style={styles.labelText}>Mobile Number:</Text>
