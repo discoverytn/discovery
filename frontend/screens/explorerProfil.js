@@ -121,6 +121,7 @@ const ExplorerProfile = () => {
           </View>
           <View style={styles.infoItem}>
             <Text style={styles.labelText}>Municipality:</Text>
+            <Text style={styles.valueText}>{explorer.municipality}</Text>
           </View>
           <View style={styles.infoItem}>
             <Text style={styles.labelText}>Mobile Number:</Text>
