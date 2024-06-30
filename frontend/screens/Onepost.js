@@ -1,21 +1,37 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faHeart, faPaperPlane, faCloudSunRain, faStar, faTrash, faEdit } from '@fortawesome/free-solid-svg-icons';
 
-const OnepostScreen = () => {
-  const mainImage = require('../assets/onep.jpg');
+const OnepostScreen = ({ route }) => {
+  const { postId, postDetails } = route.params;
+
+  // Destructure postDetails
+  const {
+    name,
+    location,
+    image,
+    image2,
+    image3,
+    image4,
+    description,
+  } = postDetails;
+
+  const mainImage = image.uri;
   const [selectedImage, setSelectedImage] = useState(mainImage);
   const [showFullDescription, setShowFullDescription] = useState(false);
   const [showMoreReviews, setShowMoreReviews] = useState(false);
   const scrollViewRef = useRef(null);
 
-  const description = "this place was recommended to me by one of my friends, after i you get there the locals will help guide you , it's one of the best natural places i got to visit and had a blast on my time there";
   const shortDescription = description.slice(0, 100) + '...';
+
+  useEffect(() => {
+    setSelectedImage(mainImage);
+  }, [mainImage]);
 
   const handleSeeMorePress = () => {
     setShowMoreReviews(!showMoreReviews);
-  
+
     if (!showMoreReviews && scrollViewRef.current) {
       scrollViewRef.current.scrollToEnd({ animated: true });
     }
@@ -24,37 +40,43 @@ const OnepostScreen = () => {
   return (
     <ScrollView style={styles.container} ref={scrollViewRef}>
       <View style={styles.imageContainer}>
-        <Image source={selectedImage} style={styles.mainImage} />
+        <Image source={{ uri: selectedImage }} style={styles.mainImage} />
         <View style={styles.iconsContainer}>
           <FontAwesomeIcon icon={faHeart} style={styles.icon} size={26} />
           <FontAwesomeIcon icon={faPaperPlane} style={styles.icon1} size={26} />
         </View>
         <View style={styles.thumbnailContainer}>
-          <TouchableOpacity onPress={() => setSelectedImage(require('../assets/cycling.jpg'))}>
-            <Image source={require('../assets/cycling.jpg')} style={styles.thumbnail} />
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => setSelectedImage(require('../assets/eljem.jpg'))}>
-            <Image source={require('../assets/eljem.jpg')} style={styles.thumbnail} />
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => setSelectedImage(require('../assets/kairouen1.jpg'))}>
-            <Image source={require('../assets/kairouen1.jpg')} style={styles.thumbnail} />
-          </TouchableOpacity>
+          {image2 && (
+            <TouchableOpacity onPress={() => setSelectedImage(image2.uri)}>
+              <Image source={{ uri: image2.uri }} style={styles.thumbnail} />
+            </TouchableOpacity>
+          )}
+          {image3 && (
+            <TouchableOpacity onPress={() => setSelectedImage(image3.uri)}>
+              <Image source={{ uri: image3.uri }} style={styles.thumbnail} />
+            </TouchableOpacity>
+          )}
+          {image4 && (
+            <TouchableOpacity onPress={() => setSelectedImage(image4.uri)}>
+              <Image source={{ uri: image4.uri }} style={styles.thumbnail} />
+            </TouchableOpacity>
+          )}
           {selectedImage !== mainImage && (
             <TouchableOpacity onPress={() => setSelectedImage(mainImage)}>
-              <Image source={mainImage} style={styles.thumbnail} />
+              <Image source={{ uri: mainImage }} style={styles.thumbnail} />
             </TouchableOpacity>
           )}
         </View>
       </View>
       <View style={styles.detailsContainer}>
-        <Text style={styles.title}>Nefza</Text>
+        <Text style={styles.title}>{name}</Text>
         <View style={styles.infoRow}>
           <View style={styles.infoItem}>
             <Image source={require('../assets/location.jpg')} style={styles.infoIcon} />
-            <Text style={styles.infoText}>Location</Text>
+            <Text style={styles.infoText}>{location}</Text>
           </View>
           <View style={styles.infoItem}>
-            <FontAwesomeIcon icon={faCloudSunRain} style={styles.weatherIcon} size={32}/>
+            <FontAwesomeIcon icon={faCloudSunRain} style={styles.weatherIcon} size={32} />
             <Text style={styles.infoText}>25°C</Text>
           </View>
           <View style={styles.infoItem}>
@@ -135,7 +157,7 @@ const styles = StyleSheet.create({
   icon: {
     color: '#DB81B6',
     marginBottom: 12,
-    marginTop:11
+    marginTop: 11,
   },
   icon1: {
     color: '#2ac00a',
@@ -181,14 +203,12 @@ const styles = StyleSheet.create({
   infoText: {
     fontSize: 16,
     color: 'grey',
-    marginRight:5,
-    fontStyle:'italic'
+    marginRight: 5,
+    fontStyle: 'italic',
   },
   weatherIcon: {
-   
     color: 'blue',
     marginRight: 8,
-    marginLeft:-22
   },
   eventIconContainer: {
     padding: 5,
@@ -265,7 +285,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 20,
   },
-
   seeMoreText: {
     color: 'grey',
   },

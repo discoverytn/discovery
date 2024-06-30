@@ -171,6 +171,20 @@ const getAllPosts = async (req, res) => {
     res.status(500).json({ error: "Failed to fetch posts" });
   }
 };
+const getPostById = async (req, res) => {
+  const { idposts } = req.params;
+
+  try {
+    const post = await Posts.findByPk(idposts);
+    if (!post) {
+      return res.status(404).json({ error: "Post not found" });
+    }
+    res.status(200).json(post);
+  } catch (error) {
+    console.error("Error fetching post:", error);
+    res.status(500).json({ error: "Failed to fetch post" });
+  }
+};
 
 module.exports = {
   ExplorerCreatePost,
@@ -180,4 +194,5 @@ module.exports = {
   ExplorerDeletePost,
   BusinessDeletePost,
   getAllPosts,
+  getPostById
 };

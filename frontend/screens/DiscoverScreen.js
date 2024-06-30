@@ -1,23 +1,26 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import { View, Text, Image, FlatList, StyleSheet, Dimensions, TouchableOpacity, ScrollView } from 'react-native';
 import Rating from './Rating';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 
-const { width } = Dimensions.get('window'); 
+const { width } = Dimensions.get('window');
 
-const DiscoverScreen = ({ navigation }) => {
+const DiscoverScreen = () => {
+  const navigation = useNavigation();
   const [postRatings, setPostRatings] = useState({});
   const [categories, setCategories] = useState([]);
 
-  useEffect(() => {
-    fetchPosts();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      fetchPosts();
+    }, [])
+  );
 
   const fetchPosts = async () => {
     try {
-      const response = await fetch('http://192.168.1.8:3000/posts/allposts');
+      const response = await fetch('http://192.168.1.19:3000/posts/allposts');
       const posts = await response.json();
 
-      // Categorize posts
       const categorizedPosts = categorizePosts(posts);
 
       setCategories(categorizedPosts);
@@ -38,6 +41,10 @@ const DiscoverScreen = ({ navigation }) => {
         name: post.title,
         location: post.location,
         image: { uri: post.image1 },
+        description: post.description,
+        image2: post.image2 ? { uri: post.image2 } : null,
+        image3: post.image3 ? { uri: post.image3 } : null,
+        image4: post.image4 ? { uri: post.image4 } : null,
       });
     });
 
@@ -55,12 +62,18 @@ const DiscoverScreen = ({ navigation }) => {
     }));
   };
 
+  const navigateToPost = (postId, postDetails) => {
+    console.log('Navigating to post ID:', postId);
+    console.log('Post details:', postDetails);
+    navigation.navigate('Onepost', { postId, postDetails });
+  };
+
   const renderPostItem = ({ item }) => {
     const postId = item.id.toString();
     const selectedRating = postRatings[postId] || 0;
 
     return (
-      <ScrollView style={styles.postContainer}>
+      <TouchableOpacity onPress={() => navigateToPost(postId, item)} style={styles.postContainer}>
         <Image source={item.image} style={styles.postImage} />
         <Text style={styles.postName}>{item.name}</Text>
         <View style={styles.locationContainer}>
@@ -68,7 +81,7 @@ const DiscoverScreen = ({ navigation }) => {
           <Text style={styles.postLocation}>{item.location}</Text>
         </View>
         <Rating postId={postId} selectedRating={selectedRating} onRate={(rating) => handleRating(postId, rating)} />
-      </ScrollView>
+      </TouchableOpacity>
     );
   };
 
@@ -87,13 +100,13 @@ const DiscoverScreen = ({ navigation }) => {
   );
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Image source={require('../assets/left-arrow.jpg')} style={styles.icon} />
         </TouchableOpacity>
         <Text style={styles.headerText}>Discover</Text>
-        <TouchableOpacity onPress={() => {/* Add your notification logic */ }}>
+        <TouchableOpacity onPress={() => {/* ps : i will add notification for later */ }}>
           <Image source={require('../assets/notification.jpg')} style={styles.icon} />
         </TouchableOpacity>
       </View>
@@ -104,7 +117,7 @@ const DiscoverScreen = ({ navigation }) => {
         keyExtractor={(category) => category.id.toString()}
         contentContainerStyle={styles.categoriesContainer}
       />
-    </View>
+    </ScrollView>
   );
 };
 
@@ -151,7 +164,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   postContainer: {
-    width: (width - 60) / 2, // adjusted width dynamically based on window width
+    width: (width - 60) / 2, 
     marginRight: 40,
     backgroundColor: '#f8f8f8',
     borderRadius: 10,

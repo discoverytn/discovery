@@ -8,6 +8,9 @@ const {
   ExplorerDeletePost,
   BusinessDeletePost,
   getAllPosts,
+  getPostById
+
+  
 } = require('../Controllers/postController');
 
 
@@ -25,5 +28,7 @@ router.delete('/explorer/delete/:id', ExplorerDeletePost);
 router.delete('/business/delete/:id', BusinessDeletePost);
 
 router.get('/allposts', getAllPosts);
+
+router.get('/onepost/:idposts', getPostById);
 
 module.exports = router;
