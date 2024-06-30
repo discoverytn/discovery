@@ -10,6 +10,7 @@ import {
 import { useNavigation } from "@react-navigation/native";
 import { useAuth } from "../context/AuthContext";
 import axios from "axios";
+import {jwtDecode} from "jwt-decode"; 
 
 const LoginScreen = () => {
   const navigation = useNavigation();
@@ -29,7 +30,16 @@ const LoginScreen = () => {
       const { token: authToken } = await loginAction({ email, password }); 
 
       if (authToken) {
-        navigation.navigate("BusinessProfileScreen");
+        const decodedToken = jwtDecode(authToken);
+        const userRole = decodedToken.role;
+
+        if (userRole === "explorer") {
+          navigation.navigate("explorerProfil");
+        } else if (userRole === "business") {
+          navigation.navigate("BusinessProfileScreen");
+        } else {
+          Alert.alert("Login Failed", "Unknown user role");
+        }
       } else {
         Alert.alert("Login Failed", "Token not received");
       }

@@ -141,15 +141,11 @@ const BusinessDeletePost = async (req, res) => {
   try {
     const post = await Posts.findOne({ where: { idposts: id } });
 
-    if (post) {
-      if (post.business_idbusiness !== null) {
-        await post.destroy();
-        res.status(200).json({ message: "Business post deleted successfully" });
-      } else {
-        res.status(404).json({ error: "Business post not associated with a business" });
-      }
+    if (post && post.business_idbusiness !== null) {
+      await post.destroy();
+      res.status(200).json({ message: "Business post deleted successfully" });
     } else {
-      res.status(404).json({ error: "Business post not found" });
+      res.status(404).json({ error: "Business post not found or not associated with an business" });
     }
   } catch (error) {
     console.error("Error deleting business post:", error);

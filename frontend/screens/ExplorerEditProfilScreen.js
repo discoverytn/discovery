@@ -3,6 +3,7 @@ import { StyleSheet, Text, TextInput, TouchableOpacity, View, Alert, Image, Scro
 import axios from 'axios';
 import * as ImagePicker from 'expo-image-picker';
 import { useAuth } from '../context/AuthContext';
+import { useNavigation } from '@react-navigation/native';
 import { Picker } from "@react-native-picker/picker";
 
 const CLOUDINARY_UPLOAD_PRESET = 'discovery';
@@ -15,6 +16,8 @@ const governorateOptions = [
 ];
 
 const ExplorerEditProfileScreen = () => {
+  const navigation = useNavigation();
+
   const { explorer, setExplorer } = useAuth();
   const [explorerId, setExplorerId] = useState(null);
   const [firstname, setFirstname] = useState('');
@@ -75,6 +78,8 @@ const ExplorerEditProfileScreen = () => {
       if (response.status === 200) {
         setExplorer(response.data);
         Alert.alert('Success', 'Profile updated successfully');
+               navigation.navigate("explorerProfil");
+
       } else {
         Alert.alert('Error', 'Failed to update profile');
       }

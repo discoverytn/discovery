@@ -106,7 +106,7 @@ const BusinessProfileScreen = () => {
 
   const deleteBusinessPost = async (postId, token) => {
     try {
-      const response = await fetch(`http://192.168.1.19:3000/posts/explorer/delete/${postId}`, {
+      const response = await fetch(`http://192.168.1.19:3000/posts/business/delete/${postId}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -116,16 +116,19 @@ const BusinessProfileScreen = () => {
       const data = await response.json();
       if (response.ok) {
         console.log(data);
-        alert('Explorer post deleted successfully');
+        Alert.alert('Business post deleted successfully');
+        setPosts(posts.filter(post => post.id !== postId));
+        setNumPosts(numPosts - 1); 
       } else {
         console.error('Error:', data);
-        alert(`Error: ${data.message}`);
+        Alert.alert(`Error: ${data.message}`);
       }
     } catch (error) {
       console.error('Error:', error);
-      alert(`Error: ${error.message}`);
+      Alert.alert(`Error: ${error.message}`);
     }
   };
+  
   
 
   const renderPostItem = ({ item }) => (
