@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, Modal, StyleSheet } from 'react-native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faTimes, faEnvelope } from '@fortawesome/free-solid-svg-icons'; // Import the faEnvelope icon
+import { faTimes, faEnvelope } from '@fortawesome/free-solid-svg-icons'; 
 
 const CustomModal = ({ visible, onClose, message }) => {
   return (

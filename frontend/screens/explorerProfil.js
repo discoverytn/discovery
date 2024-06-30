@@ -63,7 +63,7 @@ const ExplorerProfile = () => {
     if (activeTab === 'Posts' && explorer?.id) {
       fetchExplorerPosts();
     }
-  }, [explorer?.id, activeTab]);
+  }, [explorer?.id, activeTab, posts.length]); // Include `posts.length` as a dependency
 
   const handleTabChange = (tabName) => {
     setActiveTab(tabName);
@@ -90,17 +90,20 @@ const ExplorerProfile = () => {
       const data = await response.json();
       if (response.ok) {
         console.log(data);
-        alert('Explorer post deleted successfully');
+        Alert.alert('Explorer post deleted successfully');
+        setPosts(posts.filter(post => post.id !== postId));
+        setNumPosts(numPosts - 1); 
       } else {
         console.error('Error:', data);
-        alert(`Error: ${data.message}`);
+        Alert.alert(`Error: ${data.message}`);
       }
     } catch (error) {
       console.error('Error:', error);
-      alert(`Error: ${error.message}`);
+      Alert.alert(`Error: ${error.message}`);
     }
   };
   
+
   if (!explorer) {
     return (
       <View style={styles.container}>
@@ -182,13 +185,14 @@ const ExplorerProfile = () => {
         </TouchableOpacity>
       </View>
       {activeTab === 'Posts' && (
-       <FlatList
-       data={posts}
-       keyExtractor={(item, index) => item.id ? item.id.toString() : index.toString()}
-       renderItem={renderPostItem}
-       numColumns={2}
-       contentContainerStyle={styles.postsContainer}
-     />
+        <FlatList
+          data={posts}
+          keyExtractor={(item, index) => item.id ? item.id.toString() : index.toString()}
+          renderItem={renderPostItem}
+          numColumns={2}
+          contentContainerStyle={styles.postsContainer}
+       
+        />
       )}
     </View>
   );

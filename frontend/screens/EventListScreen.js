@@ -124,7 +124,7 @@ const styles = StyleSheet.create({
   eventDetails: {
     flex: 1,
     padding: 10,
-    justifyContent: 'space-between', // Ensure proper spacing
+    justifyContent: 'space-between', 
   },
   eventTitleRow: {
     flexDirection: 'row',
@@ -143,7 +143,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 5, // Add margin bottom for spacing
+    marginBottom: 5, 
   },
   eventPrice: {
     fontSize: 14,
@@ -154,10 +154,10 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     alignSelf: 'flex-start',
     marginTop: 5,
-     // Adjust flex to take available space
+    
   },
   routeButton: {
-    marginRight: 135, // Adjust margin left for spacing
+    marginRight: 135, 
   },
   eventDateRow: {
     flexDirection: 'row',
@@ -181,13 +181,13 @@ const styles = StyleSheet.create({
     width: 20,
     height: 20,
     borderRadius: 10,
-    marginRight: -8, // overlap the icons
+    marginRight: -8,
     borderColor: '#fff',
     borderWidth: 2,
   },
   joinedText: {
     color: 'grey',
-    marginLeft: 20, // spacing after overlapped icons
+    marginLeft: 20, 
   },
 });
 

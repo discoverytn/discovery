@@ -4,6 +4,7 @@ import axios from 'axios';
 import { Picker } from '@react-native-picker/picker';
 import * as ImagePicker from 'expo-image-picker';
 import { useAuth } from '../context/AuthContext';
+import { useNavigation } from '@react-navigation/native';
 
 const CLOUDINARY_UPLOAD_PRESET = 'discovery'; 
 const CLOUDINARY_UPLOAD_URL = 'https://api.cloudinary.com/v1_1/dflixnywo/image/upload';
@@ -19,7 +20,7 @@ const ExplorerAddPostScreen = () => {
   const [images, setImages] = useState({ image1: null, image2: null, image3: null, image4: null });
   const [category, setCategory] = useState('');
   const [explorerId, setExplorerId] = useState('');
-
+  const navigation = useNavigation();
   useEffect(() => {
     if (explorer && explorer.id) {
       setExplorerId(explorer.id);
@@ -54,7 +55,8 @@ const ExplorerAddPostScreen = () => {
 
       if (response.status === 201) {
         Alert.alert('Success', 'Post created successfully');
-        clearFields();
+       clearFields();
+       navigation.navigate("explorerProfil");
       } else {
         Alert.alert('Error', 'Failed to create post');
       }
