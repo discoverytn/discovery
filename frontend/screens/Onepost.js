@@ -6,6 +6,7 @@ import { faHeart, faPaperPlane, faCloudSunRain, faStar, faTrash, faEdit } from '
 const OnepostScreen = ({ route }) => {
   const { postId, postDetails } = route.params;
 
+  // Destructure postDetails
   const {
     name,
     location,
