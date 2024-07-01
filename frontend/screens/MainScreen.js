@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, Dimensions, FlatList, ScrollView } from 'react-native';
 import { Icon } from 'react-native-elements';
 import LeaderScreen from './LeaderScreen'; 
-import FavoritesScreen from './FavoritesScreen';
 import LeaderScreen2 from './LeaderScreen2';
+import RecommendedScreen from './RecommendedScreen';
 
 const { width } = Dimensions.get('window');
 
@@ -55,9 +55,9 @@ const MainScreen = ({ navigation }) => {
         </View>
       </View>
 
-
       {/* Title */}
       <Text style={styles.title}>Discovery  🇹🇳</Text>
+      
       {/* Content Section */}
       <ScrollView style={styles.scrollView}>
         <Image
@@ -85,7 +85,9 @@ const MainScreen = ({ navigation }) => {
         {/* Insert LeaderScreen Component */}
         <LeaderScreen />
         <LeaderScreen2 />
-        <FavoritesScreen />
+      
+        {/* Add RecommendedScreen Component */}
+        <RecommendedScreen navigation={navigation} />
 
         {/* Add padding to bottom for BottomNav */}
         <View style={{ paddingBottom: 80 }} />
@@ -130,14 +132,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 10,
     marginBottom: 20,
-   backgroundColor:'#E4EFF1'
+    backgroundColor:'#E4EFF1'
   },
   headerLeft: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   profileCircle: {
-    
     width: 50,
     height: 50,
     borderRadius: 25,
@@ -154,7 +155,6 @@ const styles = StyleSheet.create({
   username: {
     fontSize: 18,
     fontWeight: 'bold',
-   
   },
   iconsContainer: {
     flexDirection: 'row',
@@ -174,7 +174,6 @@ const styles = StyleSheet.create({
     width: 30,
     height: 30,
   },
- 
   mainContentImage: {
     width: '89%',
     height: 180,
@@ -209,38 +208,6 @@ const styles = StyleSheet.create({
     width: width * 0.95,
     height: 200,
     borderRadius: 10,
-  },
-  leaderboardContainer: {
-    paddingHorizontal: 20,
-  },
-  leaderboardTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 10,
-    textAlign: 'center',
-  },
-  leaderboardItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 10,
-  },
-  medalContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  medalImage: {
-    width: 20,
-    height: 20,
-    marginLeft: 10,
-  },
-  leaderDetails: {
-    marginLeft: 10,
-  },
-  leaderName: {
-    fontSize: 16,
-  },
-  postsText: {
-    color: '#666',
   },
   bottomNav: {
     flexDirection: 'row',
