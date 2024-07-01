@@ -56,12 +56,10 @@ function MainNavigator() {
       <Tab.Screen name="explorerProfil" component={explorerProfil} options={{ tabBarLabel: () => null }} />
       <Tab.Screen name="ExplorerEditProfilScreen" component={ExplorerEditProfileScreen} options={{ tabBarLabel: () => null }} />
       <Tab.Screen name="ExplorerAddPostScreen" component={ExplorerAddPostScreen} options={{ tabBarLabel: () => null }} />
-     
-     <Tab.Screen name="BusinessddPostScreen" component={BusinessddPostScreen} options={{ tabBarLabel: () => null }} />
+      <Tab.Screen name="BusinessddPostScreen" component={BusinessddPostScreen} options={{ tabBarLabel: () => null }} />
      <Tab.Screen name="Onepost" component={OnepostScreen} options={{ tabBarLabel: () => null }} />
      <Tab.Screen name="Categories" component={CategoriesScreen} options={{ tabBarLabel: () => null }} />
-  
-      <Tab.Screen name="Favorites" component={FavoritesScreen} options={{ tabBarLabel: () => null }} />
+     <Tab.Screen name="Favorites" component={FavoritesScreen} options={{ tabBarLabel: () => null }} />
       <Tab.Screen name="ScheduleEvent" component={ScheduleEventScreen} options={{ tabBarLabel: () => null }} />
       <Tab.Screen name="EventList" component={EventListScreen} options={{ tabBarLabel: () => null }} />
      
