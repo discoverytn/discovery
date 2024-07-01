@@ -24,6 +24,7 @@ import ExplorerEditProfil from "./screens/ExplorerEditProfil"
 import explorerProfil from "./screens/explorerProfil"
 import Notifications from './screens/Notifications'
 import Requests from './screens/Requests';
+import Chats from './screens/Chats'
 
 
 
@@ -66,6 +67,7 @@ function MainNavigator() {
 
 
       <Tab.Screen name="Notifications" component={Notifications} options={{ tabBarLabel: () => null }} />
+      <Tab.Screen name="Chats" component={Chats} options={{ tabBarLabel: () => null }} />
 
     </Tab.Navigator>
   );
