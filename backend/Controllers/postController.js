@@ -145,6 +145,7 @@ const BusinessDeletePost = async (req, res) => {
       await post.destroy();
       res.status(200).json({ message: "Business post deleted successfully" });
     } else {
+      console.log("post",post);
       res.status(404).json({ error: "Business post not found or not associated with an business" });
     }
   } catch (error) {

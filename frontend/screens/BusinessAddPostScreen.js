@@ -3,12 +3,14 @@ import { StyleSheet, Text, TextInput, TouchableOpacity, View, Alert, Image, Scro
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import * as ImagePicker from 'expo-image-picker';
+import { useNavigation } from '@react-navigation/native';
 
 const CLOUDINARY_UPLOAD_PRESET = 'discovery';
 const CLOUDINARY_UPLOAD_URL = 'https://api.cloudinary.com/v1_1/dflixnywo/image/upload';
 
 const BusinessAddPostScreen = () => {
-  const { business } = useAuth();
+  const { business, setBusiness } = useAuth();
+  const [businessId, setBusinessId] = useState(null);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [hashtags, setHashtags] = useState('');
@@ -17,7 +19,9 @@ const BusinessAddPostScreen = () => {
   const [latt, setLatt] = useState('');
   const [images, setImages] = useState({ image1: null, image2: null, image3: null, image4: null });
   const [category, setCategory] = useState('');
-  const [businessId, setBusinessId] = useState('');
+
+  const navigation = useNavigation();
+
 
   useEffect(() => {
     if (business && business.id) {
@@ -49,7 +53,7 @@ const BusinessAddPostScreen = () => {
     }
   };
 
-  const handleSubmit = async () => {
+  const Submit = async () => {
     const Hashtags = hashtags.split(',').map(hashtag => hashtag.trim());
   
     const payload = {
@@ -73,8 +77,12 @@ const BusinessAddPostScreen = () => {
       const response = await axios.post('http://192.168.1.19:3000/posts/business/add', payload);
   
       if (response.status === 201) {
+        setBusiness(response.data)
+
         Alert.alert('Success', 'Post created successfully');
         clearFields();
+        navigation.navigate("Login");
+
       } else {
         Alert.alert('Error', 'Failed to create post');
       }
@@ -217,7 +225,7 @@ const BusinessAddPostScreen = () => {
         <View style={styles.imagesContainer}>
           {Object.keys(images).map(key => renderImageItem(images[key], key))}
         </View>
-        <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+        <TouchableOpacity style={styles.button} onPress={Submit}>
           <Text style={styles.buttonText}>Submit Post</Text>
         </TouchableOpacity>
       </View>

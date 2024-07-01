@@ -17,7 +17,7 @@ const Intro3 = () => {
       <Text style={styles.subheading}>
       Don't let those special memories fade away use our app now and start creating lasting connections through shared experiences!
       </Text>
-      <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Login')} >
+      <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Signup')} >
         <Text style={styles.buttonText}>Next</Text>
       </TouchableOpacity>
     </View>

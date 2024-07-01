@@ -30,7 +30,7 @@ const ExplorerAddPostScreen = () => {
     }
   }, [explorer]);
 
-  const handleSubmit = async () => {
+  const Submit = async () => {
     const Hashtags = hashtags.split(',').map(hashtag => hashtag.trim());
 
     const payload = {
@@ -56,7 +56,7 @@ const ExplorerAddPostScreen = () => {
       if (response.status === 201) {
         Alert.alert('Success', 'Post created successfully');
        clearFields();
-       navigation.navigate("explorerProfil");
+       navigation.navigate("Login");
       } else {
         Alert.alert('Error', 'Failed to create post');
       }
@@ -213,7 +213,7 @@ const ExplorerAddPostScreen = () => {
         <View style={styles.imagesContainer}>
           {Object.keys(images).map(key => renderImageItem(images[key], key))}
         </View>
-        <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+        <TouchableOpacity style={styles.button} onPress={Submit}>
           <Text style={styles.buttonText}>Submit Post</Text>
         </TouchableOpacity>
       </View>
