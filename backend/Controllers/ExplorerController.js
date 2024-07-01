@@ -53,7 +53,9 @@ module.exports = {
       });
 
       if (result[0] === 1) {
-        return res.status(200).send("Explorer updated successfully");
+        const newData = await db.Explorer.findOne({where : {idexplorer : req.params.idexplorer}})    
+            return res.status(200).send(newData);
+
       } else {
         return res.status(500).send("Failed to update explorer");
       }

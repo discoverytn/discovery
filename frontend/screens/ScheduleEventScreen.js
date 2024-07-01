@@ -23,7 +23,7 @@ const ScheduleEventScreen = ({ navigation }) => {
     setEndDate(currentDate);
   };
 //testing in front
-  const handleSubmit = () => {
+  const Submit = () => {
     const eventData = {
       eventName,
       eventDescription,
@@ -98,7 +98,7 @@ const ScheduleEventScreen = ({ navigation }) => {
         keyboardType="numeric"
       />
 
-      <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+      <TouchableOpacity style={styles.button} onPress={Submit}>
         <Text style={styles.buttonText}>Post Event</Text>
       </TouchableOpacity>
     </View>
