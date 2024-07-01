@@ -18,7 +18,7 @@ const DiscoverScreen = () => {
 
   const fetchPosts = async () => {
     try {
-      const response = await fetch('http://192.168.1.19:3000/posts/allposts');
+      const response = await fetch('http://192.168.1.8:3000/posts/allposts');
       const posts = await response.json();
 
       const categorizedPosts = categorizePosts(posts);

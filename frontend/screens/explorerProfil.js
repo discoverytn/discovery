@@ -12,11 +12,11 @@ const ExplorerProfile = () => {
   const [numPosts, setNumPosts] = useState(0);
   const [numLikes, setNumLikes] = useState(0);
   const [numTraveled, setNumTraveled] = useState(0);
-
+console.log("explorer profil",explorer)
   useEffect(() => {
     const fetchExplorerData = async () => {
       try {
-        const response = await axios.get(`http://192.168.1.19:3000/explorer/${explorer.id}`);
+        const response = await axios.get(`http://192.168.1.8:3000/explorer/${explorer.id}`);
         if (response.status === 200) {
           setExplorer(response.data);
           setNumPosts(response.data.Posts?.length || 0);
@@ -38,7 +38,7 @@ const ExplorerProfile = () => {
   useEffect(() => {
     const fetchExplorerPosts = async () => {
       try {
-        const response = await axios.get(`http://192.168.1.19:3000/explorer/${explorer.id}/posts`);
+        const response = await axios.get(`http://192.168.1.8:3000/explorer/${explorer.id}/posts`);
         if (response.status === 200) {
           const transformedPosts = response.data.map(post => ({
             id: post.idposts,
@@ -80,7 +80,7 @@ const ExplorerProfile = () => {
 
   const deleteExplorerPost = async (postId, token) => {
     try {
-      const response = await fetch(`http://192.168.1.19:3000/posts/explorer/delete/${postId}`, {
+      const response = await fetch(`http://192.168.1.8:3000/posts/explorer/delete/${postId}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -117,7 +117,7 @@ const ExplorerProfile = () => {
       <Image source={{ uri: item.image1 }} style={styles.postImage} />
       <Text style={styles.postTitle}>{item.title}</Text>
       <Text style={styles.postDescription}>{item.description}</Text>
-      <TouchableOpacity style={styles.deleteButton} onPress={() => deleteExplorerPost(item.id)}>
+      <TouchableOpacity style={styles.deleteButton} onPress={() => {deleteExplorerPost(item.id),console.log("item",item)}}>
         <Text style={styles.deleteButtonText}>Delete</Text>
       </TouchableOpacity>
     </View>
