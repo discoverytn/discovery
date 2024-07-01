@@ -65,6 +65,7 @@ function MainNavigator() {
      
 
     </Tab.Navigator>
+    
   );
 }
 

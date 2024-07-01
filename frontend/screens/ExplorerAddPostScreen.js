@@ -51,7 +51,7 @@ const ExplorerAddPostScreen = () => {
     console.log('Payload:', payload);
 
     try {
-      const response = await axios.post('http://192.168.1.19:3000/posts/explorer/add', payload);
+      const response = await axios.post('http://192.168.100.3:3000/posts/explorer/add', payload);
 
       if (response.status === 201) {
         Alert.alert('Success', 'Post created successfully');
