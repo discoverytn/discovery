@@ -28,7 +28,7 @@ const OnepostScreen = ({ route }) => {
   const checkIfPostFavorited = async (postId) => {
     try {
       const idexplorer = explorer.idexplorer; 
-      const response = await axios.get(`http://192.168.100.3:3000/explorer/${idexplorer}/favourites/${postId}/isFavorited`);
+      const response = await axios.get(`http://192.168.1.19:3000/explorer/${idexplorer}/favourites/${postId}/isFavorited`);
 
       setIsFavorited(response.data.isFavorited); 
     } catch (error) {
@@ -57,7 +57,7 @@ const OnepostScreen = ({ route }) => {
     try {
       const idexplorer = explorer.idexplorer; 
 
-      const response = await axios.post(`http://192.168.100.3:3000/explorer/${idexplorer}/favourites/${postId}/addOrRemove`, {
+      const response = await axios.post(`http://192.168.1.19:3000/explorer/${idexplorer}/favourites/${postId}/addOrRemove`, {
         idposts: postId,
       });
 
