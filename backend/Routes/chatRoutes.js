@@ -4,5 +4,6 @@ const chatController = require('../Controllers/chatController');
 
 router.post('/chat/send', chatController.sendMessage);
 router.get('/chat/:explorer_idexplorer/:business_idbusiness', chatController.getMessages);
+router.delete('/chat/:idchat', chatController.deleteMessage);
 
 module.exports = router;

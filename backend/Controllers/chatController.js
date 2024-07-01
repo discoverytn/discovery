@@ -34,4 +34,21 @@ const db = require('../database/index');
       return res.status(500).json({ error: 'Failed to fetch messages' });
     }
   }
-module.exports={sendMessage,getMessages}
+  const deleteMessage = async (req, res) => {
+    const { idchat } = req.params;
+  
+    try {
+      const deleted = await db.Chat.destroy({
+        where: { idchat }
+      });
+      if (deleted) {
+        return res.status(204).json({ message: 'Message deleted' });
+      }
+      return res.status(404).json({ error: 'Message not found' });
+    } catch (error) {
+      console.error('Error deleting message:', error);
+      return res.status(500).json({ error: 'Failed to delete message' });
+    }
+  }
+  
+module.exports={sendMessage,getMessages,deleteMessage}
