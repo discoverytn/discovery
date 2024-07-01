@@ -12,6 +12,8 @@ import { Picker } from "@react-native-picker/picker";
 import { useAuth } from "../context/AuthContext";
 import * as ImagePicker from "expo-image-picker";
 import axios from "axios";
+import { useNavigation } from '@react-navigation/native';
+
 
 const CLOUDINARY_UPLOAD_PRESET = "discovery";
 const CLOUDINARY_UPLOAD_URL =
@@ -28,7 +30,10 @@ const SignupScreen = () => {
   const [credImg, setCredImg] = useState(null);
   const [category, setCategory] = useState("Restaurant"); 
 
-  const handleSubmit = async () => {
+  const navigation = useNavigation();
+
+
+  const Submit = async () => {
     try {
       let payload;
 
@@ -56,6 +61,7 @@ const SignupScreen = () => {
       console.log("Signup successful with token:", token);
       Alert.alert("Signup Successful", "You have successfully signed up!");
       clearFields();
+      navigation.navigate('Login');
     } catch (error) {
       console.error("Signup error:", error);
       Alert.alert("Signup Failed", "Failed to signup, please try again");
@@ -69,7 +75,7 @@ const SignupScreen = () => {
     setBusinessName("");
     setBOid("");
     setCredImg(null);
-    setCategory("Restaurant"); // Reset category to default
+    setCategory("Restaurant"); 
   };
 
   const selectImage = async () => {
@@ -146,7 +152,7 @@ const SignupScreen = () => {
         </>
       )}
       <TouchableOpacity style={styles.selectImageButton} onPress={selectImage}>
-        <Text style={styles.buttonText}>Select Business Image</Text>
+        <Text style={styles.buttonText}>Business Doc Image</Text>
       </TouchableOpacity>
     </View>
   );
@@ -191,7 +197,7 @@ const SignupScreen = () => {
           />
           <TextInput
             style={styles.input}
-            placeholder="Business Organization ID (BOid)"
+            placeholder="Business Owner ID"
             value={BOid}
             onChangeText={setBOid}
           />
@@ -211,7 +217,7 @@ const SignupScreen = () => {
           {renderImageItem()}
         </>
       )}
-      <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+      <TouchableOpacity style={styles.button} onPress={Submit}>
         <Text style={styles.buttonText}>Sign Up</Text>
       </TouchableOpacity>
     </View>

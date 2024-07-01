@@ -3,6 +3,8 @@ import { StyleSheet, Text, View, Image, TouchableOpacity, FlatList, Alert } from
 import axios from 'axios';
 import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../context/AuthContext';
+import { Picker } from '@react-native-picker/picker';
+import Icon from 'react-native-vector-icons/FontAwesome';
 
 const ExplorerProfile = () => {
   const { explorer, setExplorer, logOut } = useAuth();
@@ -12,11 +14,12 @@ const ExplorerProfile = () => {
   const [numPosts, setNumPosts] = useState(0);
   const [numLikes, setNumLikes] = useState(0);
   const [numTraveled, setNumTraveled] = useState(0);
-console.log("explorer profil",explorer)
+  const [selectedValue, setSelectedValue] = useState("");
+
   useEffect(() => {
     const fetchExplorerData = async () => {
       try {
-        const response = await axios.get(`http://192.168.1.8:3000/explorer/${explorer.id}`);
+        const response = await axios.get(`http://192.168.100.3:3000/explorer/${explorer.id}`);
         if (response.status === 200) {
           setExplorer(response.data);
           setNumPosts(response.data.Posts?.length || 0);
@@ -38,7 +41,7 @@ console.log("explorer profil",explorer)
   useEffect(() => {
     const fetchExplorerPosts = async () => {
       try {
-        const response = await axios.get(`http://192.168.1.8:3000/explorer/${explorer.id}/posts`);
+        const response = await axios.get(`http://192.168.100.3:3000/explorer/${explorer.id}/posts`);
         if (response.status === 200) {
           const transformedPosts = response.data.map(post => ({
             id: post.idposts,
@@ -63,7 +66,7 @@ console.log("explorer profil",explorer)
     if (activeTab === 'Posts' && explorer?.id) {
       fetchExplorerPosts();
     }
-  }, [explorer?.id, activeTab, posts.length]); // Include `posts.length` as a dependency
+  }, [explorer?.id, activeTab, posts.length]);
 
   const handleTabChange = (tabName) => {
     setActiveTab(tabName);
@@ -80,7 +83,7 @@ console.log("explorer profil",explorer)
 
   const deleteExplorerPost = async (postId, token) => {
     try {
-      const response = await fetch(`http://192.168.1.8:3000/posts/explorer/delete/${postId}`, {
+      const response = await fetch(`http://192.168.100.3:3000/posts/explorer/delete/${postId}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -92,7 +95,7 @@ console.log("explorer profil",explorer)
         console.log(data);
         Alert.alert('Explorer post deleted successfully');
         setPosts(posts.filter(post => post.id !== postId));
-        setNumPosts(numPosts - 1); 
+      
       } else {
         console.error('Error:', data);
         Alert.alert(`Error: ${data.message}`);
@@ -102,7 +105,6 @@ console.log("explorer profil",explorer)
       Alert.alert(`Error: ${error.message}`);
     }
   };
-  
 
   if (!explorer) {
     return (
@@ -117,11 +119,20 @@ console.log("explorer profil",explorer)
       <Image source={{ uri: item.image1 }} style={styles.postImage} />
       <Text style={styles.postTitle}>{item.title}</Text>
       <Text style={styles.postDescription}>{item.description}</Text>
-      <TouchableOpacity style={styles.deleteButton} onPress={() => {deleteExplorerPost(item.id),console.log("item",item)}}>
+      <TouchableOpacity style={styles.deleteButton} onPress={() => { deleteExplorerPost(item.id), console.log("item", item) }}>
         <Text style={styles.deleteButtonText}>Delete</Text>
       </TouchableOpacity>
     </View>
   );
+
+  const handlePickerChange = (value) => {
+    setSelectedValue(value);
+    if (value === 'Home') {
+      navigation.navigate('Main');
+    } else if (value === 'AddPost') {
+      navigation.navigate('ExplorerAddPostScreen');
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -184,6 +195,19 @@ console.log("explorer profil",explorer)
           <Text style={styles.navBarText}>Visited</Text>
         </TouchableOpacity>
       </View>
+      <View style={styles.pickerContainer}>
+        <Icon name="bars" size={20} color="#333" style={styles.icon} />
+        <Picker
+          selectedValue={selectedValue}
+          onValueChange={handlePickerChange}
+          style={styles.picker}
+          mode="dropdown"
+        >
+          <Picker.Item label="Select an option" value="" />
+          <Picker.Item label="Home" value="Home" />
+          <Picker.Item label="Add Post" value="AddPost" />
+        </Picker>
+      </View>
       {activeTab === 'Posts' && (
         <FlatList
           data={posts}
@@ -191,7 +215,6 @@ console.log("explorer profil",explorer)
           renderItem={renderPostItem}
           numColumns={2}
           contentContainerStyle={styles.postsContainer}
-       
         />
       )}
     </View>
@@ -224,8 +247,7 @@ const styles = StyleSheet.create({
   descriptionText: {
     fontSize: 16,
     textAlign: 'center',
-    color: '#555',
-    lineHeight: 22,
+    color: '#666',
     marginBottom: 10,
   },
   statsContainer: {
@@ -359,6 +381,24 @@ const styles = StyleSheet.create({
     color: 'red',
     textAlign: 'center',
     marginTop: 20,
+  },
+  pickerContainer: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    position: 'absolute',
+    top: 30,
+    right: 10,
+    backgroundColor: '#f0f0f0',
+    borderRadius: 8,
+    padding: 5,
+  },
+  icon: {
+    marginRight: 5,
+  },
+  picker: {
+    width: 30,
+    height: 20,
   },
 });
 

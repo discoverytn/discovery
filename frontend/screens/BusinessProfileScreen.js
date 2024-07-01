@@ -3,6 +3,8 @@ import { StyleSheet, Text, View, Image, TouchableOpacity, FlatList, ScrollView, 
 import axios from 'axios';
 import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../context/AuthContext';
+import { Picker } from '@react-native-picker/picker';
+import Icon from 'react-native-vector-icons/FontAwesome';
 
 const BusinessProfileScreen = () => {
   const { business, setBusiness, logOut } = useAuth();
@@ -12,11 +14,13 @@ const BusinessProfileScreen = () => {
   const [events, setEvents] = useState([]);
   const [numPosts, setNumPosts] = useState(0);
   const [numEvents, setNumEvents] = useState(0);
+  const [selectedValue, setSelectedValue] = useState("");
+
 
   useEffect(() => {
     const fetchBusinessData = async () => {
       try {
-        const response = await axios.get(`http://192.168.1.8:3000/business/${business.id}`);
+        const response = await axios.get(`http://192.168.100.3:3000/business/${business.id}`);
         if (response.status === 200) {
           setBusiness(response.data);
           setNumPosts(response.data.Posts?.length || 0);
@@ -37,15 +41,19 @@ const BusinessProfileScreen = () => {
   useEffect(() => {
     const fetchBusinessPosts = async () => {
       try {
-        const response = await axios.get(`http://192.168.1.8:3000/business/${business.id}/posts`);
-        if (response.status === 200) {
+        const response = await axios.get(`http://192.168.100.3:3000/business/${business.id}/posts`);
+        if (response.status === 200) 
+        
+          {
+            console.log("res",response.data);
           const transformedPosts = response.data.map(post => ({
-            id: post.id,
+            id: post.idposts,
             title: post.title,
             description: post.description,
             image1: post.image1
           }));
           setPosts(transformedPosts);
+        
           setNumPosts(transformedPosts.length || 0);
         } else {
           console.error('Failed to fetch business posts');
@@ -58,10 +66,10 @@ const BusinessProfileScreen = () => {
         setNumPosts(0);
       }
     };
-
+    console.log("the posts",posts);
     const fetchBusinessEvents = async () => {
       try {
-        const response = await axios.get(`http://192.168.1.8:3000/business/${business.id}/events`);
+        const response = await axios.get(`http://192.168.100.3:3000/business/${business.id}/events`);
         if (response.status === 200) {
           const transformedEvents = response.data.map(event => ({
             id: event.id,
@@ -106,7 +114,7 @@ const BusinessProfileScreen = () => {
 
   const deleteBusinessPost = async (postId, token) => {
     try {
-      const response = await fetch(`http://192.168.1.8:3000/posts/business/delete/${postId}`, {
+      const response = await fetch(`http://192.168.100.3:3000/posts/business/delete/${postId}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -118,7 +126,7 @@ const BusinessProfileScreen = () => {
         console.log(data);
         Alert.alert('Business post deleted successfully');
         setPosts(posts.filter(post => post.id !== postId));
-        setNumPosts(numPosts - 1); 
+       
       } else {
         console.error('Error:', data);
         Alert.alert(`Error: ${data.message}`);
@@ -150,12 +158,33 @@ const BusinessProfileScreen = () => {
       <Text style={styles.eventDate}>{item.date}</Text>
     </View>
   );
+  const handlePickerChange = (value) => {
+    setSelectedValue(value);
+    if (value === 'Home') {
+      navigation.navigate('Main');
+    } else if (value === 'AddPost') {
+      navigation.navigate('BusinessddPostScreen');
+    }
+  };
 
   return (
     <ScrollView style={styles.container}>
       <View style={styles.profileContainer}>
         <Text style={styles.nameText}>{`${business.firstname} ${business.lastname}`}</Text>
         <Image source={{ uri: business.image }} style={styles.profileImage} />
+        <View style={styles.pickerContainer}>
+        <Icon name="bars" size={20} color="#333" style={styles.icon} />
+        <Picker
+          selectedValue={selectedValue}
+          onValueChange={handlePickerChange}
+          style={styles.picker}
+          mode="dropdown"
+        >
+          <Picker.Item label="Select an option" value="" />
+          <Picker.Item label="Home" value="Home" />
+          <Picker.Item label="Add Post" value="AddPost" />
+        </Picker>
+      </View>
         <Text style={styles.usernameText}>{business.username}</Text>
         <Text style={styles.descriptionText}>{business.description}</Text>
         <View style={styles.statsContainer}>
@@ -425,6 +454,24 @@ const styles = StyleSheet.create({
   eventDate: {
     fontSize: 12,
     color: '#888',
+  },
+  pickerContainer: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    position: 'absolute',
+    top: 30,
+    right: 10,
+    backgroundColor: '#f0f0f0',
+    borderRadius: 8,
+    padding: 5,
+  },
+  icon: {
+    marginRight: 5,
+  },
+  picker: {
+    width: 30,
+    height: 20,
   },
 });
 

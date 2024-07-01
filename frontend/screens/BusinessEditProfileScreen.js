@@ -4,6 +4,8 @@ import axios from 'axios';
 import * as ImagePicker from 'expo-image-picker';
 import { useAuth } from '../context/AuthContext';
 import { Picker } from "@react-native-picker/picker";
+import { useNavigation } from '@react-navigation/native';
+
 
 const CLOUDINARY_UPLOAD_PRESET = 'discovery';
 const CLOUDINARY_UPLOAD_URL = 'https://api.cloudinary.com/v1_1/dflixnywo/image/upload';
@@ -15,6 +17,8 @@ const governorateOptions = [
 ];
 
 const BusinessEditProfileScreen = () => {
+  const navigation = useNavigation();
+
   const { business, setBusiness } = useAuth();
   const [businessId, setBusinessId] = useState(null);
   const [firstname, setFirstname] = useState('');
@@ -56,7 +60,7 @@ const BusinessEditProfileScreen = () => {
     }
   }, [business]);
 
-  const handleSave = async () => {
+  const Save = async () => {
     if (newPassword && newPassword !== confirmNewPassword) {
       Alert.alert('Error', 'New passwords do not match');
       return;
@@ -64,7 +68,7 @@ const BusinessEditProfileScreen = () => {
     setModalVisible(true);
   };
 
-  const handleConfirmPassword = async () => {
+  const ConfirmPass = async () => {
     setModalVisible(false);
 
     const payload = {
@@ -87,10 +91,13 @@ const BusinessEditProfileScreen = () => {
     }
 
     try {
-      const response = await axios.put(`http://192.168.1.8:3000/business/${businessId}/edit`, payload);
+      const response = await axios.put(`http://192.168.100.3:3000/business/${businessId}/edit`, payload);
 
       if (response.status === 200) {
+        setBusiness(response.data)
         Alert.alert('Success', 'Profile updated successfully');
+        navigation.navigate("BusinessProfileScreen");
+
         
       } else {
         Alert.alert('Error', 'Failed to update profile');
@@ -121,7 +128,7 @@ const BusinessEditProfileScreen = () => {
 
       console.log('ImagePicker result:', result);
 
-      if (!result.cancelled) {
+      if (!result.canceled) {
         const source = { uri: result.assets[0].uri };
         console.log('Selected image URI:', source.uri);
         uploadImage(source.uri);
@@ -183,7 +190,7 @@ const BusinessEditProfileScreen = () => {
           />
           <TouchableOpacity
             style={styles.button}
-            onPress={handleConfirmPassword}
+            onPress={ConfirmPass}
           >
             <Text style={styles.buttonText}>Confirm</Text>
           </TouchableOpacity>
@@ -301,7 +308,7 @@ const BusinessEditProfileScreen = () => {
       )}
       <TouchableOpacity
         style={styles.button}
-        onPress={handleSave}
+        onPress={Save}
       >
         <Text style={styles.buttonText}>Save</Text>
       </TouchableOpacity>
