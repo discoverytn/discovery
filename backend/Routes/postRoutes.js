@@ -8,7 +8,8 @@ const {
   ExplorerDeletePost,
   BusinessDeletePost,
   getAllPosts,
-  getPostById
+  getPostById,
+  ratePost
 
   
 } = require('../Controllers/postController');
@@ -30,5 +31,8 @@ router.delete('/business/delete/:id', BusinessDeletePost);
 router.get('/allposts', getAllPosts);
 
 router.get('/onepost/:idposts', getPostById);
+
+// route to rate a post
+router.post('/ratepost', ratePost);
 
 module.exports = router;
