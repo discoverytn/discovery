@@ -54,6 +54,9 @@ db.Events.belongsTo(db.Business, { foreignKey: 'business_idbusiness' });
 db.Posts.belongsToMany(db.Explorer, { through: db.Favorites, foreignKey: 'posts_idposts' });
 db.Explorer.belongsToMany(db.Posts, { through: db.Favorites, foreignKey: 'explorer_idexplorer' });
 
+db.Favorites.belongsTo(db.Posts, { foreignKey: 'posts_idposts' });
+db.Favorites.belongsTo(db.Explorer, { foreignKey: 'explorer_idexplorer' });
+
 sequelize
   .authenticate()
   .then(() => {
