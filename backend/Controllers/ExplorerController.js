@@ -91,31 +91,33 @@ module.exports = {
   addToFavourites: async function (req, res) {
     const { idexplorer } = req.params;
     const { idposts } = req.body;
-
+  
     try {
       const explorer = await db.Explorer.findByPk(idexplorer);
       if (!explorer) {
         return res.status(404).json({ error: "Explorer not found" });
       }
-
+  
       const post = await db.Posts.findByPk(idposts);
       if (!post) {
         return res.status(404).json({ error: "Post not found" });
       }
-
+  
       const newFavourite = await db.Favorites.create({
         explorer_idexplorer: idexplorer,
         posts_idposts: idposts,
+        posts_title: post.title,
+        posts_image1: post.image1,
+        posts_location: post.location,
       });
-
+  
       return res.status(200).json({ message: "Post added to favourites" });
     } catch (error) {
       console.error("Error adding post to favourites:", error);
-      return res
-        .status(500)
-        .json({ error: "Failed to add post to favourites" });
+      return res.status(500).json({ error: "Failed to add post to favourites" });
     }
   },
+  
 
   removeFromFavourites: async function (req, res) {
     const { idexplorer, idposts } = req.params;
@@ -142,9 +144,10 @@ module.exports = {
         .json({ error: "Failed to remove post from favourites" });
     }
   },
+
   addOrRemoveFromFavorites: async function (req, res) {
     const { idexplorer, idposts } = req.params;
-
+  
     try {
       const favorite = await db.Favorites.findOne({
         where: {
@@ -152,15 +155,24 @@ module.exports = {
           posts_idposts: idposts,
         },
       });
-
+  
       if (favorite) {
         await favorite.destroy();
         return res.status(200).json({ message: "Post removed from favorites" });
       } else {
+        const post = await db.Posts.findByPk(idposts);
+        if (!post) {
+          return res.status(404).json({ error: "Post not found" });
+        }
+  
         await db.Favorites.create({
           explorer_idexplorer: idexplorer,
           posts_idposts: idposts,
+          post_title: post.title,         
+          post_image1: post.image1,
+          post_location: post.location,
         });
+  
         return res.status(200).json({ message: "Post added to favorites" });
       }
     } catch (error) {
@@ -170,6 +182,8 @@ module.exports = {
         .json({ error: "Failed to add/remove post to/from favorites" });
     }
   },
+  
+  
   isPostFavoritedByExplorer: async function (req, res) {
     const { idexplorer, idposts } = req.params;
 
@@ -187,4 +201,27 @@ module.exports = {
       return res.status(500).json({ error: "Error checking favorite" });
     }
   },
+
+  getExplorerFavorites: async function (req, res) {
+    const { idexplorer } = req.params;
+  
+    try {
+      const favoritePosts = await db.Favorites.findAll({
+        where: { explorer_idexplorer: idexplorer },
+        include: [
+          {
+            model: db.Posts,
+            attributes: ['idposts', 'title', 'image1', 'location'],
+          },
+        ],
+        order: [["createdAt", "DESC"]],
+      });
+      return res.status(200).json(favoritePosts);
+    } catch (error) {
+      console.error("Error fetching explorer favorites:", error);
+      return res.status(500).json({ error: "Failed to fetch explorer favorites" });
+    }
+  }
+  
+  
 };
