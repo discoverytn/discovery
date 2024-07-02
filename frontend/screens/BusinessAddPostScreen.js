@@ -36,7 +36,7 @@ const BusinessAddPostScreen = () => {
   const fetchBusinessDetails = async (businessId) => {
     try {
       console.log('Fetching business details for ID:', businessId);
-      const response = await axios.get(`http://192.168.1.19:3000/admin/business/${businessId}`);
+      const response = await axios.get(`http://192.168.100.3:3000/admin/business/${businessId}`);
       if (response.status === 200) {
         const businessData = response.data;
         console.log('Business Data:', businessData);
@@ -74,7 +74,7 @@ const BusinessAddPostScreen = () => {
     console.log('Payload:', payload);
   
     try {
-      const response = await axios.post('http://192.168.1.19:3000/posts/business/add', payload);
+      const response = await axios.post('http://192.168.100.3:3000/posts/business/add', payload);
   
       if (response.status === 201) {
         setBusiness(response.data)

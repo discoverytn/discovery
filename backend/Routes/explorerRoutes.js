@@ -1,7 +1,5 @@
-// routes/explorer.js
-
 const express = require("express");
-const { getExplorerById, editExplorer, getExplorerPosts, addToFavourites, removeFromFavourites, addOrRemoveFromFavorites,isPostFavoritedByExplorer } = require("../Controllers/ExplorerController");
+const { getExplorerById, editExplorer, getExplorerPosts, addToFavourites, removeFromFavourites, addOrRemoveFromFavorites, isPostFavoritedByExplorer, getExplorerFavorites } = require("../Controllers/ExplorerController");
 const router = express.Router();
 
 // Route to get a specific explorer profile by their ID
@@ -20,7 +18,12 @@ router.post("/:idexplorer/favourites", addToFavourites);
 router.delete("/:idexplorer/favourites/:idposts", removeFromFavourites);
 
 // Route to add or remove a post from an explorer's favourites based on existence
-router.post("/:idexplorer/favourites/:idposts/addOrRemove", addOrRemoveFromFavorites); 
-router.get("/:idexplorer/favourites/:idposts/check",isPostFavoritedByExplorer)
+router.post("/:idexplorer/favourites/:idposts/addOrRemove", addOrRemoveFromFavorites);
+
+// Route to check if a post is favorited by an explorer
+router.get("/:idexplorer/favourites/:idposts/check", isPostFavoritedByExplorer);
+
+// Route to get all favorite posts of an explorer
+router.get("/:idexplorer/favourites", getExplorerFavorites);
 
 module.exports = router;
