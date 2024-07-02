@@ -315,7 +315,7 @@ const styles = StyleSheet.create({
     paddingLeft: 10,
   },
   button: {
-    backgroundColor: '#007bff',
+    backgroundColor: '#00aacc',
     paddingVertical: 10,
     borderRadius: 5,
     alignItems: 'center',
