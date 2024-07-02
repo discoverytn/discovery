@@ -26,6 +26,7 @@ db.Notif = require('../Models/notif')(sequelize, DataTypes);
 db.Chat = require('../Models/chat')(sequelize, DataTypes);
 db.Events = require('../Models/events')(sequelize, DataTypes);
 db.Favorites = require('../Models/favorites')(sequelize, DataTypes);
+db.Traveled = require ("../Models/traveled.js")(sequelize, DataTypes);
 
 db.Explorer.hasMany(db.Posts, { foreignKey: 'explorer_idexplorer' });
 db.Posts.belongsTo(db.Explorer, { foreignKey: 'explorer_idexplorer' });
@@ -56,6 +57,12 @@ db.Explorer.belongsToMany(db.Posts, { through: db.Favorites, foreignKey: 'explor
 
 db.Favorites.belongsTo(db.Posts, { foreignKey: 'posts_idposts' });
 db.Favorites.belongsTo(db.Explorer, { foreignKey: 'explorer_idexplorer' });
+//
+db.Posts.belongsToMany(db.Explorer, { through: db.Traveled, foreignKey: 'posts_idposts' });
+db.Explorer.belongsToMany(db.Posts, { through: db.Traveled, foreignKey: 'explorer_idexplorer' });
+
+db.Traveled.belongsTo(db.Posts, { foreignKey: 'posts_idposts' });
+db.Traveled.belongsTo(db.Explorer, { foreignKey: 'explorer_idexplorer' });
 
 sequelize
   .authenticate()

@@ -10,36 +10,52 @@ const OnepostScreen = ({ route }) => {
   const [postData, setPostData] = useState(null);
   const [selectedImage, setSelectedImage] = useState(null);
   const [showFullDescription, setShowFullDescription] = useState(false);
-  const [isFavorited, setIsFavorited] = useState(false); 
+  const [isFavorited, setIsFavorited] = useState(false);
+  const [isTraveled, setIsTraveled] = useState(false); 
   const [showMoreReviews, setShowMoreReviews] = useState(false);
   const scrollViewRef = useRef(null);
-  const { explorer } = useAuth(); 
-  const navigation = useNavigation(); 
+  const { explorer } = useAuth();
+  const navigation = useNavigation();
 
   useEffect(() => {
     if (route.params) {
       const { postId, postDetails } = route.params;
       setPostData({ postId, postDetails });
       setSelectedImage(postDetails.image.uri);
-      checkIfPostFavorited(postId); 
+      checkIfPostFavorited(postId);
+      checkIfPostTraveled(postId); 
     }
   }, [route.params]);
 
   const checkIfPostFavorited = async (postId) => {
     try {
-      const idexplorer = explorer.idexplorer; 
-      const response = await axios.get(`http://192.168.1.19:3000/explorer/${idexplorer}/favourites/${postId}/check`);
-      setIsFavorited(response.data.favorited); 
+      const idexplorer = explorer.idexplorer;
+      const response = await axios.get(`http://192.168.100.3:3000/explorer/${idexplorer}/favourites/${postId}/check`);
+
+      setIsFavorited(response.data.favorited);
     } catch (error) {
       console.error('Error checking if post is favorited:', error);
     }
   };
 
+  const checkIfPostTraveled = async (postId) => {
+    try {
+      const idexplorer = explorer.idexplorer;
+      const response = await axios.get(`http://192.168.100.3:3000/explorer/${idexplorer}/traveled/${postId}/check`);
+
+      setIsTraveled(response.data.traveled);
+    } catch (error) {
+      console.error('Error checking if post is traveled:', error);
+    }
+  };
+
   if (!postData) {
-    return  <View style={styles.loadingContainer}>
-    <Text style={styles.loadingText}>Onepost</Text>
-    <Text style={styles.noPostsText}>No post selected yet !</Text>
-  </View>
+    return (
+      <View style={styles.loadingContainer}>
+        <Text style={styles.loadingText}>Onepost</Text>
+        <Text style={styles.noPostsText}>No post selected yet !</Text>
+      </View>
+    );
   }
 
   const { postId, postDetails } = postData;
@@ -49,16 +65,16 @@ const OnepostScreen = ({ route }) => {
 
   const addToFavorites = async () => {
     try {
-      const idexplorer = explorer.idexplorer; 
-      const response = await axios.post(`http://192.168.1.19:3000/explorer/${idexplorer}/favourites/${postId}/addOrRemove`, {
+      const idexplorer = explorer.idexplorer;
+      const response = await axios.post(`http://192.168.100.3:3000/explorer/${idexplorer}/favourites/${postId}/addOrRemove`, {
         idposts: postId,
       });
-  
+
       if (response.data.message === "Post added to favorites") {
-        setIsFavorited(true); 
+        setIsFavorited(true);
         Alert.alert('Success', 'Post added to favorites');
       } else if (response.data.message === "Post removed from favorites") {
-        setIsFavorited(false); 
+        setIsFavorited(false);
         Alert.alert('Success', 'Post removed from favorites');
       } else {
         Alert.alert('Error', 'Unexpected response from server');
@@ -68,7 +84,29 @@ const OnepostScreen = ({ route }) => {
       Alert.alert('Error', 'Failed to update favorites');
     }
   };
-  
+
+  const addToTraveled = async () => {
+    try {
+      const idexplorer = explorer.idexplorer;
+      const response = await axios.post(`http://192.168.100.3:3000/explorer/${idexplorer}/traveled/${postId}/addOrRemove`, {
+        idposts: postId,
+      });
+
+      if (response.data.message === "Post added to traveled") {
+        setIsTraveled(true);
+        Alert.alert('Success', 'Post added to traveled');
+      } else if (response.data.message === "Post removed from traveled") {
+        setIsTraveled(false);
+        Alert.alert('Success', 'Post removed from traveled');
+      } else {
+        Alert.alert('Error', 'Unexpected response from server');
+      }
+    } catch (error) {
+      console.error('Error adding/removing post to/from traveled:', error);
+      Alert.alert('Error', 'Failed to update traveled');
+    }
+  };
+
   const handleScrollToTop = () => {
     if (scrollViewRef.current) {
       scrollViewRef.current.scrollTo({ y: 0, animated: true });
@@ -76,7 +114,7 @@ const OnepostScreen = ({ route }) => {
   };
 
   const handleSendPost = () => {
-    Alert.alert('Post sent', 'Your post has been sent successfully!');
+    addToTraveled(); 
   };
 
   const handleImagePress = (imageUri) => {
@@ -96,7 +134,13 @@ const OnepostScreen = ({ route }) => {
               size={26}
             />
           </TouchableOpacity>
-          <FontAwesomeIcon icon={faPaperPlane} style={styles.icon1} size={26} onPress={handleSendPost} />
+          <TouchableOpacity onPress={handleSendPost} style={styles.iconContainer}>
+            <FontAwesomeIcon
+              icon={faPaperPlane}
+              style={[styles.icon, isTraveled ? styles.traveledIconActive : styles.traveledIconInactive]}
+              size={26}
+            />
+          </TouchableOpacity>
         </View>
         <View style={styles.thumbnailContainer}>
           {image2 && (
@@ -159,29 +203,7 @@ const OnepostScreen = ({ route }) => {
           <FontAwesomeIcon icon={faTrash} style={styles.userIcon} />
           <FontAwesomeIcon icon={faEdit} style={styles.userIcon} />
         </View>
-        <TouchableOpacity style={styles.seeMoreButton} onPress={() => setShowMoreReviews(!showMoreReviews)}>
-          <Text style={styles.seeMoreText}>{showMoreReviews ? 'Hide reviews' : 'See more reviews'}</Text>
-        </TouchableOpacity>
-        {showMoreReviews && (
-          <View style={styles.reviewsContainer}>
-            <View style={styles.userRow}>
-              <Image source={require('../assets/user.jpg')} style={styles.profileImage} />
-              <View style={styles.userInfo}>
-                <Text style={styles.userName}>Jane Smith</Text>
-                <Text style={styles.userHandle}>@janesmith</Text>
-                <Text style={styles.comment}>Amazing experience, will come back!</Text>
-              </View>
-            </View>
-            <View style={styles.userRow}>
-              <Image source={require('../assets/user.jpg')} style={styles.profileImage} />
-              <View style={styles.userInfo}>
-                <Text style={styles.userName}>Alex Johnson</Text>
-                <Text style={styles.userHandle}>@alexjohnson</Text>
-                <Text style={styles.comment}>Beautiful scenery and great weather.</Text>
-              </View>
-            </View>
-          </View>
-        )}
+        
       </View>
     </ScrollView>
   );
@@ -192,45 +214,62 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
   },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+  noPostsText: {
+    marginTop: 20,
+    fontSize: 16,
+  },
   imageContainer: {
     position: 'relative',
   },
   mainImage: {
     width: '100%',
-    height: 350,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    marginBottom: 7,
+    height: 300,
   },
   iconsContainer: {
     position: 'absolute',
     top: 20,
     right: 20,
-    flexDirection: 'column',
+    flexDirection: 'row',
+  },
+  iconContainer: {
+    marginLeft: 10,
   },
   icon: {
-    color: '#DB81B6',
-    marginBottom: 12,
-    marginTop: 11,
+    color: '#333',
   },
-  icon1: {
-    color: '#2ac00a',
-    marginBottom: 12,
+  favoriteIconActive: {
+    color: 'red', 
+  },
+  favoriteIconInactive: {
+    color: '#333', 
+  },
+  traveledIconActive: {
+    color: 'green', 
+  },
+  traveledIconInactive: {
+    color: '#333', 
   },
   thumbnailContainer: {
-    position: 'absolute',
-    bottom: 10,
-    right: 10,
-    flexDirection: 'column',
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
-    padding: 5,
-    borderRadius: 20,
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    marginTop: 10,
+    paddingHorizontal: 10,
   },
   thumbnail: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    marginBottom: 5,
+    width: 60,
+    height: 60,
+    borderRadius: 10,
+    marginRight: 10,
   },
   detailsContainer: {
     padding: 20,
@@ -242,84 +281,77 @@ const styles = StyleSheet.create({
   },
   infoRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    alignItems: 'center',
     marginBottom: 10,
   },
   infoItem: {
     flexDirection: 'row',
     alignItems: 'center',
+    marginRight: 20,
   },
   infoIcon: {
     width: 20,
     height: 20,
     marginRight: 5,
   },
-  infoText: {
-    fontSize: 16,
-    color: 'grey',
-    marginRight: 5,
-    fontStyle: 'italic',
-  },
   weatherIcon: {
-    color: 'blue',
-    marginRight: 8,
+    color: '#FFA500',
+    marginRight: 5,
   },
   eventIconContainer: {
-    padding: 5,
-    borderWidth: 1,
-    borderColor: 'grey',
-    borderRadius: 10,
+    backgroundColor: '#FFA500',
+    padding: 10,
+    borderRadius: 20,
   },
   eventIcon: {
-    width: 35,
-    height: 35,
+    width: 20,
+    height: 20,
   },
   subtitle: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
-    marginTop: 20,
-    marginBottom: 10,
+    marginTop: 10,
+    marginBottom: 5,
   },
   description: {
-    fontSize: 14,
-    color: 'grey',
+    fontSize: 16,
+    lineHeight: 24,
+    marginBottom: 10,
   },
   readMore: {
-    color: 'orange',
-    marginTop: 5,
+    color: 'blue',
+    textDecorationLine: 'underline',
+    marginBottom: 10,
   },
   ratingRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 10,
+    marginBottom: 10,
   },
   starIcon: {
-    color: 'yellow',
+    color: 'gold',
     marginRight: 5,
   },
   ratingText: {
     fontSize: 16,
+    fontWeight: 'bold',
     marginRight: 5,
   },
   ratingValue: {
     fontSize: 16,
-    fontWeight: 'bold',
-  },
-  favoriteIconInactive: {
-    color: '#DB81B6',
-  },
-  favoriteIconActive: {
-    color: '#f00',
   },
   userRow: {
     flexDirection: 'row',
     alignItems: 'center',
     marginTop: 20,
+    paddingBottom: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
   },
   profileImage: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 50,
+    height: 50,
+    borderRadius: 25,
     marginRight: 10,
   },
   userInfo: {
@@ -327,46 +359,20 @@ const styles = StyleSheet.create({
   },
   userName: {
     fontWeight: 'bold',
+    fontSize: 16,
+    marginBottom: 5,
   },
   userHandle: {
-    color: 'violet',
+    color: '#666',
+    marginBottom: 5,
   },
   comment: {
-    color: 'grey',
+    marginBottom: 5,
   },
   userIcon: {
-    color: 'grey',
     marginLeft: 10,
+    color: '#333',
   },
-  seeMoreButton: {
-    borderWidth: 1,
-    borderColor: 'grey',
-    borderRadius: 5,
-    padding: 10,
-    alignItems: 'center',
-    marginTop: 20,
-  },
-  seeMoreText: {
-    color: 'grey',
-  },
-  reviewsContainer: {
-    marginTop: 20,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-  },
-  loadingText: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 20,
-  },
-  noPostsText: {
-    fontSize: 18,
-    color: 'grey',
-  }
 });
 
 export default OnepostScreen;
