@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, StyleSheet, ActivityIndicator, Image } from 'react-native'; 
+import { View, Text, FlatList, StyleSheet, ActivityIndicator, Image } from 'react-native'; // Import Image component from react-native
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 
@@ -27,7 +27,7 @@ const FavoritesScreen = () => {
     try {
       const url = `http://192.168.100.3:3000/explorer/${explorerId}/favourites`;
       const response = await axios.get(url);
-      console.log('Favorites fetched:', response.data); 
+      console.log('Favorites fetched:', response.data); // Log the response data
       setFavorites(response.data);
     } catch (error) {
       console.error('Error fetching favorites:', error);
