@@ -91,7 +91,7 @@ const BusinessEditProfileScreen = () => {
     }
 
     try {
-      const response = await axios.put(`http://192.168.100.3:3000/business/${businessId}/edit`, payload);
+      const response = await axios.put(`http://192.168.1.19:3000/business/${businessId}/edit`, payload);
 
       if (response.status === 200) {
         setBusiness(response.data)
@@ -376,7 +376,7 @@ const styles = StyleSheet.create({
     marginLeft: 5,
   },
   button: {
-    backgroundColor: '#007bff',
+    backgroundColor: '#00aacc',
     paddingVertical: 12,
     borderRadius: 5,
     alignItems: 'center',

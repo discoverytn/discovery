@@ -73,7 +73,7 @@ const ExplorerEditProfileScreen = () => {
     }
 
     try {
-      const response = await axios.put(`http://192.168.100.3:3000/explorer/${explorerId}/edit`, payload);
+      const response = await axios.put(`http://192.168.1.19:3000/explorer/${explorerId}/edit`, payload);
 
       if (response.status === 200) {
         setExplorer(response.data);
@@ -315,7 +315,7 @@ const styles = StyleSheet.create({
     paddingLeft: 10,
   },
   button: {
-    backgroundColor: '#007bff',
+    backgroundColor: '#00aacc',
     paddingVertical: 10,
     borderRadius: 5,
     alignItems: 'center',
