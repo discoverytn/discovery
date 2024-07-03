@@ -197,7 +197,8 @@ const ratePost = async (req, res) => {
     const newNumOfRatings = post.numOfRatings + 1;
 
     // Calculate average rating
-    const averageRating = Math.round(newTotalRating / newNumOfRatings);
+    const averageRating = parseFloat((newTotalRating / newNumOfRatings).toFixed(1));
+
 
     // Update post with new ratings data
     post.totalRating = newTotalRating;

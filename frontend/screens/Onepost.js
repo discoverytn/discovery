@@ -13,6 +13,7 @@ const OnepostScreen = ({ route }) => {
   const [isFavorited, setIsFavorited] = useState(false);
   const [isTraveled, setIsTraveled] = useState(false); 
   const [showMoreReviews, setShowMoreReviews] = useState(false);
+  const [averageRating, setAverageRating] = useState(0);
   const scrollViewRef = useRef(null);
   const { explorer } = useAuth();
   const navigation = useNavigation();
@@ -23,15 +24,24 @@ const OnepostScreen = ({ route }) => {
       setPostData({ postId, postDetails });
       setSelectedImage(postDetails.image.uri);
       checkIfPostFavorited(postId);
-      checkIfPostTraveled(postId); 
+      checkIfPostTraveled(postId);
+      fetchPostDetails(postId);
     }
   }, [route.params]);
+
+  const fetchPostDetails = async (postId) => {
+    try {
+      const response = await axios.get(`http://192.168.11.67:3000/posts/onepost/${postId}`);
+      setAverageRating(response.data.averageRating);
+    } catch (error) {
+      console.error('Error fetching post details:', error);
+    }
+  };
 
   const checkIfPostFavorited = async (postId) => {
     try {
       const idexplorer = explorer.idexplorer;
-      const response = await axios.get(`http://192.168.100.3:3000/explorer/${idexplorer}/favourites/${postId}/check`);
-
+      const response = await axios.get(`http://192.168.11.67:3000/explorer/${idexplorer}/favourites/${postId}/check`);
       setIsFavorited(response.data.favorited);
     } catch (error) {
       console.error('Error checking if post is favorited:', error);
@@ -41,8 +51,7 @@ const OnepostScreen = ({ route }) => {
   const checkIfPostTraveled = async (postId) => {
     try {
       const idexplorer = explorer.idexplorer;
-      const response = await axios.get(`http://192.168.100.3:3000/explorer/${idexplorer}/traveled/${postId}/check`);
-
+      const response = await axios.get(`http://192.168.11.67:3000/explorer/${idexplorer}/traveled/${postId}/check`);
       setIsTraveled(response.data.traveled);
     } catch (error) {
       console.error('Error checking if post is traveled:', error);
@@ -66,7 +75,7 @@ const OnepostScreen = ({ route }) => {
   const addToFavorites = async () => {
     try {
       const idexplorer = explorer.idexplorer;
-      const response = await axios.post(`http://192.168.100.3:3000/explorer/${idexplorer}/favourites/${postId}/addOrRemove`, {
+      const response = await axios.post(`http://192.168.11.67:3000/explorer/${idexplorer}/favourites/${postId}/addOrRemove`, {
         idposts: postId,
       });
 
@@ -88,7 +97,7 @@ const OnepostScreen = ({ route }) => {
   const addToTraveled = async () => {
     try {
       const idexplorer = explorer.idexplorer;
-      const response = await axios.post(`http://192.168.100.3:3000/explorer/${idexplorer}/traveled/${postId}/addOrRemove`, {
+      const response = await axios.post(`http://192.168.11.67:3000/explorer/${idexplorer}/traveled/${postId}/addOrRemove`, {
         idposts: postId,
       });
 
@@ -122,6 +131,14 @@ const OnepostScreen = ({ route }) => {
     handleScrollToTop();
   };
 
+  const handleSeeMorePress = () => {
+    setShowMoreReviews(!showMoreReviews);
+
+    if (!showMoreReviews && scrollViewRef.current) {
+      scrollViewRef.current.scrollToEnd({ animated: true });
+    }
+  };
+
   return (
     <ScrollView ref={scrollViewRef} style={styles.container}>
       <View style={styles.imageContainer}>
@@ -137,7 +154,7 @@ const OnepostScreen = ({ route }) => {
           <TouchableOpacity onPress={handleSendPost} style={styles.iconContainer}>
             <FontAwesomeIcon
               icon={faPaperPlane}
-              style={[styles.icon, isTraveled ? styles.traveledIconActive : styles.traveledIconInactive]}
+              style={[styles.icon1, isTraveled ? styles.traveledIconActive : styles.traveledIconInactive]}
               size={26}
             />
           </TouchableOpacity>
@@ -190,7 +207,7 @@ const OnepostScreen = ({ route }) => {
         <View style={styles.ratingRow}>
           <FontAwesomeIcon icon={faStar} style={styles.starIcon} />
           <Text style={styles.ratingText}>Rating</Text>
-          <Text style={styles.ratingValue}>4.5 out of 5</Text>
+          <Text style={styles.ratingValue}>{averageRating.toFixed(1)} out of 5</Text>
         </View>
         
         <View style={styles.userRow}>
@@ -204,10 +221,34 @@ const OnepostScreen = ({ route }) => {
           <FontAwesomeIcon icon={faEdit} style={styles.userIcon} />
         </View>
         
+        <TouchableOpacity style={styles.seeMoreButton} onPress={handleSeeMorePress}>
+          <Text style={styles.seeMoreText}>{showMoreReviews ? 'Hide reviews' : 'See more reviews'}</Text>
+        </TouchableOpacity>
+        {showMoreReviews && (
+          <View style={styles.reviewsContainer}>
+            <View style={styles.userRow}>
+              <Image source={require('../assets/user.jpg')} style={styles.profileImage} />
+              <View style={styles.userInfo}>
+                <Text style={styles.userName}>Yessmine nouri</Text>
+                <Text style={styles.userHandle}>@janesmith</Text>
+                <Text style={styles.comment}>Amazing experience, will come back!</Text>
+              </View>
+            </View>
+            <View style={styles.userRow}>
+              <Image source={require('../assets/user.jpg')} style={styles.profileImage} />
+              <View style={styles.userInfo}>
+                <Text style={styles.userName}>Amen jbeli</Text>
+                <Text style={styles.userHandle}>@alexjohnson</Text>
+                <Text style={styles.comment}>Beautiful scenery and great weather.</Text>
+              </View>
+            </View>
+          </View>
+        )}
       </View>
     </ScrollView>
   );
 };
+
 
 const styles = StyleSheet.create({
   container: {
@@ -232,44 +273,55 @@ const styles = StyleSheet.create({
   },
   mainImage: {
     width: '100%',
-    height: 300,
+    height: 350,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    marginBottom: 7,
   },
   iconsContainer: {
     position: 'absolute',
     top: 20,
     right: 20,
-    flexDirection: 'row',
+    flexDirection: 'column',
   },
   iconContainer: {
-    marginLeft: 10,
+    marginBottom: 10,
   },
   icon: {
-    color: '#333',
+    color: '#DB81B6',
+    marginBottom: 12,
+    marginTop: 11,
+  },
+  icon1: {
+    color: '#2ac00a',
+    marginBottom: 12,
   },
   favoriteIconActive: {
     color: 'red', 
   },
   favoriteIconInactive: {
-    color: '#333', 
+    color: 'darkgrey', 
   },
   traveledIconActive: {
     color: 'green', 
   },
   traveledIconInactive: {
-    color: '#333', 
+    color: '#2ac00a', 
   },
   thumbnailContainer: {
-    flexDirection: 'row',
-    justifyContent: 'flex-start',
-    alignItems: 'center',
-    marginTop: 10,
-    paddingHorizontal: 10,
+    position: 'absolute',
+    bottom: 10,
+    right: 10,
+    flexDirection: 'column',
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    padding: 5,
+    borderRadius: 20,
   },
   thumbnail: {
-    width: 60,
-    height: 60,
-    borderRadius: 10,
-    marginRight: 10,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    marginBottom: 5,
   },
   detailsContainer: {
     padding: 20,
@@ -281,77 +333,77 @@ const styles = StyleSheet.create({
   },
   infoRow: {
     flexDirection: 'row',
-    alignItems: 'center',
+    justifyContent: 'space-between',
     marginBottom: 10,
   },
   infoItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginRight: 20,
   },
   infoIcon: {
     width: 20,
     height: 20,
     marginRight: 5,
   },
-  weatherIcon: {
-    color: '#FFA500',
+  infoText: {
+    fontSize: 16,
+    color: 'grey',
     marginRight: 5,
+    fontStyle: 'italic',
+  },
+  weatherIcon: {
+    color: 'blue',
+    marginRight: 8,
   },
   eventIconContainer: {
-    backgroundColor: '#FFA500',
-    padding: 10,
-    borderRadius: 20,
+    padding: 5,
+    borderWidth: 1,
+    borderColor: 'grey',
+    borderRadius: 10,
   },
   eventIcon: {
-    width: 20,
-    height: 20,
+    width: 35,
+    height: 35,
   },
   subtitle: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: 'bold',
-    marginTop: 10,
-    marginBottom: 5,
+    marginTop: 20,
+    marginBottom: 10,
   },
   description: {
-    fontSize: 16,
-    lineHeight: 24,
-    marginBottom: 10,
+    fontSize: 14,
+    color: 'grey',
   },
   readMore: {
-    color: 'blue',
-    textDecorationLine: 'underline',
-    marginBottom: 10,
+    color: 'orange',
+    marginTop: 5,
   },
   ratingRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 10,
+    marginTop: 20,
   },
   starIcon: {
     color: 'gold',
-    marginRight: 5,
+    marginRight: 10,
   },
   ratingText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginRight: 5,
+    color: 'grey',
+    marginRight: 10,
   },
   ratingValue: {
-    fontSize: 16,
+    color: 'grey',
   },
   userRow: {
     flexDirection: 'row',
     alignItems: 'center',
     marginTop: 20,
-    paddingBottom: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
   },
   profileImage: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     marginRight: 10,
   },
   userInfo: {
@@ -359,19 +411,30 @@ const styles = StyleSheet.create({
   },
   userName: {
     fontWeight: 'bold',
-    fontSize: 16,
-    marginBottom: 5,
   },
   userHandle: {
-    color: '#666',
-    marginBottom: 5,
+    color: 'violet',
   },
   comment: {
-    marginBottom: 5,
+    color: 'grey',
   },
   userIcon: {
+    color: 'grey',
     marginLeft: 10,
-    color: '#333',
+  },
+  seeMoreButton: {
+    borderWidth: 1,
+    borderColor: 'grey',
+    borderRadius: 5,
+    padding: 10,
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  seeMoreText: {
+    color: 'grey',
+  },
+  reviewsContainer: {
+    marginTop: 20,
   },
 });
 

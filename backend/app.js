@@ -8,6 +8,8 @@ const postRoutes = require('./Routes/postRoutes');
 const db = require("./database/index");
 const app = express();
 const transporter = require("./resetCode"); 
+const ratingRoutes = require("./Routes/ratingRoutes");
+
 
 app.use(express.json());
 
@@ -16,6 +18,8 @@ app.use("/auth", authRoutes);
 app.use("/explorer", explorerRoutes); 
 app.use("/business", businessRoutes);
 app.use('/posts', postRoutes);
+app.use('/ratings', ratingRoutes);
+
 
 app.post("/send-email", async (req, res) => {
   try {

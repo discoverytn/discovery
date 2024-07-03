@@ -1,14 +1,14 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { View, Text, Image, FlatList, StyleSheet, Dimensions, TouchableOpacity, ScrollView } from 'react-native';
-import Rating from './Rating';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import Rating from './Rating';
 
 const { width } = Dimensions.get('window');
 
 const DiscoverScreen = () => {
   const navigation = useNavigation();
-  const [postRatings, setPostRatings] = useState({});
   const [categories, setCategories] = useState([]);
+
 
   useFocusEffect(
     useCallback(() => {
@@ -18,11 +18,9 @@ const DiscoverScreen = () => {
 
   const fetchPosts = async () => {
     try {
-      const response = await fetch('http://192.168.100.3:3000/posts/allposts');
+      const response = await fetch('http://192.168.11.67:3000/posts/allposts');
       const posts = await response.json();
-
       const categorizedPosts = categorizePosts(posts);
-
       setCategories(categorizedPosts);
     } catch (error) {
       console.error('Error fetching posts:', error);
@@ -45,6 +43,7 @@ const DiscoverScreen = () => {
         image2: post.image2 ? { uri: post.image2 } : null,
         image3: post.image3 ? { uri: post.image3 } : null,
         image4: post.image4 ? { uri: post.image4 } : null,
+        averageRating: post.averageRating,
       });
     });
 
@@ -55,11 +54,11 @@ const DiscoverScreen = () => {
     }));
   };
 
-  const handleRating = (postId, rating) => {
-    setPostRatings((prevRatings) => ({
-      ...prevRatings,
-      [postId]: rating,
-    }));
+  const handleRating = async (postId, rating) => {
+    // This function can be used to update local state or perform any other actions
+    // when a rating is submitted
+    console.log(`Post ${postId} rated: ${rating}`);
+    // You might want to refresh the posts or update the local state here
   };
 
   const navigateToPost = (postId, postDetails) => {
@@ -70,7 +69,6 @@ const DiscoverScreen = () => {
 
   const renderPostItem = ({ item }) => {
     const postId = item.id.toString();
-    const selectedRating = postRatings[postId] || 0;
 
     return (
       <TouchableOpacity onPress={() => navigateToPost(postId, item)} style={styles.postContainer}>
@@ -80,7 +78,10 @@ const DiscoverScreen = () => {
           <Image source={require('../assets/location.jpg')} style={styles.locationIcon} />
           <Text style={styles.postLocation}>{item.location}</Text>
         </View>
-        <Rating postId={postId} selectedRating={selectedRating} onRate={(rating) => handleRating(postId, rating)} />
+        <Rating 
+          postId={postId} 
+          onRate={(rating) => handleRating(postId, rating)}
+        />
       </TouchableOpacity>
     );
   };
@@ -106,7 +107,7 @@ const DiscoverScreen = () => {
           <Image source={require('../assets/left-arrow.jpg')} style={styles.icon} />
         </TouchableOpacity>
         <Text style={styles.headerText}>Discover</Text>
-        <TouchableOpacity onPress={() => {/* ps : i will add notification for later */ }}>
+        <TouchableOpacity onPress={() => {/* Add notification functionality later */}}>
           <Image source={require('../assets/notification.jpg')} style={styles.icon} />
         </TouchableOpacity>
       </View>
@@ -170,6 +171,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 10,
     marginLeft: -20,
+    alignItems: 'center'
   },
   postImage: {
     width: '100%',
@@ -180,6 +182,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     marginTop: 8,
+    textAlign: 'center'
   },
   locationContainer: {
     flexDirection: 'row',
@@ -195,6 +198,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#666',
     fontWeight: 'bold',
+    textAlign: 'center',
   },
   flatListContainer: {
     paddingLeft: 20,

@@ -68,6 +68,11 @@ module.exports = (sequelize) => {
       type: DataTypes.INTEGER,
       allowNull: false,
       defaultValue: 0
+    },
+    averageRating: {
+      type: DataTypes.FLOAT,
+      allowNull: false,
+      defaultValue: 0,
     }
   });
 };
