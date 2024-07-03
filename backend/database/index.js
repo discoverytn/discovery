@@ -28,6 +28,9 @@ db.Events = require('../Models/events')(sequelize, DataTypes);
 db.Favorites = require('../Models/favorites')(sequelize, DataTypes);
 db.Traveled = require ("../Models/traveled.js")(sequelize, DataTypes);
 
+db.Rating = require("../Models/rating.js")(sequelize, DataTypes);
+
+
 db.Explorer.hasMany(db.Posts, { foreignKey: 'explorer_idexplorer' });
 db.Posts.belongsTo(db.Explorer, { foreignKey: 'explorer_idexplorer' });
 db.Business.hasMany(db.Posts, { foreignKey: 'business_idbusiness' });
@@ -63,6 +66,13 @@ db.Explorer.belongsToMany(db.Posts, { through: db.Traveled, foreignKey: 'explore
 
 db.Traveled.belongsTo(db.Posts, { foreignKey: 'posts_idposts' });
 db.Traveled.belongsTo(db.Explorer, { foreignKey: 'explorer_idexplorer' });
+
+db.Posts.hasMany(db.Rating, { foreignKey: 'posts_idposts' });
+db.Rating.belongsTo(db.Posts, { foreignKey: 'posts_idposts' });
+
+db.Explorer.hasMany(db.Rating, { foreignKey: 'explorer_idexplorer' });
+db.Rating.belongsTo(db.Explorer, { foreignKey: 'explorer_idexplorer' });
+
 
 sequelize
   .authenticate()

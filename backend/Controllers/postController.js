@@ -182,6 +182,37 @@ const getPostById = async (req, res) => {
     res.status(500).json({ error: "Failed to fetch post" });
   }
 };
+const ratePost = async (req, res) => {
+  const { idposts, rating } = req.body;
+
+  try {
+    const post = await Posts.findByPk(idposts);
+
+    if (!post) {
+      return res.status(404).json({ error: "Post not found" });
+    }
+
+    // Update total rating and number of ratings
+    const newTotalRating = post.totalRating + rating;
+    const newNumOfRatings = post.numOfRatings + 1;
+
+    // Calculate average rating
+    const averageRating = parseFloat((newTotalRating / newNumOfRatings).toFixed(1));
+
+
+    // Update post with new ratings data
+    post.totalRating = newTotalRating;
+    post.numOfRatings = newNumOfRatings;
+    post.averageRating = averageRating;
+
+    await post.save();
+
+    res.status(200).json(post);
+  } catch (error) {
+    console.error("Error rating post:", error);
+    res.status(500).json({ error: "Failed to rate post" });
+  }
+};
 
 module.exports = {
   ExplorerCreatePost,
@@ -191,5 +222,6 @@ module.exports = {
   ExplorerDeletePost,
   BusinessDeletePost,
   getAllPosts,
-  getPostById
+  getPostById,
+  ratePost
 };
