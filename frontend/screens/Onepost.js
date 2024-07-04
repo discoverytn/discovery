@@ -31,17 +31,25 @@ const OnepostScreen = ({ route }) => {
 
   const fetchPostDetails = async (postId) => {
     try {
-      const response = await axios.get(`http://192.168.11.67:3000/posts/onepost/${postId}`);
-      setAverageRating(response.data.averageRating);
+      const response = await axios.get(`http://192.168.1.19:3000/posts/onepost/${postId}`);
+      setAverageRating(parseFloat(response.data.averageRating));
+      setPostData(prevData => ({
+        ...prevData,
+        postDetails: {
+          ...prevData.postDetails,
+          averageRating: parseFloat(response.data.averageRating),
+        },
+      }));
     } catch (error) {
       console.error('Error fetching post details:', error);
+      Alert.alert('Error', 'Failed to fetch post details');
     }
   };
 
   const checkIfPostFavorited = async (postId) => {
     try {
       const idexplorer = explorer.idexplorer;
-      const response = await axios.get(`http://192.168.11.67:3000/explorer/${idexplorer}/favourites/${postId}/check`);
+      const response = await axios.get(`http://192.168.1.19:3000/explorer/${idexplorer}/favourites/${postId}/check`);
       setIsFavorited(response.data.favorited);
     } catch (error) {
       console.error('Error checking if post is favorited:', error);
@@ -51,7 +59,7 @@ const OnepostScreen = ({ route }) => {
   const checkIfPostTraveled = async (postId) => {
     try {
       const idexplorer = explorer.idexplorer;
-      const response = await axios.get(`http://192.168.11.67:3000/explorer/${idexplorer}/traveled/${postId}/check`);
+      const response = await axios.get(`http://192.168.1.19:3000/explorer/${idexplorer}/traveled/${postId}/check`);
       setIsTraveled(response.data.traveled);
     } catch (error) {
       console.error('Error checking if post is traveled:', error);
@@ -75,7 +83,7 @@ const OnepostScreen = ({ route }) => {
   const addToFavorites = async () => {
     try {
       const idexplorer = explorer.idexplorer;
-      const response = await axios.post(`http://192.168.11.67:3000/explorer/${idexplorer}/favourites/${postId}/addOrRemove`, {
+      const response = await axios.post(`http://192.168.1.19:3000/explorer/${idexplorer}/favourites/${postId}/addOrRemove`, {
         idposts: postId,
       });
 
@@ -97,7 +105,7 @@ const OnepostScreen = ({ route }) => {
   const addToTraveled = async () => {
     try {
       const idexplorer = explorer.idexplorer;
-      const response = await axios.post(`http://192.168.11.67:3000/explorer/${idexplorer}/traveled/${postId}/addOrRemove`, {
+      const response = await axios.post(`http://192.168.1.19:3000/explorer/${idexplorer}/traveled/${postId}/addOrRemove`, {
         idposts: postId,
       });
 

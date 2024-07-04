@@ -1,31 +1,48 @@
-import React, { useState, useCallback } from 'react';
-import { View, Text, Image, FlatList, StyleSheet, Dimensions, TouchableOpacity, ScrollView } from 'react-native';
+import React, { useState, useCallback, useMemo } from 'react';
+import { View, Text, Image, FlatList, StyleSheet, Dimensions, TouchableOpacity, ScrollView, ActivityIndicator, RefreshControl, Alert } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import Rating from './Rating';
+import { useAuth } from '../context/AuthContext';
 
 const { width } = Dimensions.get('window');
 
 const DiscoverScreen = () => {
+  const { explorer, business } = useAuth();
+  console.log('Business user:', business);
+
   const navigation = useNavigation();
   const [categories, setCategories] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [refreshing, setRefreshing] = useState(false);
 
-
-  useFocusEffect(
-    useCallback(() => {
-      fetchPosts();
-    }, [])
-  );
-
-  const fetchPosts = async () => {
+  const fetchPosts = useCallback(async () => {
     try {
-      const response = await fetch('http://192.168.11.67:3000/posts/allposts');
+      setIsLoading(true);
+      setError(null);
+      const response = await fetch('http://192.168.1.19:3000/posts/allposts');
+      if (!response.ok) throw new Error('Failed to fetch posts');
       const posts = await response.json();
       const categorizedPosts = categorizePosts(posts);
       setCategories(categorizedPosts);
     } catch (error) {
       console.error('Error fetching posts:', error);
+      setError('Failed to load posts. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
-  };
+  }, []);
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    fetchPosts().then(() => setRefreshing(false));
+  }, [fetchPosts]);
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchPosts();
+    }, [fetchPosts])
+  );
 
   const categorizePosts = (posts) => {
     const categories = {};
@@ -54,39 +71,97 @@ const DiscoverScreen = () => {
     }));
   };
 
-  const handleRating = async (postId, rating) => {
-    // This function can be used to update local state or perform any other actions
-    // when a rating is submitted
-    console.log(`Post ${postId} rated: ${rating}`);
-    // You might want to refresh the posts or update the local state here
-  };
+  const handleRating = useCallback(async (postId, rating) => {
+    try {
+      const response = await fetch(`http://192.168.1.19:3000/ratings/rate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          idposts: postId, 
+          explorer_idexplorer: explorer.idexplorer, 
+          rating 
+        })
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to submit rating');
+      }
+      
+      const data = await response.json();
+      
+      // now update the state with the new average rating
+      setCategories(prevCategories => 
+        prevCategories.map(category => ({
+          ...category,
+          posts: category.posts.map(post => 
+            post.id === postId ? { ...post, averageRating: parseFloat(data.averageRating) } : post
+          )
+        }))
+      );
+  
+      // show success message for explorer to know they rated
+      Alert.alert('Success', 'Rating submitted successfully');
+    } catch (error) {
+      console.error('Error submitting rating:', error);
+      Alert.alert('Error', error.message || 'Failed to submit rating');
+    }
+  }, [explorer.idexplorer]);
 
-  const navigateToPost = (postId, postDetails) => {
-    console.log('Navigating to post ID:', postId);
-    console.log('Post details:', postDetails);
+  const navigateToPost = useCallback((postId, postDetails) => {
     navigation.navigate('Onepost', { postId, postDetails });
-  };
+  }, [navigation]);
 
-  const renderPostItem = ({ item }) => {
+  const renderPostItem = useMemo(() => ({ item }) => {
     const postId = item.id.toString();
+  
+    if (business && Object.keys(business).length > 0) {
+      // render for business view
+      return (
+        <TouchableOpacity onPress={() => navigateToPost(postId, item)} style={styles.postContainer}>
+          <Image source={item.image} style={styles.postImage} />
+          <Text style={styles.postName}>{item.name}</Text>
+          <View style={styles.locationContainer}>
+            <Image source={require('../assets/location.jpg')} style={styles.locationIcon} />
+            <Text style={styles.postLocation}>{item.location}</Text>
+          </View>
+          <Text style={styles.businessText}>Business view, no ratings</Text>
+        </TouchableOpacity>
+      );
+    } else if (explorer && Object.keys(explorer).length > 0) {
+      // render for explorer view
+      return (
+        <TouchableOpacity onPress={() => navigateToPost(postId, item)} style={styles.postContainer}>
+          <Image source={item.image} style={styles.postImage} />
+          <Text style={styles.postName}>{item.name}</Text>
+          <View style={styles.locationContainer}>
+            <Image source={require('../assets/location.jpg')} style={styles.locationIcon} />
+            <Text style={styles.postLocation}>{item.location}</Text>
+          </View>
+          <Rating 
+            postId={postId} 
+            onRate={(rating) => handleRating(postId, rating)}
+          />
+        </TouchableOpacity>
+      );
+    } else {
+      // handle the case when neither business nor explorer is logged in or if they are empty objects
+      return (
+        <TouchableOpacity onPress={() => navigateToPost(postId, item)} style={styles.postContainer}>
+          <Image source={item.image} style={styles.postImage} />
+          <Text style={styles.postName}>{item.name}</Text>
+          <View style={styles.locationContainer}>
+            <Image source={require('../assets/location.jpg')} style={styles.locationIcon} />
+            <Text style={styles.postLocation}>{item.location}</Text>
+          </View>
+          <Text style={styles.signupText}>Sign up to rate this!</Text>
+        </TouchableOpacity>
+      );
+    }
+  }, [navigateToPost, handleRating, business, explorer]);
+  
 
-    return (
-      <TouchableOpacity onPress={() => navigateToPost(postId, item)} style={styles.postContainer}>
-        <Image source={item.image} style={styles.postImage} />
-        <Text style={styles.postName}>{item.name}</Text>
-        <View style={styles.locationContainer}>
-          <Image source={require('../assets/location.jpg')} style={styles.locationIcon} />
-          <Text style={styles.postLocation}>{item.location}</Text>
-        </View>
-        <Rating 
-          postId={postId} 
-          onRate={(rating) => handleRating(postId, rating)}
-        />
-      </TouchableOpacity>
-    );
-  };
-
-  const renderCategory = ({ item }) => (
+  const renderCategory = useCallback(({ item }) => (
     <View style={styles.categoryContainer}>
       <Text style={styles.categoryName}>{item.name}</Text>
       <FlatList
@@ -98,10 +173,32 @@ const DiscoverScreen = () => {
         contentContainerStyle={styles.flatListContainer}
       />
     </View>
-  );
+  ), [renderPostItem]);
+
+  if (isLoading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#0000ff" />
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.errorContainer}>
+        <Text style={styles.errorText}>{error}</Text>
+      </View>
+    );
+  }
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView 
+      style={styles.container}
+      contentContainerStyle={styles.scrollContent}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
+    >
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Image source={require('../assets/left-arrow.jpg')} style={styles.icon} />
@@ -153,8 +250,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   categoriesContainer: {
-    flexDirection: 'column',
-    justifyContent: 'space-between',
+    flexGrow: 1,
   },
   categoryContainer: {
     marginBottom: 20,
@@ -166,12 +262,13 @@ const styles = StyleSheet.create({
   },
   postContainer: {
     width: (width - 60) / 2, 
-    marginRight: 40,
+    marginRight: 20,
     backgroundColor: '#f8f8f8',
     borderRadius: 10,
     padding: 10,
     marginLeft: -20,
-    alignItems: 'center'
+    alignItems: 'center',
+    marginBottom: 20, 
   },
   postImage: {
     width: '100%',
@@ -203,6 +300,34 @@ const styles = StyleSheet.create({
   flatListContainer: {
     paddingLeft: 20,
   },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  errorText: {
+    fontSize: 16,
+    color: 'red',
+    textAlign: 'center',
+  },
+  businessText: {
+    fontSize: 14,
+    color: '#666',
+    marginTop: 5,
+    textAlign: 'center',
+  },
+  signupText: {
+    fontSize: 14,
+    color: '#666',
+    marginTop: 5,
+    textAlign: 'center',
+  },
 });
 
-export default DiscoverScreen;
+export default React.memo(DiscoverScreen);

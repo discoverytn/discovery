@@ -1,16 +1,17 @@
 const express = require('express');
 const router = express.Router();
 const {
-    createRating,
-    getRatingsForPost,
-    updateRating,
-    deleteRating  
-    
-  } = require('../Controllers/ratingController.js');
-// Routes for ratings
-router.post('/rate', createRating);
-router.get('/rate/:postId/rating', getRatingsForPost);
-router.put('/rate/:id', updateRating);
-router.delete('/rate/:id', deleteRating);
+  createOrUpdateRating,
+  getUserRating,
+  getRatingsForPost,
+  updateRating,
+  deleteRating
+} = require('../Controllers/ratingController.js');
+
+router.post('/rate', createOrUpdateRating);
+router.post('/user-rating', getUserRating);
+router.get('/post/:idposts', getRatingsForPost);
+router.put('/:id', updateRating);
+router.delete('/:id', deleteRating);
 
 module.exports = router;
