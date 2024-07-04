@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet, ScrollView, Alert } from 'react-native';
+import { View, Text, Image, TouchableOpacity, StyleSheet, ScrollView, Alert, Linking, Platform } from 'react-native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faHeart, faPaperPlane, faCloudSunRain, faStar, faTrash, faEdit } from '@fortawesome/free-solid-svg-icons';
 import axios from 'axios';
@@ -14,6 +14,8 @@ const OnepostScreen = ({ route }) => {
   const [isTraveled, setIsTraveled] = useState(false); 
   const [showMoreReviews, setShowMoreReviews] = useState(false);
   const [averageRating, setAverageRating] = useState(0);
+  const [weatherData, setWeatherData] = useState(null);
+  const [coordinates, setCoordinates] = useState(null);
   const scrollViewRef = useRef(null);
   const { explorer } = useAuth();
   const navigation = useNavigation();
@@ -26,6 +28,7 @@ const OnepostScreen = ({ route }) => {
       checkIfPostFavorited(postId);
       checkIfPostTraveled(postId);
       fetchPostDetails(postId);
+      fetchWeatherData(postDetails.location);
     }
   }, [route.params]);
 
@@ -43,6 +46,46 @@ const OnepostScreen = ({ route }) => {
     } catch (error) {
       console.error('Error fetching post details:', error);
       Alert.alert('Error', 'Failed to fetch post details');
+    }
+  };
+
+  const fetchWeatherData = async (location) => {
+    const options = {
+      method: 'GET',
+      url: 'https://api.tomorrow.io/v4/weather/realtime',
+      params: {
+        location: location,
+        units: 'metric',
+        apikey: '7FU1FI9CTOulnIYgaTTCHHOIXyfS4WlF'
+      },
+      headers: {accept: 'application/json'}
+    };
+
+    try {
+      const response = await axios.request(options);
+      setWeatherData(response.data.data.values);
+      setCoordinates({
+        latitude: response.data.location.lat,
+        longitude: response.data.location.lon
+      });
+    } catch (error) {
+      console.error('Error fetching weather data:', error);
+    }
+  };
+
+  const openMap = () => {
+    if (coordinates) {
+      const scheme = Platform.select({ ios: 'maps:0,0?q=', android: 'geo:0,0?q=' });
+      const latLng = `${coordinates.latitude},${coordinates.longitude}`;
+      const label = postData.postDetails.location;
+      const url = Platform.select({
+        ios: `${scheme}${label}@${latLng}`,
+        android: `${scheme}${latLng}(${label})`
+      });
+
+      Linking.openURL(url);
+    } else {
+      Alert.alert('Error', 'Location coordinates are not available');
     }
   };
 
@@ -65,20 +108,6 @@ const OnepostScreen = ({ route }) => {
       console.error('Error checking if post is traveled:', error);
     }
   };
-
-  if (!postData) {
-    return (
-      <View style={styles.loadingContainer}>
-        <Text style={styles.loadingText}>Onepost</Text>
-        <Text style={styles.noPostsText}>No post selected yet !</Text>
-      </View>
-    );
-  }
-
-  const { postId, postDetails } = postData;
-  const { name, location, image, image2, image3, image4, description } = postDetails;
-
-  const shortDescription = description.slice(0, 100) + '...';
 
   const addToFavorites = async () => {
     try {
@@ -147,6 +176,20 @@ const OnepostScreen = ({ route }) => {
     }
   };
 
+  if (!postData) {
+    return (
+      <View style={styles.loadingContainer}>
+        <Text style={styles.loadingText}>Onepost</Text>
+        <Text style={styles.noPostsText}>No post selected yet !</Text>
+      </View>
+    );
+  }
+
+  const { postId, postDetails } = postData;
+  const { name, location, image, image2, image3, image4, description } = postDetails;
+
+  const shortDescription = description.slice(0, 100) + '...';
+
   return (
     <ScrollView ref={scrollViewRef} style={styles.container}>
       <View style={styles.imageContainer}>
@@ -193,13 +236,17 @@ const OnepostScreen = ({ route }) => {
       <View style={styles.detailsContainer}>
         <Text style={styles.title}>{name}</Text>
         <View style={styles.infoRow}>
-          <View style={styles.infoItem}>
-            <Image source={require('../assets/location.jpg')} style={styles.infoIcon} />
-            <Text style={styles.infoText}>{location}</Text>
-          </View>
+          <TouchableOpacity onPress={openMap}>
+            <View style={styles.infoItem}>
+              <Image source={require('../assets/location.jpg')} style={styles.infoIcon} />
+              <Text style={styles.infoText}>{location}</Text>
+            </View>
+          </TouchableOpacity>
           <View style={styles.infoItem}>
             <FontAwesomeIcon icon={faCloudSunRain} style={styles.weatherIcon} size={32} />
-            <Text style={styles.infoText}>25°C</Text>
+            <Text style={styles.infoText}>
+              {weatherData ? `${Math.round(weatherData.temperature)}°C` : 'Loading...'}
+            </Text>
           </View>
           <View style={styles.infoItem}>
             <View style={styles.eventIconContainer}>
@@ -256,7 +303,6 @@ const OnepostScreen = ({ route }) => {
     </ScrollView>
   );
 };
-
 
 const styles = StyleSheet.create({
   container: {
@@ -337,24 +383,24 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 10,
+    marginBottom: 20,
   },
   infoRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 10,
+    marginBottom: 1,
   },
   infoItem: {
     flexDirection: 'row',
-    alignItems: 'center',
+   
   },
   infoIcon: {
-    width: 20,
-    height: 20,
+    width: 24,
+    height: 25,
     marginRight: 5,
   },
   infoText: {
-    fontSize: 16,
+    fontSize: 17,
     color: 'grey',
     marginRight: 5,
     fontStyle: 'italic',
@@ -362,6 +408,7 @@ const styles = StyleSheet.create({
   weatherIcon: {
     color: 'blue',
     marginRight: 8,
+    
   },
   eventIconContainer: {
     padding: 5,
