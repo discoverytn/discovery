@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { View, Image, TouchableOpacity, Text, StyleSheet } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuth } from '../context/AuthContext';
 
 const starGrey = require('../assets/star_grey.jpg');
@@ -9,29 +8,42 @@ const starGold = require('../assets/star_gold.jpg');
 const Rating = ({ postId, onRate }) => {
   const [userRating, setUserRating] = useState(null);
   const [averageRating, setAverageRating] = useState(null);
-  const { explorer, business } = useAuth();
-
-  const userId = explorer.id || business.id;
+  const { explorer } = useAuth();
 
   useEffect(() => {
     fetchRatings();
-  }, []);
+  }, [postId, explorer.idexplorer]);
 
   const fetchRatings = async () => {
     try {
-      // Fetch user's rating from local storage
-      const storedRating = await AsyncStorage.getItem(`userRating_${userId}_${postId}`);
-      if (storedRating) {
-        setUserRating(parseFloat(storedRating));
+      // fetch user's rating from server
+      const userRatingResponse = await fetch('http://192.168.1.19:3000/ratings/user-rating', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          idposts: postId,
+          explorer_idexplorer: explorer.idexplorer,
+        }),
+      });
+      
+      console.log('User rating response:', userRatingResponse);
+      
+      if (userRatingResponse.ok) {
+        const userData = await userRatingResponse.json();
+        console.log('User rating data:', userData);
+        if (userData.rating) {
+          setUserRating(userData.rating);
+        }
       }
-
-      // Fetch average rating from server
-      const response = await fetch(`http://192.168.11.67:3000/posts/${postId}`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch post details');
+  
+      // fetch average rating for the post
+      const averageRatingResponse = await fetch(`http://192.168.1.19:3000/ratings/average-rating/${postId}`);
+      if (averageRatingResponse.ok) {
+        const averageData = await averageRatingResponse.json();
+        setAverageRating(parseFloat(averageData.averageRating));
       }
-      const postData = await response.json();
-      setAverageRating(postData.averageRating);
     } catch (error) {
       console.error('Error fetching ratings:', error);
     }
@@ -39,33 +51,33 @@ const Rating = ({ postId, onRate }) => {
 
   const handleRate = async (rating) => {
     try {
-      const response = await fetch('http://192.168.11.67:3000/posts/ratepost', {
+      const response = await fetch('http://192.168.1.19:3000/ratings/rate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           idposts: postId,
-          userId: userId,
+          explorer_idexplorer: explorer.idexplorer,
           rating: rating,
         }),
       });
-
+  
       if (!response.ok) {
-        throw new Error('Failed to rate post');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to rate post');
       }
-
-      const updatedPost = await response.json();
+  
+      const updatedRating = await response.json();
       setUserRating(rating);
-      setAverageRating(updatedPost.averageRating);
-
-      // Store user's rating locally
-      await AsyncStorage.setItem(`userRating_${userId}_${postId}`, rating.toString());
-
-      // Notify parent component
+      setAverageRating(parseFloat(updatedRating.averageRating));
+  
+      
       onRate(rating);
+  
     } catch (error) {
       console.error('Error rating post:', error);
+      Alert.alert('Error', error.message || 'Failed to rate post');
     }
   };
 
@@ -87,10 +99,13 @@ const Rating = ({ postId, onRate }) => {
   return (
     <View style={styles.container}>
       <View style={styles.starsContainer}>
-        {renderStars(userRating || averageRating || 0)}
+        {renderStars(userRating || 0)}
       </View>
       <Text style={styles.ratingText}>
-        {userRating ? userRating.toFixed(1) : averageRating ? averageRating.toFixed(1) : 'N/A'}
+        {userRating ? userRating.toFixed(1) : 'Rate this'}
+      </Text>
+      <Text style={styles.averageRatingText}>
+        {averageRating ? `Avg: ${averageRating.toFixed(1)}` : ''}
       </Text>
     </View>
   );
@@ -98,7 +113,7 @@ const Rating = ({ postId, onRate }) => {
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: 'row',
+    flexDirection: 'column',
     alignItems: 'center',
     marginTop: 5,
   },
@@ -114,6 +129,11 @@ const styles = StyleSheet.create({
   ratingText: {
     fontWeight: 'bold',
     fontSize: 16,
+    marginTop: 5, 
+  },
+  averageRatingText: {
+    fontSize: 12,
+    marginTop: 5,
   },
 });
 
