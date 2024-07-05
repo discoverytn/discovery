@@ -39,6 +39,10 @@ db.Posts.belongsTo(db.Business, { foreignKey: 'business_idbusiness' });
 db.Posts.hasMany(db.Comments, { foreignKey: 'posts_idposts' });
 db.Comments.belongsTo(db.Posts, { foreignKey: 'posts_idposts' });
 db.Comments.belongsTo(db.Explorer, { foreignKey: 'explorer_idexplorer' });
+db.Comments.belongsTo(db.Business, { foreignKey: 'business_idbusiness' });
+db.Explorer.hasMany(db.Comments, { foreignKey: 'explorer_idexplorer' });
+db.Business.hasMany(db.Comments, { foreignKey: 'business_idbusiness' });
+
 
 db.Business.hasMany(db.Notif, { foreignKey: 'business_idbusiness' });
 db.Explorer.hasMany(db.Notif, { foreignKey: 'explorer_idexplorer' });

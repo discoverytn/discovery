@@ -1,9 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet, ScrollView, Alert, Linking, Platform } from 'react-native';
+import { View, Text, Image, TouchableOpacity, StyleSheet, ScrollView, Alert, Linking, Platform, TextInput } from 'react-native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faHeart, faPaperPlane, faCloudSunRain, faStar, faTrash, faEdit } from '@fortawesome/free-solid-svg-icons';
+import { faHeart, faPaperPlane, faCloudSunRain, faStar, faTrash, faEdit, faComment } from '@fortawesome/free-solid-svg-icons';
 import axios from 'axios';
-import { useNavigation } from '@react-navigation/native'; 
+import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../context/AuthContext';
 
 const OnepostScreen = ({ route }) => {
@@ -16,8 +16,11 @@ const OnepostScreen = ({ route }) => {
   const [averageRating, setAverageRating] = useState(0);
   const [weatherData, setWeatherData] = useState(null);
   const [coordinates, setCoordinates] = useState(null);
+  const [comments, setComments] = useState([]);
+  const [newComment, setNewComment] = useState('');
+  const [editingCommentId, setEditingCommentId] = useState(null);
   const scrollViewRef = useRef(null);
-  const { explorer } = useAuth();
+  const { explorer,business } = useAuth();
   const navigation = useNavigation();
 
   useEffect(() => {
@@ -29,12 +32,13 @@ const OnepostScreen = ({ route }) => {
       checkIfPostTraveled(postId);
       fetchPostDetails(postId);
       fetchWeatherData(postDetails.location);
+      fetchComments(postId);
     }
   }, [route.params]);
 
   const fetchPostDetails = async (postId) => {
     try {
-      const response = await axios.get(`http://192.168.1.19:3000/posts/onepost/${postId}`);
+      const response = await axios.get(`http://192.168.11.67:3000/posts/onepost/${postId}`);
       setAverageRating(parseFloat(response.data.averageRating));
       setPostData(prevData => ({
         ...prevData,
@@ -92,7 +96,7 @@ const OnepostScreen = ({ route }) => {
   const checkIfPostFavorited = async (postId) => {
     try {
       const idexplorer = explorer.idexplorer;
-      const response = await axios.get(`http://192.168.1.19:3000/explorer/${idexplorer}/favourites/${postId}/check`);
+      const response = await axios.get(`http://192.168.11.67:3000/explorer/${idexplorer}/favourites/${postId}/check`);
       setIsFavorited(response.data.favorited);
     } catch (error) {
       console.error('Error checking if post is favorited:', error);
@@ -102,7 +106,7 @@ const OnepostScreen = ({ route }) => {
   const checkIfPostTraveled = async (postId) => {
     try {
       const idexplorer = explorer.idexplorer;
-      const response = await axios.get(`http://192.168.1.19:3000/explorer/${idexplorer}/traveled/${postId}/check`);
+      const response = await axios.get(`http://192.168.11.67:3000/explorer/${idexplorer}/traveled/${postId}/check`);
       setIsTraveled(response.data.traveled);
     } catch (error) {
       console.error('Error checking if post is traveled:', error);
@@ -112,7 +116,7 @@ const OnepostScreen = ({ route }) => {
   const addToFavorites = async () => {
     try {
       const idexplorer = explorer.idexplorer;
-      const response = await axios.post(`http://192.168.1.19:3000/explorer/${idexplorer}/favourites/${postId}/addOrRemove`, {
+      const response = await axios.post(`http://192.168.11.67:3000/explorer/${idexplorer}/favourites/${postId}/addOrRemove`, {
         idposts: postId,
       });
 
@@ -134,7 +138,7 @@ const OnepostScreen = ({ route }) => {
   const addToTraveled = async () => {
     try {
       const idexplorer = explorer.idexplorer;
-      const response = await axios.post(`http://192.168.1.19:3000/explorer/${idexplorer}/traveled/${postId}/addOrRemove`, {
+      const response = await axios.post(`http://192.168.11.67:3000/explorer/${idexplorer}/traveled/${postId}/addOrRemove`, {
         idposts: postId,
       });
 
@@ -173,6 +177,58 @@ const OnepostScreen = ({ route }) => {
 
     if (!showMoreReviews && scrollViewRef.current) {
       scrollViewRef.current.scrollToEnd({ animated: true });
+    }
+  };
+  const fetchComments = async (postId) => {
+    try {
+      const response = await axios.get(`http://192.168.11.67:3000/comments/post/${postId}`);
+      setComments(response.data);
+    } catch (error) {
+      console.error('Error fetching comments:', error);
+      Alert.alert('Error', 'Failed to fetch comments');
+    }
+  };
+
+  const handleAddComment = async () => {
+    if (!newComment.trim()) return;
+
+    try {
+      const commentData = {
+        idposts: postData.postId,
+        content: newComment,
+        explorer_idexplorer: explorer.idexplorer,
+        business_idbusiness: business.idbusiness
+      };
+
+      const response = await axios.post('http://192.168.11.67:3000/comments/create', commentData);
+      setComments([response.data.comment, ...comments]);
+      setNewComment('');
+    } catch (error) {
+      console.error('Error adding comment:', error);
+      Alert.alert('Error', 'Failed to add comment');
+    }
+  };
+
+  const handleEditComment = async (commentId, newContent) => {
+    try {
+      await axios.put(`http://192.168.11.67:3000/comments/${commentId}`, { content: newContent });
+      setComments(comments.map(comment => 
+        comment.idcomments === commentId ? { ...comment, content: newContent } : comment
+      ));
+      setEditingCommentId(null);
+    } catch (error) {
+      console.error('Error editing comment:', error);
+      Alert.alert('Error', 'Failed to edit comment');
+    }
+  };
+
+  const handleDeleteComment = async (commentId) => {
+    try {
+      await axios.delete(`http://192.168.11.67:3000/comments/${commentId}`);
+      setComments(comments.filter(comment => comment.idcomments !== commentId));
+    } catch (error) {
+      console.error('Error deleting comment:', error);
+      Alert.alert('Error', 'Failed to delete comment');
     }
   };
 
@@ -265,17 +321,55 @@ const OnepostScreen = ({ route }) => {
           <Text style={styles.ratingValue}>{averageRating.toFixed(1)} out of 5</Text>
         </View>
         
-        <View style={styles.userRow}>
-          <Image source={require('../assets/user.jpg')} style={styles.profileImage} />
-          <View style={styles.userInfo}>
-            <Text style={styles.userName}>John Doe</Text>
-            <Text style={styles.userHandle}>@johndoe</Text>
-            <Text style={styles.comment}>Great place to visit! Highly recommend.</Text>
+        <View style={styles.commentsSection}>
+          <Text style={styles.commentsSectionTitle}>Comments</Text>
+          <View style={styles.addCommentContainer}>
+            <TextInput
+              style={styles.commentInput}
+              value={newComment}
+              onChangeText={setNewComment}
+              placeholder="Add a comment..."
+            />
+            <TouchableOpacity onPress={handleAddComment} style={styles.sendButton}>
+              <FontAwesomeIcon icon={faComment} style={styles.sendIcon} size={20} />
+            </TouchableOpacity>
           </View>
-          <FontAwesomeIcon icon={faTrash} style={styles.userIcon} />
-          <FontAwesomeIcon icon={faEdit} style={styles.userIcon} />
+          {comments.map(comment => (
+            <View key={comment.idcomments} style={styles.commentContainer}>
+              <Image source={require('../assets/user.jpg')} style={styles.commentUserImage} />
+              <View style={styles.commentContent}>
+                <Text style={styles.commentUserName}>
+                  {comment.Explorer ? comment.Explorer.username : comment.Business ? comment.Business.businessname : 'Unknown User'}
+                </Text>
+                {editingCommentId === comment.idcomments ? (
+                  <TextInput
+                    style={styles.editCommentInput}
+                    value={comment.content}
+                    onChangeText={(text) => setComments(comments.map(c => 
+                      c.idcomments === comment.idcomments ? { ...c, content: text } : c
+                    ))}
+                    autoFocus
+                    onBlur={() => setEditingCommentId(null)}
+                    onSubmitEditing={() => handleEditComment(comment.idcomments, comment.content)}
+                  />
+                ) : (
+                  <Text style={styles.commentText}>{comment.content}</Text>
+                )}
+              </View>
+              {(explorer.idexplorer === comment.explorer_idexplorer || business.idbusiness === comment.business_idbusiness) && (
+                <View style={styles.commentActions}>
+                  <TouchableOpacity onPress={() => setEditingCommentId(comment.idcomments)}>
+                    <FontAwesomeIcon icon={faEdit} style={styles.commentActionIcon} size={20} />
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={() => handleDeleteComment(comment.idcomments)}>
+                    <FontAwesomeIcon icon={faTrash} style={styles.commentActionIcon} size={20} />
+                  </TouchableOpacity>
+                </View>
+              )}
+            </View>
+          ))}
         </View>
-        
+  
         <TouchableOpacity style={styles.seeMoreButton} onPress={handleSeeMorePress}>
           <Text style={styles.seeMoreText}>{showMoreReviews ? 'Hide reviews' : 'See more reviews'}</Text>
         </TouchableOpacity>
@@ -490,6 +584,69 @@ const styles = StyleSheet.create({
   },
   reviewsContainer: {
     marginTop: 20,
+  },
+  commentsSection: {
+    marginTop: 20,
+  },
+  commentsSectionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  addCommentContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 15,
+  },
+  commentInput: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 20,
+    paddingHorizontal: 15,
+    paddingVertical: 8,
+    marginRight: 10,
+  },
+  sendButton: {
+    padding: 10,
+  },
+  sendIcon: {
+    color: '#007AFF',
+  },
+  commentContainer: {
+    flexDirection: 'row',
+    marginBottom: 15,
+  },
+  commentUserImage: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    marginRight: 10,
+  },
+  commentContent: {
+    flex: 1,
+  },
+  commentUserName: {
+    fontWeight: 'bold',
+    marginBottom: 3,
+  },
+  commentText: {
+    color: '#333',
+  },
+  editCommentInput: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 5,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+  },
+  commentActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  commentActionIcon: {
+    color: '#007AFF',
+    marginLeft: 10,
   },
 });
 
