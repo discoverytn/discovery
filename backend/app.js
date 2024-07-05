@@ -9,6 +9,8 @@ const db = require("./database/index");
 const app = express();
 const transporter = require("./resetCode"); 
 const ratingRoutes = require("./Routes/ratingRoutes");
+const commentRoutes = require('./Routes/commentRoutes');
+
 
 
 app.use(express.json());
@@ -19,6 +21,7 @@ app.use("/explorer", explorerRoutes);
 app.use("/business", businessRoutes);
 app.use('/posts', postRoutes);
 app.use('/ratings', ratingRoutes);
+app.use('/comments', commentRoutes);
 
 
 app.post("/send-email", async (req, res) => {
