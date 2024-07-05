@@ -27,6 +27,7 @@ const createComment = async (req, res) => {
 };
 
 // Get all comments for a specific post
+// Get all comments for a specific post
 const getCommentsForPost = async (req, res) => {
   const { idposts } = req.params;
 
@@ -34,8 +35,14 @@ const getCommentsForPost = async (req, res) => {
     const comments = await Comments.findAll({
       where: { posts_idposts: idposts },
       include: [
-        { model: Explorer, attributes: ['idexplorer', 'username'] },
-        { model: Business, attributes: ['idbusiness', 'businessname'] }
+        { 
+          model: Explorer, 
+          attributes: ['idexplorer', 'username', 'image', 'firstname', 'lastname'] 
+        },
+        { 
+          model: Business, 
+          attributes: ['idbusiness', 'businessname', 'image'] 
+        }
       ],
       order: [['createdAt', 'DESC']]
     });
