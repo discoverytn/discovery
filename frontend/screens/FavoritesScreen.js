@@ -29,7 +29,7 @@ const FavoritesScreen = () => {
   const fetchFavorites = async (explorerId) => {
     setLoading(true);
     try {
-      const url = `http://192.168.11.67:3000/explorer/${explorerId}/favourites`;
+      const url = `http://192.168.1.8:3000/explorer/${explorerId}/favourites`;
       const response = await axios.get(url);
       console.log('Favorites fetched:', response.data);
       setFavorites(response.data);
