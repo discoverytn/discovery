@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
-import { View, Text, Image, TouchableOpacity, TextInput, Button, StyleSheet, Alert } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, Image, TouchableOpacity, TextInput, StyleSheet, Alert } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import axios from 'axios';
+import { useAuth } from '../context/AuthContext';
 
 const ScheduleEventScreen = ({ navigation }) => {
   const [startDate, setStartDate] = useState(new Date());
@@ -9,7 +11,36 @@ const ScheduleEventScreen = ({ navigation }) => {
   const [showEndDatePicker, setShowEndDatePicker] = useState(false);
   const [eventName, setEventName] = useState('');
   const [eventDescription, setEventDescription] = useState('');
-  const [eventPriceFee, setEventPriceFee] = useState('');
+  const [eventPrice, setEventPrice] = useState('');
+
+  const { explorer, business } = useAuth();
+
+  useEffect(() => {
+    checkUserEligibility();
+  }, [explorer]);
+
+  const checkUserEligibility = async () => {
+    if (explorer && explorer.id) {
+      try {
+        const response = await axios.get(`http://192.168.1.19:3000/explorer/${explorer.id}/numPosts`);
+        const numOfPosts = response.data;
+        if (numOfPosts < 10) {
+          Alert.alert(
+            "Not Eligible",
+            `You need to have at least 10 posts to schedule an event. You currently have ${numOfPosts} posts.`,
+            [{ text: "OK", onPress: () => navigation.navigate('EventList') }]
+          );
+        }
+      } catch (error) {
+        console.error("Error fetching explorer's post count:", error);
+        if (error.response) {
+          console.error("Response data:", error.response.data);
+          console.error("Response status:", error.response.status);
+        }
+        Alert.alert("Error", "Unable to verify eligibility. Please try again later.");
+      }
+    }
+  };
 
   const handleStartDateChange = (event, selectedDate) => {
     const currentDate = selectedDate || startDate;
@@ -22,19 +53,54 @@ const ScheduleEventScreen = ({ navigation }) => {
     setShowEndDatePicker(false);
     setEndDate(currentDate);
   };
-//testing in front
-  const Submit = () => {
+
+  const Submit = async () => {
+    if (explorer && explorer.id) {
+      try {
+        const response = await axios.get(`http://192.168.1.19:3000/explorer/${explorer.id}/numPosts`);
+        const numOfPosts = response.data;
+        if (numOfPosts < 10) {
+          Alert.alert(
+            "Not Eligible",
+            `You need to have at least 10 posts to schedule an event. You currently have ${numOfPosts} posts.`,
+            [{ text: "OK", onPress: () => navigation.navigate('EventList') }]
+          );
+          return;
+        }
+      } catch (error) {
+        console.error("Error fetching explorer's post count:", error);
+        if (error.response) {
+          console.error("Response data:", error.response.data);
+          console.error("Response status:", error.response.status);
+        }
+        Alert.alert("Error", "Unable to verify eligibility. Please try again later.");
+        return;
+      }
+    }
+
     const eventData = {
       eventName,
       eventDescription,
-      eventPriceFee,
-      startDate,
-      endDate,
+      eventPrice: parseInt(eventPrice),
+      startDate: startDate.toISOString().split('T')[0],
+      endDate: endDate.toISOString().split('T')[0],
     };
 
-   
-    console.log('Event Data:', eventData);
-    Alert.alert('Event Posted', 'Your event has been posted successfully!');
+    if (explorer && explorer.id) {
+      eventData.explorer_idexplorer = explorer.id;
+    } else if (business && business.id) {
+      eventData.business_idbusiness = business.id;
+    }
+
+    try {
+      const response = await axios.post('http://192.168.1.19:3000/events/create', eventData);
+      console.log('Event Data:', response.data);
+      Alert.alert('Success', 'Your event has been posted successfully!');
+      navigation.navigate('EventList');
+    } catch (error) {
+      console.error('Error posting event:', error);
+      Alert.alert('Error', 'Failed to post event. Please try again.');
+    }
   };
 
   return (
@@ -92,8 +158,8 @@ const ScheduleEventScreen = ({ navigation }) => {
       <Text style={styles.label}>Event Price Fee</Text>
       <TextInput
         style={styles.input}
-        onChangeText={setEventPriceFee}
-        value={eventPriceFee}
+        onChangeText={setEventPrice}
+        value={eventPrice}
         placeholder="Enter event price fee"
         keyboardType="numeric"
       />
