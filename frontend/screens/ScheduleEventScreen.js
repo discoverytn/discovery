@@ -12,33 +12,32 @@ const ScheduleEventScreen = ({ navigation }) => {
   const [eventName, setEventName] = useState('');
   const [eventDescription, setEventDescription] = useState('');
   const [eventPrice, setEventPrice] = useState('');
+  const [canPostEvent, setCanPostEvent] = useState(false);
+  const [notEligibleReason, setNotEligibleReason] = useState('');
 
   const { explorer, business } = useAuth();
 
   useEffect(() => {
-    checkUserEligibility();
-  }, [explorer]);
+    checkEligibility();
+  }, [explorer, business]);
 
-  const checkUserEligibility = async () => {
-    if (explorer && explorer.id) {
-      try {
-        const response = await axios.get(`http://192.168.1.19:3000/explorer/${explorer.id}/numPosts`);
-        const numOfPosts = response.data;
-        if (numOfPosts < 10) {
-          Alert.alert(
-            "Not Eligible",
-            `You need to have at least 10 posts to schedule an event. You currently have ${numOfPosts} posts.`,
-            [{ text: "OK", onPress: () => navigation.navigate('EventList') }]
-          );
-        }
-      } catch (error) {
-        console.error("Error fetching explorer's post count:", error);
-        if (error.response) {
-          console.error("Response data:", error.response.data);
-          console.error("Response status:", error.response.status);
-        }
-        Alert.alert("Error", "Unable to verify eligibility. Please try again later.");
+  const checkEligibility = () => {
+    if (explorer && Object.keys(explorer).length > 0) {
+      console.log("Explorer object in schedule:", explorer);
+      if (explorer.numOfPosts >= 5) {
+        setCanPostEvent(true);
+        setNotEligibleReason('');
+      } else {
+        setCanPostEvent(false);
+        setNotEligibleReason(`You need to have at least 5 posts to schedule an event. You currently have ${explorer.numOfPosts} posts.`);
       }
+    } else if (business && Object.keys(business).length > 0) {
+      setCanPostEvent(true);
+      setNotEligibleReason('');
+    } else {
+      setCanPostEvent(false);
+      setNotEligibleReason('Unable to verify user. Please log in again.');
+      navigation.navigate('Login');
     }
   };
 
@@ -55,27 +54,8 @@ const ScheduleEventScreen = ({ navigation }) => {
   };
 
   const Submit = async () => {
-    if (explorer && explorer.id) {
-      try {
-        const response = await axios.get(`http://192.168.1.19:3000/explorer/${explorer.id}/numPosts`);
-        const numOfPosts = response.data;
-        if (numOfPosts < 10) {
-          Alert.alert(
-            "Not Eligible",
-            `You need to have at least 10 posts to schedule an event. You currently have ${numOfPosts} posts.`,
-            [{ text: "OK", onPress: () => navigation.navigate('EventList') }]
-          );
-          return;
-        }
-      } catch (error) {
-        console.error("Error fetching explorer's post count:", error);
-        if (error.response) {
-          console.error("Response data:", error.response.data);
-          console.error("Response status:", error.response.status);
-        }
-        Alert.alert("Error", "Unable to verify eligibility. Please try again later.");
-        return;
-      }
+    if (!canPostEvent) {
+      return;
     }
 
     const eventData = {
@@ -95,8 +75,9 @@ const ScheduleEventScreen = ({ navigation }) => {
     try {
       const response = await axios.post('http://192.168.1.19:3000/events/create', eventData);
       console.log('Event Data:', response.data);
-      Alert.alert('Success', 'Your event has been posted successfully!');
-      navigation.navigate('EventList');
+      Alert.alert('Success', 'Your event has been posted successfully!', [
+        { text: "OK", onPress: () => navigation.navigate('EventList') }
+      ]);
     } catch (error) {
       console.error('Error posting event:', error);
       Alert.alert('Error', 'Failed to post event. Please try again.');
@@ -113,60 +94,66 @@ const ScheduleEventScreen = ({ navigation }) => {
         <Image source={require('../assets/notification.jpg')} style={styles.icon} />
       </View>
 
-      <View style={styles.datePickerContainer}>
-        <TouchableOpacity onPress={() => setShowStartDatePicker(true)}>
-          <Text style={styles.dateText}>Start Date: {startDate.toDateString()}</Text>
-        </TouchableOpacity>
-        {showStartDatePicker && (
-          <DateTimePicker
-            value={startDate}
-            mode="date"
-            display="default"
-            onChange={handleStartDateChange}
+      {canPostEvent ? (
+        <>
+          <View style={styles.datePickerContainer}>
+            <TouchableOpacity onPress={() => setShowStartDatePicker(true)}>
+              <Text style={styles.dateText}>Start Date: {startDate.toDateString()}</Text>
+            </TouchableOpacity>
+            {showStartDatePicker && (
+              <DateTimePicker
+                value={startDate}
+                mode="date"
+                display="default"
+                onChange={handleStartDateChange}
+              />
+            )}
+
+            <TouchableOpacity onPress={() => setShowEndDatePicker(true)}>
+              <Text style={styles.dateText}>End Date: {endDate.toDateString()}</Text>
+            </TouchableOpacity>
+            {showEndDatePicker && (
+              <DateTimePicker
+                value={endDate}
+                mode="date"
+                display="default"
+                onChange={handleEndDateChange}
+              />
+            )}
+          </View>
+
+          <Text style={styles.label}>Event Name</Text>
+          <TextInput
+            style={styles.input}
+            onChangeText={setEventName}
+            value={eventName}
+            placeholder="Enter event name"
           />
-        )}
 
-        <TouchableOpacity onPress={() => setShowEndDatePicker(true)}>
-          <Text style={styles.dateText}>End Date: {endDate.toDateString()}</Text>
-        </TouchableOpacity>
-        {showEndDatePicker && (
-          <DateTimePicker
-            value={endDate}
-            mode="date"
-            display="default"
-            onChange={handleEndDateChange}
+          <Text style={styles.label}>Event Description</Text>
+          <TextInput
+            style={styles.input}
+            onChangeText={setEventDescription}
+            value={eventDescription}
+            placeholder="Enter event description"
           />
-        )}
-      </View>
 
-      <Text style={styles.label}>Event Name</Text>
-      <TextInput
-        style={styles.input}
-        onChangeText={setEventName}
-        value={eventName}
-        placeholder="Enter event name"
-      />
+          <Text style={styles.label}>Event Price Fee</Text>
+          <TextInput
+            style={styles.input}
+            onChangeText={setEventPrice}
+            value={eventPrice}
+            placeholder="Enter event price fee"
+            keyboardType="numeric"
+          />
 
-      <Text style={styles.label}>Event Description</Text>
-      <TextInput
-        style={styles.input}
-        onChangeText={setEventDescription}
-        value={eventDescription}
-        placeholder="Enter event description"
-      />
-
-      <Text style={styles.label}>Event Price Fee</Text>
-      <TextInput
-        style={styles.input}
-        onChangeText={setEventPrice}
-        value={eventPrice}
-        placeholder="Enter event price fee"
-        keyboardType="numeric"
-      />
-
-      <TouchableOpacity style={styles.button} onPress={Submit}>
-        <Text style={styles.buttonText}>Post Event</Text>
-      </TouchableOpacity>
+          <TouchableOpacity style={styles.button} onPress={Submit}>
+            <Text style={styles.buttonText}>Post Event</Text>
+          </TouchableOpacity>
+        </>
+      ) : (
+        <Text style={styles.notEligibleText}>{notEligibleReason}</Text>
+      )}
     </View>
   );
 };
@@ -228,6 +215,12 @@ const styles = StyleSheet.create({
   buttonText: {
     color: '#fff',
     fontSize: 18,
+  },
+  notEligibleText: {
+    fontSize: 18,
+    textAlign: 'center',
+    marginTop: 20,
+    color: 'red',
   },
 });
 

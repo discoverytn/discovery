@@ -11,7 +11,7 @@ router.put("/:idexplorer/edit", editExplorer);
 // Route to get all posts by a specific explorer
 router.get("/:idexplorer/posts", getExplorerPosts);
 
-router.get("/:idexplorer/numposts", getExplorerNumberPosts);
+router.get("/:idexplorer/numPosts", getExplorerNumberPosts);
 
 
 
