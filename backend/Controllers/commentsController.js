@@ -4,7 +4,6 @@ const Explorer = db.Explorer;
 const Business = db.Business;
 const Post = db.Posts;
 
-// Create a new comment
 const createComment = async (req, res) => {
   const { idposts, content, explorer_idexplorer, business_idbusiness } = req.body;
 
@@ -26,7 +25,7 @@ const createComment = async (req, res) => {
   }
 };
 
-// Get all comments for a specific post
+
 const getCommentsForPost = async (req, res) => {
   const { idposts } = req.params;
 
@@ -34,8 +33,14 @@ const getCommentsForPost = async (req, res) => {
     const comments = await Comments.findAll({
       where: { posts_idposts: idposts },
       include: [
-        { model: Explorer, attributes: ['idexplorer', 'username'] },
-        { model: Business, attributes: ['idbusiness', 'businessname'] }
+        { 
+          model: Explorer, 
+          attributes: ['idexplorer', 'username', 'image', 'firstname', 'lastname'] 
+        },
+        { 
+          model: Business, 
+          attributes: ['idbusiness', 'businessname', 'image'] 
+        }
       ],
       order: [['createdAt', 'DESC']]
     });
@@ -88,10 +93,10 @@ const deleteComment = async (req, res) => {
     res.status(500).json({ error: 'Failed to delete comment' });
   }
 };
-// Get all comments for a specific user (explorer or business)
+
 const getUserComments = async (req, res) => {
     const { userId } = req.params;
-    const { userType } = req.query; // 'explorer' or 'business'
+    const { userType } = req.query; 
   
     try {
       let where = {};

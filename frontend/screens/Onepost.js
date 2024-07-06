@@ -20,7 +20,7 @@ const OnepostScreen = ({ route }) => {
   const [newComment, setNewComment] = useState('');
   const [editingCommentId, setEditingCommentId] = useState(null);
   const scrollViewRef = useRef(null);
-  const { explorer,business } = useAuth();
+  const { explorer, business } = useAuth();
   const navigation = useNavigation();
 
   useEffect(() => {
@@ -38,7 +38,7 @@ const OnepostScreen = ({ route }) => {
 
   const fetchPostDetails = async (postId) => {
     try {
-      const response = await axios.get(`http://192.168.1.8:3000/posts/onepost/${postId}`);
+      const response = await axios.get(`http://192.168.11.67:3000/posts/onepost/${postId}`);
       setAverageRating(parseFloat(response.data.averageRating));
       setPostData(prevData => ({
         ...prevData,
@@ -96,7 +96,7 @@ const OnepostScreen = ({ route }) => {
   const checkIfPostFavorited = async (postId) => {
     try {
       const idexplorer = explorer.idexplorer;
-      const response = await axios.get(`http://192.168.1.8:3000/explorer/${idexplorer}/favourites/${postId}/check`);
+      const response = await axios.get(`http://192.168.11.67:3000/explorer/${idexplorer}/favourites/${postId}/check`);
       setIsFavorited(response.data.favorited);
     } catch (error) {
       console.error('Error checking if post is favorited:', error);
@@ -106,74 +106,75 @@ const OnepostScreen = ({ route }) => {
   const checkIfPostTraveled = async (postId) => {
     try {
       const idexplorer = explorer.idexplorer;
-      const response = await axios.get(`http://192.168.1.8:3000/explorer/${idexplorer}/traveled/${postId}/check`);
+      const response = await axios.get(`http://192.168.11.67:3000/explorer/${idexplorer}/traveled/${postId}/check`);
       setIsTraveled(response.data.traveled);
     } catch (error) {
       console.error('Error checking if post is traveled:', error);
     }
   };
+// ... continued from Part 1
 
   const addToFavorites = async () => {
     try {
       const idexplorer = explorer.idexplorer;
-      const response = await axios.post(`http://192.168.1.8:3000/explorer/${idexplorer}/favourites/${postId}/addOrRemove`, {
+      const response = await axios.post(`http://192.168.11.67:3000/explorer/${idexplorer}/favourites/${postId}/addOrRemove`, {
         idposts: postId,
       });
 
-      if (response.data.message === "Post added to favorites") {
-        setIsFavorited(true);
-        Alert.alert('Success', 'Post added to favorites');
-      } else if (response.data.message === "Post removed from favorites") {
-        setIsFavorited(false);
-        Alert.alert('Success', 'Post removed from favorites');
-      } else {
-        Alert.alert('Error', 'Unexpected response from server');
-      }
-    } catch (error) {
-      console.error('Error adding/removing post to/from favorites:', error);
-      Alert.alert('Error', 'Failed to update favorites');
+    if (response.data.message === "Post added to favorites") {
+      setIsFavorited(true);
+      Alert.alert('Success', 'Post added to favorites');
+    } else if (response.data.message === "Post removed from favorites") {
+      setIsFavorited(false);
+      Alert.alert('Success', 'Post removed from favorites');
+    } else {
+      Alert.alert('Error', 'Unexpected response from server');
     }
-  };
+  } catch (error) {
+    console.error('Error adding/removing post to/from favorites:', error);
+    Alert.alert('Error', 'Failed to update favorites');
+  }
+};
 
   const addToTraveled = async () => {
     try {
       const idexplorer = explorer.idexplorer;
-      const response = await axios.post(`http://192.168.1.8:3000/explorer/${idexplorer}/traveled/${postId}/addOrRemove`, {
+      const response = await axios.post(`http://192.168.11.67:3000/explorer/${idexplorer}/traveled/${postId}/addOrRemove`, {
         idposts: postId,
       });
 
-      if (response.data.message === "Post added to traveled") {
-        setIsTraveled(true);
-        Alert.alert('Success', 'Post added to traveled');
-      } else if (response.data.message === "Post removed from traveled") {
-        setIsTraveled(false);
-        Alert.alert('Success', 'Post removed from traveled');
-      } else {
-        Alert.alert('Error', 'Unexpected response from server');
-      }
-    } catch (error) {
-      console.error('Error adding/removing post to/from traveled:', error);
-      Alert.alert('Error', 'Failed to update traveled');
+    if (response.data.message === "Post added to traveled") {
+      setIsTraveled(true);
+      Alert.alert('Success', 'Post added to traveled');
+    } else if (response.data.message === "Post removed from traveled") {
+      setIsTraveled(false);
+      Alert.alert('Success', 'Post removed from traveled');
+    } else {
+      Alert.alert('Error', 'Unexpected response from server');
     }
-  };
+  } catch (error) {
+    console.error('Error adding/removing post to/from traveled:', error);
+    Alert.alert('Error', 'Failed to update traveled');
+  }
+};
 
-  const handleScrollToTop = () => {
-    if (scrollViewRef.current) {
-      scrollViewRef.current.scrollTo({ y: 0, animated: true });
-    }
-  };
+const handleScrollToTop = () => {
+  if (scrollViewRef.current) {
+    scrollViewRef.current.scrollTo({ y: 0, animated: true });
+  }
+};
 
-  const handleSendPost = () => {
-    addToTraveled(); 
-  };
+const handleSendPost = () => {
+  addToTraveled(); 
+};
 
-  const handleImagePress = (imageUri) => {
-    setSelectedImage(imageUri);
-    handleScrollToTop();
-  };
+const handleImagePress = (imageUri) => {
+  setSelectedImage(imageUri);
+  handleScrollToTop();
+};
 
-  const handleSeeMorePress = () => {
-    setShowMoreReviews(!showMoreReviews);
+const handleSeeMorePress = () => {
+  setShowMoreReviews(!showMoreReviews);
 
     if (!showMoreReviews && scrollViewRef.current) {
       scrollViewRef.current.scrollToEnd({ animated: true });
@@ -181,7 +182,7 @@ const OnepostScreen = ({ route }) => {
   };
   const fetchComments = async (postId) => {
     try {
-      const response = await axios.get(`http://192.168.1.8:3000/comments/post/${postId}`);
+      const response = await axios.get(`http://192.168.11.67:3000/comments/post/${postId}`);
       setComments(response.data);
     } catch (error) {
       console.error('Error fetching comments:', error);
@@ -189,18 +190,18 @@ const OnepostScreen = ({ route }) => {
     }
   };
 
-  const handleAddComment = async () => {
-    if (!newComment.trim()) return;
+const handleAddComment = async () => {
+  if (!newComment.trim()) return;
 
-    try {
-      const commentData = {
-        idposts: postData.postId,
-        content: newComment,
-        explorer_idexplorer: explorer.idexplorer,
-        business_idbusiness: business.idbusiness
-      };
+  try {
+    const commentData = {
+      idposts: postData.postId,
+      content: newComment,
+      explorer_idexplorer: explorer.idexplorer,
+      business_idbusiness: business.idbusiness
+    };
 
-      const response = await axios.post('http://192.168.1.8:3000/comments/create', commentData);
+      const response = await axios.post('http://192.168.11.67:3000/comments/create', commentData);
       setComments([response.data.comment, ...comments]);
       setNewComment('');
     } catch (error) {
@@ -211,7 +212,7 @@ const OnepostScreen = ({ route }) => {
 
   const handleEditComment = async (commentId, newContent) => {
     try {
-      await axios.put(`http://192.168.1.8:3000/comments/${commentId}`, { content: newContent });
+      await axios.put(`http://192.168.11.67:3000/comments/${commentId}`, { content: newContent });
       setComments(comments.map(comment => 
         comment.idcomments === commentId ? { ...comment, content: newContent } : comment
       ));
@@ -224,7 +225,7 @@ const OnepostScreen = ({ route }) => {
 
   const handleDeleteComment = async (commentId) => {
     try {
-      await axios.delete(`http://192.168.1.8:3000/comments/${commentId}`);
+      await axios.delete(`http://192.168.11.67:3000/comments/${commentId}`);
       setComments(comments.filter(comment => comment.idcomments !== commentId));
     } catch (error) {
       console.error('Error deleting comment:', error);
@@ -232,142 +233,151 @@ const OnepostScreen = ({ route }) => {
     }
   };
 
-  if (!postData) {
-    return (
-      <View style={styles.loadingContainer}>
-        <Text style={styles.loadingText}>Onepost</Text>
-        <Text style={styles.noPostsText}>No post selected yet !</Text>
-      </View>
-    );
-  }
-
-  const { postId, postDetails } = postData;
-  const { name, location, image, image2, image3, image4, description } = postDetails;
-
-  const shortDescription = description.slice(0, 100) + '...';
-
+if (!postData) {
   return (
-    <ScrollView ref={scrollViewRef} style={styles.container}>
-      <View style={styles.imageContainer}>
-        <Image source={{ uri: selectedImage }} style={styles.mainImage} />
-        <View style={styles.iconsContainer}>
-          <TouchableOpacity onPress={addToFavorites} style={styles.iconContainer}>
-            <FontAwesomeIcon
-              icon={faHeart}
-              style={[styles.icon, isFavorited ? styles.favoriteIconActive : styles.favoriteIconInactive]}
-              size={26}
-            />
+    <View style={styles.loadingContainer}>
+      <Text style={styles.loadingText}>Onepost</Text>
+      <Text style={styles.noPostsText}>No post selected yet !</Text>
+    </View>
+  );
+}
+
+const { postId, postDetails } = postData;
+const { name, location, image, image2, image3, image4, description } = postDetails;
+
+const shortDescription = description.slice(0, 100) + '...';
+
+return (
+  <ScrollView ref={scrollViewRef} style={styles.container}>
+    <View style={styles.imageContainer}>
+      <Image source={{ uri: selectedImage }} style={styles.mainImage} />
+      <View style={styles.iconsContainer}>
+        <TouchableOpacity onPress={addToFavorites} style={styles.iconContainer}>
+          <FontAwesomeIcon
+            icon={faHeart}
+            style={[styles.icon, isFavorited ? styles.favoriteIconActive : styles.favoriteIconInactive]}
+            size={26}
+          />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={handleSendPost} style={styles.iconContainer}>
+          <FontAwesomeIcon
+            icon={faPaperPlane}
+            style={[styles.icon1, isTraveled ? styles.traveledIconActive : styles.traveledIconInactive]}
+            size={26}
+          />
+        </TouchableOpacity>
+      </View>
+      <View style={styles.thumbnailContainer}>
+        {image2 && (
+          <TouchableOpacity onPress={() => handleImagePress(image2.uri)}>
+            <Image source={{ uri: image2.uri }} style={styles.thumbnail} />
           </TouchableOpacity>
-          <TouchableOpacity onPress={handleSendPost} style={styles.iconContainer}>
-            <FontAwesomeIcon
-              icon={faPaperPlane}
-              style={[styles.icon1, isTraveled ? styles.traveledIconActive : styles.traveledIconInactive]}
-              size={26}
-            />
+        )}
+        {image3 && (
+          <TouchableOpacity onPress={() => handleImagePress(image3.uri)}>
+            <Image source={{ uri: image3.uri }} style={styles.thumbnail} />
           </TouchableOpacity>
+        )}
+        {image4 && (
+          <TouchableOpacity onPress={() => handleImagePress(image4.uri)}>
+            <Image source={{ uri: image4.uri }} style={styles.thumbnail} />
+          </TouchableOpacity>
+        )}
+        {selectedImage !== image.uri && (
+          <TouchableOpacity onPress={() => handleImagePress(image.uri)}>
+            <Image source={{ uri: image.uri }} style={styles.thumbnail} />
+          </TouchableOpacity>
+        )}
+      </View>
+    </View>
+    <View style={styles.detailsContainer}>
+      <Text style={styles.title}>{name}</Text>
+      <View style={styles.infoRow}>
+        <TouchableOpacity onPress={openMap}>
+          <View style={styles.infoItem}>
+            <Image source={require('../assets/location.jpg')} style={styles.infoIcon} />
+            <Text style={styles.infoText}>{location}</Text>
+          </View>
+        </TouchableOpacity>
+        <View style={styles.infoItem}>
+          <FontAwesomeIcon icon={faCloudSunRain} style={styles.weatherIcon} size={32} />
+          <Text style={styles.infoText}>
+            {weatherData ? `${Math.round(weatherData.temperature)}°C` : 'Loading...'}
+          </Text>
         </View>
-        <View style={styles.thumbnailContainer}>
-          {image2 && (
-            <TouchableOpacity onPress={() => handleImagePress(image2.uri)}>
-              <Image source={{ uri: image2.uri }} style={styles.thumbnail} />
-            </TouchableOpacity>
-          )}
-          {image3 && (
-            <TouchableOpacity onPress={() => handleImagePress(image3.uri)}>
-              <Image source={{ uri: image3.uri }} style={styles.thumbnail} />
-            </TouchableOpacity>
-          )}
-          {image4 && (
-            <TouchableOpacity onPress={() => handleImagePress(image4.uri)}>
-              <Image source={{ uri: image4.uri }} style={styles.thumbnail} />
-            </TouchableOpacity>
-          )}
-          {selectedImage !== image.uri && (
-            <TouchableOpacity onPress={() => handleImagePress(image.uri)}>
-              <Image source={{ uri: image.uri }} style={styles.thumbnail} />
-            </TouchableOpacity>
-          )}
+        <View style={styles.infoItem}>
+          <View style={styles.eventIconContainer}>
+            <Image source={require('../assets/calender.jpg')} style={styles.eventIcon} />
+          </View>
         </View>
       </View>
-      <View style={styles.detailsContainer}>
-        <Text style={styles.title}>{name}</Text>
-        <View style={styles.infoRow}>
-          <TouchableOpacity onPress={openMap}>
-            <View style={styles.infoItem}>
-              <Image source={require('../assets/location.jpg')} style={styles.infoIcon} />
-              <Text style={styles.infoText}>{location}</Text>
-            </View>
+      <Text style={styles.subtitle}>About Destination</Text>
+      <Text style={styles.description}>{showFullDescription ? description : shortDescription}</Text>
+      <TouchableOpacity onPress={() => setShowFullDescription(!showFullDescription)}>
+        <Text style={styles.readMore}>{showFullDescription ? 'Read Less' : 'Read More'}</Text>
+      </TouchableOpacity>
+      <View style={styles.ratingRow}>
+        <FontAwesomeIcon icon={faStar} style={styles.starIcon} />
+        <Text style={styles.ratingText}>Rating</Text>
+        <Text style={styles.ratingValue}>{averageRating.toFixed(1)} out of 5</Text>
+      </View>
+      
+      <View style={styles.commentsSection}>
+        <Text style={styles.commentsSectionTitle}>Comments</Text>
+        <View style={styles.addCommentContainer}>
+          <TextInput
+            style={styles.commentInput}
+            value={newComment}
+            onChangeText={setNewComment}
+            placeholder="Add a comment..."
+          />
+          <TouchableOpacity onPress={handleAddComment} style={styles.sendButton}>
+            <FontAwesomeIcon icon={faComment} style={styles.sendIcon} size={20} />
           </TouchableOpacity>
-          <View style={styles.infoItem}>
-            <FontAwesomeIcon icon={faCloudSunRain} style={styles.weatherIcon} size={32} />
-            <Text style={styles.infoText}>
-              {weatherData ? `${Math.round(weatherData.temperature)}°C` : 'Loading...'}
-            </Text>
-          </View>
-          <View style={styles.infoItem}>
-            <View style={styles.eventIconContainer}>
-              <Image source={require('../assets/calender.jpg')} style={styles.eventIcon} />
-            </View>
-          </View>
         </View>
-        <Text style={styles.subtitle}>About Destination</Text>
-        <Text style={styles.description}>{showFullDescription ? description : shortDescription}</Text>
-        <TouchableOpacity onPress={() => setShowFullDescription(!showFullDescription)}>
-          <Text style={styles.readMore}>{showFullDescription ? 'Read Less' : 'Read More'}</Text>
-        </TouchableOpacity>
-        <View style={styles.ratingRow}>
-          <FontAwesomeIcon icon={faStar} style={styles.starIcon} />
-          <Text style={styles.ratingText}>Rating</Text>
-          <Text style={styles.ratingValue}>{averageRating.toFixed(1)} out of 5</Text>
-        </View>
-        
-        <View style={styles.commentsSection}>
-          <Text style={styles.commentsSectionTitle}>Comments</Text>
-          <View style={styles.addCommentContainer}>
-            <TextInput
-              style={styles.commentInput}
-              value={newComment}
-              onChangeText={setNewComment}
-              placeholder="Add a comment..."
-            />
-            <TouchableOpacity onPress={handleAddComment} style={styles.sendButton}>
-              <FontAwesomeIcon icon={faComment} style={styles.sendIcon} size={20} />
-            </TouchableOpacity>
-          </View>
-          {comments.map(comment => (
-            <View key={comment.idcomments} style={styles.commentContainer}>
-              <Image source={require('../assets/user.jpg')} style={styles.commentUserImage} />
-              <View style={styles.commentContent}>
-                <Text style={styles.commentUserName}>
-                  {comment.Explorer ? comment.Explorer.username : comment.Business ? comment.Business.businessname : 'Unknown User'}
-                </Text>
+        {comments.map(comment => {
+  const user = comment.Explorer || comment.Business || {};
+  return (
+    <View key={comment.idcomments} style={styles.commentContainer}>
+      <Image 
+        source={getUserImage(user)} 
+        style={styles.commentUserImage} 
+      />
+      <View style={styles.commentContent}>
+        <Text style={styles.commentUserFullName}>
+          {getUserDisplayName(user)}
+        </Text>
+        <Text style={styles.commentUserName}>
+          @{user.username || user.businessname || 'unknown'}
+        </Text>
                 {editingCommentId === comment.idcomments ? (
-                  <TextInput
-                    style={styles.editCommentInput}
-                    value={comment.content}
-                    onChangeText={(text) => setComments(comments.map(c => 
-                      c.idcomments === comment.idcomments ? { ...c, content: text } : c
-                    ))}
-                    autoFocus
-                    onBlur={() => setEditingCommentId(null)}
-                    onSubmitEditing={() => handleEditComment(comment.idcomments, comment.content)}
-                  />
-                ) : (
-                  <Text style={styles.commentText}>{comment.content}</Text>
+                    <TextInput
+                      style={styles.editCommentInput}
+                      value={comment.content}
+                      onChangeText={(text) => setComments(comments.map(c => 
+                        c.idcomments === comment.idcomments ? { ...c, content: text } : c
+                      ))}
+                      autoFocus
+                      onBlur={() => setEditingCommentId(null)}
+                      onSubmitEditing={() => handleEditComment(comment.idcomments, comment.content)}
+                    />
+                  ) : (
+                    <Text style={styles.commentText}>{comment.content}</Text>
+                  )}
+                </View>
+                {(explorer.idexplorer === comment.explorer_idexplorer || business.idbusiness === comment.business_idbusiness) && (
+                  <View style={styles.commentActions}>
+                    <TouchableOpacity onPress={() => setEditingCommentId(comment.idcomments)}>
+                      <FontAwesomeIcon icon={faEdit} style={styles.commentActionIcon} size={20} />
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={() => handleDeleteComment(comment.idcomments)}>
+                      <FontAwesomeIcon icon={faTrash} style={styles.commentActionIcon} size={20} />
+                    </TouchableOpacity>
+                  </View>
                 )}
               </View>
-              {(explorer.idexplorer === comment.explorer_idexplorer || business.idbusiness === comment.business_idbusiness) && (
-                <View style={styles.commentActions}>
-                  <TouchableOpacity onPress={() => setEditingCommentId(comment.idcomments)}>
-                    <FontAwesomeIcon icon={faEdit} style={styles.commentActionIcon} size={20} />
-                  </TouchableOpacity>
-                  <TouchableOpacity onPress={() => handleDeleteComment(comment.idcomments)}>
-                    <FontAwesomeIcon icon={faTrash} style={styles.commentActionIcon} size={20} />
-                  </TouchableOpacity>
-                </View>
-              )}
-            </View>
-          ))}
+            );
+          })}
         </View>
   
         <TouchableOpacity style={styles.seeMoreButton} onPress={handleSeeMorePress}>
@@ -486,7 +496,6 @@ const styles = StyleSheet.create({
   },
   infoItem: {
     flexDirection: 'row',
-   
   },
   infoIcon: {
     width: 24,
@@ -502,7 +511,6 @@ const styles = StyleSheet.create({
   weatherIcon: {
     color: 'blue',
     marginRight: 8,
-    
   },
   eventIconContainer: {
     padding: 5,
@@ -543,47 +551,6 @@ const styles = StyleSheet.create({
   },
   ratingValue: {
     color: 'grey',
-  },
-  userRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 20,
-  },
-  profileImage: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    marginRight: 10,
-  },
-  userInfo: {
-    flex: 1,
-  },
-  userName: {
-    fontWeight: 'bold',
-  },
-  userHandle: {
-    color: 'violet',
-  },
-  comment: {
-    color: 'grey',
-  },
-  userIcon: {
-    color: 'grey',
-    marginLeft: 10,
-  },
-  seeMoreButton: {
-    borderWidth: 1,
-    borderColor: 'grey',
-    borderRadius: 5,
-    padding: 10,
-    alignItems: 'center',
-    marginTop: 20,
-  },
-  seeMoreText: {
-    color: 'grey',
-  },
-  reviewsContainer: {
-    marginTop: 20,
   },
   commentsSection: {
     marginTop: 20,
@@ -626,9 +593,14 @@ const styles = StyleSheet.create({
   commentContent: {
     flex: 1,
   },
-  commentUserName: {
+  commentUserFullName: {
     fontWeight: 'bold',
     marginBottom: 3,
+  },
+  commentUserName: {
+    color: 'grey',
+    marginBottom: 3,
+    fontSize: 12,
   },
   commentText: {
     color: '#333',
@@ -647,6 +619,43 @@ const styles = StyleSheet.create({
   commentActionIcon: {
     color: '#007AFF',
     marginLeft: 10,
+  },
+  seeMoreButton: {
+    borderWidth: 1,
+    borderColor: 'grey',
+    borderRadius: 5,
+    padding: 10,
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  seeMoreText: {
+    color: 'grey',
+  },
+  reviewsContainer: {
+    marginTop: 20,
+  },
+  userRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  profileImage: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    marginRight: 10,
+  },
+  userInfo: {
+    flex: 1,
+  },
+  userName: {
+    fontWeight: 'bold',
+  },
+  userHandle: {
+    color: 'violet',
+  },
+  comment: {
+    color: 'grey',
   },
 });
 
