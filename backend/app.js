@@ -10,6 +10,7 @@ const app = express();
 const transporter = require("./resetCode"); 
 const ratingRoutes = require("./Routes/ratingRoutes");
 const commentRoutes = require('./Routes/commentRoutes');
+const eventRoutes = require('./Routes/eventRoutes');
 
 
 
@@ -22,6 +23,7 @@ app.use("/business", businessRoutes);
 app.use('/posts', postRoutes);
 app.use('/ratings', ratingRoutes);
 app.use('/comments', commentRoutes);
+app.use('/events', eventRoutes);
 
 
 app.post("/send-email", async (req, res) => {
