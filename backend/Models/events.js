@@ -9,6 +9,7 @@ module.exports = (sequelize) => {
     },
     eventName: DataTypes.STRING,
     eventDate: DataTypes.DATE,
+    
     explorer_idexplorer: {
       type: DataTypes.INTEGER,
       references: {
