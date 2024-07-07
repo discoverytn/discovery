@@ -4,7 +4,6 @@ const router = express.Router();
 
 // Route to get a specific explorer profile by their ID
 router.get("/:idexplorer", getExplorerById);
-
 // Route to update a specific explorer profile by their ID
 router.put("/:idexplorer/edit", editExplorer);
 

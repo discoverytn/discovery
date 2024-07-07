@@ -301,7 +301,6 @@ module.exports = {
       return res.status(500).json({ error: "Error checking traveled" });
     }
   }
-
   
   
   
