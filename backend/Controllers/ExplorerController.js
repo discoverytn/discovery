@@ -136,40 +136,51 @@ module.exports = {
 
   addOrRemoveFromFavorites: async function (req, res) {
     const { idexplorer, idposts } = req.params;
-  
-    try {
-      const favorite = await db.Favorites.findOne({
-        where: {
-          explorer_idexplorer: idexplorer,
-          posts_idposts: idposts,
-        },
-      });
-  
-      if (favorite) {
-        await favorite.destroy();
-        return res.status(200).json({ message: "Post removed from favorites" });
-      } else {
-        const post = await db.Posts.findByPk(idposts);
-        if (!post) {
-          return res.status(404).json({ error: "Post not found" });
-        }
-  
-        await db.Favorites.create({
-          explorer_idexplorer: idexplorer,
-          posts_idposts: idposts,
-          post_title: post.title,         
-          post_image1: post.image1,
-          post_location: post.location,
-        });
-  
-        return res.status(200).json({ message: "Post added to favorites" });
+
+  try {
+    const favorite = await db.Favorites.findOne({
+      where: {
+        explorer_idexplorer: idexplorer,
+        posts_idposts: idposts,
+      },
+    });
+
+    if (favorite) {
+      await favorite.destroy();
+      return res.status(200).json({ message: "Post removed from favorites" });
+    } else {
+      const post = await db.Posts.findByPk(idposts);
+      if (!post) {
+        return res.status(404).json({ error: "Post not found" });
       }
-    } catch (error) {
-      console.error("Error adding/removing post to/from favorites:", error);
-      return res
-        .status(500)
-        .json({ error: "Failed to add/remove post to/from favorites" });
+
+      await db.Favorites.create({
+        explorer_idexplorer: idexplorer,
+        posts_idposts: idposts,
+        post_title: post.title,         
+        post_image1: post.image1,
+        post_location: post.location,
+      });
+
+      // Create a notification for the post owner
+      const explorer = await db.Explorer.findByPk(idexplorer);
+      await db.Notif.create({
+        type: 'favorite',
+        message: `${explorer.firstname} ${explorer.lastname} added your post to favorites`,
+        explorer_idexplorer: post.explorer_idexplorer,
+        business_idbusiness: null,
+        created_at: new Date(),
+        is_read: false
+      });
+
+      return res.status(200).json({ message: "Post added to favorites" });
     }
+  } catch (error) {
+    console.error("Error adding/removing post to/from favorites:", error);
+    return res
+      .status(500)
+      .json({ error: "Failed to add/remove post to/from favorites" });
+  }
   },
   
   
