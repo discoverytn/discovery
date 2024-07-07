@@ -112,7 +112,7 @@ const OnepostScreen = ({ route }) => {
       console.error('Error checking if post is traveled:', error);
     }
   };
-// ... continued from Part 1
+
 
 const addToFavorites = async () => {
   try {
@@ -130,7 +130,8 @@ const addToFavorites = async () => {
         type: 'favorite',
         message: `${explorer.firstname} ${explorer.lastname} added your post to favorites`,
         explorer_idexplorer: postDetails.explorer_idexplorer, // Assuming this is the post owner's ID
-        business_idbusiness: null
+        business_idbusiness: null,
+        senderImage: explorer.image
       });
     } else if (response.data.message === "Post removed from favorites") {
       setIsFavorited(false);
