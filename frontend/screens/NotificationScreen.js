@@ -57,6 +57,10 @@ const NotificationScreen = () => {
       style={[styles.notificationItem, !item.is_read && styles.unreadNotification]}
       onPress={() => markAsRead(item.idnotif)}
     >
+      <Image 
+        source={item.senderImage ? { uri: item.senderImage } : require('../assets/user.jpg')}
+        style={styles.notificationImage}
+      />
       <View style={styles.notificationContent}>
         <Text style={styles.notificationText}>{item.message}</Text>
         <Text style={styles.notificationTime}>{new Date(item.created_at).toLocaleString()}</Text>
@@ -83,7 +87,7 @@ const NotificationScreen = () => {
 
   </TouchableOpacity>
 </View>
-      <FlatList
+<FlatList
         data={notifications}
         renderItem={renderNotificationItem}
         keyExtractor={(item) => item.idnotif.toString()}
@@ -204,7 +208,8 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 12,
     fontWeight: 'bold',
-  }
+  },
+
 });
 
 export default NotificationScreen;
