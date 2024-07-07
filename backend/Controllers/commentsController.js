@@ -3,6 +3,7 @@ const Comments = db.Comments;
 const Explorer = db.Explorer;
 const Business = db.Business;
 const Post = db.Posts;
+const Notif = db.Notif;
 
 const createComment = async (req, res) => {
   const { idposts, content, explorer_idexplorer, business_idbusiness } = req.body;
@@ -13,6 +14,29 @@ const createComment = async (req, res) => {
       content,
       explorer_idexplorer,
       business_idbusiness
+    });
+
+    // Fetch the post to get the post owner's ID
+    const post = await Post.findByPk(idposts);
+    
+    // Determine the commenter's name
+    let commenterName = '';
+    if (explorer_idexplorer) {
+      const explorer = await Explorer.findByPk(explorer_idexplorer);
+      commenterName = explorer.username;
+    } else if (business_idbusiness) {
+      const business = await Business.findByPk(business_idbusiness);
+      commenterName = business.businessname;
+    }
+
+    // Create a notification for the post owner
+    await Notif.create({
+      type: 'comment',
+      message: `${commenterName} commented on your post: "${post.title}"`,
+      explorer_idexplorer: post.explorer_idexplorer,
+      business_idbusiness: post.business_idbusiness,
+      created_at: new Date(),
+      is_read: false
     });
 
     res.status(201).json({

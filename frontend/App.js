@@ -24,6 +24,7 @@ import ExplorerEditProfileScreen from "./screens/ExplorerEditProfilScreen"
 import explorerProfil from "./screens/explorerProfil"
 import BusinessEditProfileScreen from "./screens/BusinessEditProfileScreen"
 import BusinessProfileScreen from "./screens/BusinessProfileScreen"
+import NotificationScreen from "./screens/NotificationScreen"
 
 
 
@@ -62,6 +63,7 @@ function MainNavigator() {
      <Tab.Screen name="Favorites" component={FavoritesScreen} options={{ tabBarLabel: () => null }} />
       <Tab.Screen name="ScheduleEvent" component={ScheduleEventScreen} options={{ tabBarLabel: () => null }} />
       <Tab.Screen name="EventList" component={EventListScreen} options={{ tabBarLabel: () => null }} />
+      <Tab.Screen name="NotificationScreen" component={NotificationScreen} options={{ tabBarLabel: () => null }} />
      
 
     </Tab.Navigator>

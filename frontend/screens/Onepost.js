@@ -124,6 +124,14 @@ const OnepostScreen = ({ route }) => {
     if (response.data.message === "Post added to favorites") {
       setIsFavorited(true);
       Alert.alert('Success', 'Post added to favorites');
+      
+      // Create a notification for the post owner
+      await axios.post('http://192.168.1.19:3000/notifications/create', {
+        type: 'favorite',
+        message: `${explorer.firstname} ${explorer.lastname} added your post to favorites`,
+        explorer_idexplorer: postDetails.explorer_idexplorer, // Assuming this is the post owner's ID
+        business_idbusiness: null
+      });
     } else if (response.data.message === "Post removed from favorites") {
       setIsFavorited(false);
       Alert.alert('Success', 'Post removed from favorites');
