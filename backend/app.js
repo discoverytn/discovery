@@ -5,6 +5,7 @@ const authRoutes = require("./Routes/authRoutes");
 const explorerRoutes = require("./routes/explorerRoutes"); 
 const businessRoutes = require("./routes/businessRoutes");
 const postRoutes = require('./Routes/postRoutes');
+const chatRoutes = require ('./Routes/chatRoutes')
 const db = require("./database/index");
 const app = express();
 const transporter = require("./resetCode"); 
@@ -16,7 +17,7 @@ app.use("/auth", authRoutes);
 app.use("/explorer", explorerRoutes); 
 app.use("/business", businessRoutes);
 app.use('/posts', postRoutes);
-
+app.use('/chat',chatRoutes)
 app.post("/send-email", async (req, res) => {
   try {
     const { to, subject, text } = req.body;

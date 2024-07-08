@@ -24,8 +24,11 @@ import ExplorerEditProfileScreen from "./screens/ExplorerEditProfilScreen"
 import explorerProfil from "./screens/explorerProfil"
 import BusinessEditProfileScreen from "./screens/BusinessEditProfileScreen"
 import BusinessProfileScreen from "./screens/BusinessProfileScreen"
-
-
+import AllChats from './screens/AllChats'
+import Chats from './screens/Chats';
+import Chat from './screens/Chat'
+// import ChatCopie from './screens/ChatCopie'
+ import ChatScreen from './screens/ChatScreen'
 
 
 
@@ -43,6 +46,7 @@ function MainNavigator() {
       }}
       
     >
+      
        <Tab.Screen name="Home" component={HomeScreen} options={{ tabBarLabel: () => null }} />
        <Tab.Screen name="Intro1" component={Intro1} options={{ tabBarLabel: () => null }} />
       <Tab.Screen name="Intro2" component={Intro2} options={{ tabBarLabel: () => null }} />
@@ -64,7 +68,15 @@ function MainNavigator() {
       <Tab.Screen name="Favorites" component={FavoritesScreen} options={{ tabBarLabel: () => null }} />
       <Tab.Screen name="ScheduleEvent" component={ScheduleEventScreen} options={{ tabBarLabel: () => null }} />
       <Tab.Screen name="EventList" component={EventListScreen} options={{ tabBarLabel: () => null }} />
-     
+      <Tab.Screen name="Chat" component={Chat} options={{ tabBarLabel: () => null }} />
+      <Tab.Screen name="AllChats" component={AllChats} options={{ tabBarLabel: () => null }} />
+      <Tab.Screen name="Chats" component={Chats} options={{ tabBarLabel: () => null }} />
+      {/* <Tab.Screen name="ChatCopie" component={ChatCopie} options={{ tabBarLabel: () => null }} /> */}
+      <Tab.Screen name="ChatScreen" component={ChatScreen} options={{ tabBarLabel: () => null }} />
+
+
+
+
 
     </Tab.Navigator>
   );
