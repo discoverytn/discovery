@@ -15,7 +15,8 @@ const ScheduleEventScreen = ({ navigation }) => {
   const [canPostEvent, setCanPostEvent] = useState(false);
   const [notEligibleReason, setNotEligibleReason] = useState('');
 
-  const { explorer, business } = useAuth();
+  const { explorer} = useAuth();
+  const { business} = useAuth();
 
   useEffect(() => {
     checkEligibility();
@@ -52,7 +53,8 @@ const ScheduleEventScreen = ({ navigation }) => {
     setShowEndDatePicker(false);
     setEndDate(currentDate);
   };
-
+  console.log('Business object:', business);
+  console.log('Business ID:', business ? business.idbusiness : 'Not available');
   const Submit = async () => {
     if (!canPostEvent) {
       return;
@@ -64,6 +66,8 @@ const ScheduleEventScreen = ({ navigation }) => {
       eventPrice: parseInt(eventPrice),
       startDate: startDate.toISOString().split('T')[0],
       endDate: endDate.toISOString().split('T')[0],
+      business_idbusiness: business ? business.idbusiness : null, // Add this line
+
     };
 
     if (explorer && explorer.id) {
