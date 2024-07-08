@@ -5,7 +5,6 @@ const Business = db.Business;
 const Post = db.Posts;
 const Notif = db.Notif;
 
-// Create a new comment
 const createComment = async (req, res) => {
   const { idposts, content, explorer_idexplorer, business_idbusiness } = req.body;
 
@@ -54,8 +53,7 @@ res.status(500).json({ error: 'Failed to create comment' });
 }
 };
 
-// Get all comments for a specific post
-// Get all comments for a specific post
+
 const getCommentsForPost = async (req, res) => {
   const { idposts } = req.params;
 
@@ -123,10 +121,10 @@ const deleteComment = async (req, res) => {
     res.status(500).json({ error: 'Failed to delete comment' });
   }
 };
-// Get all comments for a specific user (explorer or business)
+
 const getUserComments = async (req, res) => {
     const { userId } = req.params;
-    const { userType } = req.query; // 'explorer' or 'business'
+    const { userType } = req.query; 
   
     try {
       let where = {};

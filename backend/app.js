@@ -1,8 +1,9 @@
 require("dotenv").config();
 const express = require("express");
+const cors = require('cors');
 const adminRoutes = require("./routes/adminRoutes");
 const authRoutes = require("./Routes/authRoutes");
-const explorerRoutes = require("./routes/explorerRoutes"); 
+const explorerRoutes = require("./Routes/explorerRoutes"); 
 const businessRoutes = require("./routes/businessRoutes");
 const postRoutes = require('./Routes/postRoutes');
 const db = require("./database/index");
@@ -16,6 +17,7 @@ const notificationRoutes = require('./Routes/notificationRoutes');
 
 
 
+app.use(cors());
 app.use(express.json());
 
 app.use("/admin", adminRoutes);
