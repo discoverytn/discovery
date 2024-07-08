@@ -20,7 +20,7 @@ const NotificationScreen = () => {
       setIsLoading(true);
       const userId = explorer?.idexplorer || business?.idbusiness;
       const userType = explorer ? 'explorer' : 'business';
-      const response = await axios.get(`http://192.168.1.19:3000/notifications/user/${userId}?userType=${userType}`);
+      const response = await axios.get(`http://192.168.11.112:3000/notifications/user/${userId}?userType=${userType}`);
       setNotifications(response.data);
       // part to count unread notifications popup
       const unreadNotifications = response.data.filter(notif => !notif.is_read);
@@ -43,7 +43,7 @@ const NotificationScreen = () => {
 
   const markAsRead = async (notificationId) => {
     try {
-      await axios.put(`http://192.168.1.19:3000/notifications/${notificationId}/read`);
+      await axios.put(`http://192.168.11.112:3000/notifications/${notificationId}/read`);
       setNotifications(notifications.map(notif => 
         notif.idnotif === notificationId ? { ...notif, is_read: true } : notif
       ));
@@ -52,21 +52,36 @@ const NotificationScreen = () => {
     }
   };
 
-  const renderNotificationItem = ({ item }) => (
-    <TouchableOpacity 
-      style={[styles.notificationItem, !item.is_read && styles.unreadNotification]}
-      onPress={() => markAsRead(item.idnotif)}
-    >
-      <Image 
-        source={item.senderImage ? { uri: item.senderImage } : require('../assets/user.jpg')}
-        style={styles.notificationImage}
-      />
-      <View style={styles.notificationContent}>
-        <Text style={styles.notificationText}>{item.message}</Text>
-        <Text style={styles.notificationTime}>{new Date(item.created_at).toLocaleString()}</Text>
-      </View>
-    </TouchableOpacity>
-  );
+  const renderNotificationItem = ({ item }) => {
+    const renderMessage = (message, type) => {
+      if (type === 'favorite') {
+        const parts = message.split(' ');
+        return (
+          <Text style={styles.notificationText}>
+            <Text style={styles.boldText}>{`${parts[0]} ${parts[1]}`}</Text>
+            {` ${parts.slice(2).join(' ')}`}
+          </Text>
+        );
+      }
+      return <Text style={styles.notificationText}>{message}</Text>;
+    };
+  
+    return (
+      <TouchableOpacity 
+        style={[styles.notificationItem, !item.is_read && styles.unreadNotification]}
+        onPress={() => markAsRead(item.idnotif)}
+      >
+        <Image 
+          source={item.senderImage ? { uri: item.senderImage } : require('../assets/user.jpg')}
+          style={styles.notificationImage}
+        />
+        <View style={styles.notificationContent}>
+          {renderMessage(item.message, item.type)}
+          <Text style={styles.notificationTime}>{new Date(item.created_at).toLocaleString()}</Text>
+        </View>
+      </TouchableOpacity>
+    );
+  };
 
   return (
     <View style={styles.container}>
@@ -209,6 +224,9 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: 'bold',
   },
+  boldText: {
+    fontWeight: 'bold',
+  }
 
 });
 
