@@ -3,7 +3,8 @@ const {
   BOEditProfile,
   getBusinessById,
   editBusiness,
-  getBusinessPosts
+  getBusinessPosts,
+  getBusinessNumberPosts
 } = require("../Controllers/businessController");
 const router = express.Router();
 
@@ -16,5 +17,6 @@ router.put("/:idbusiness/edit", editBusiness);
 
 // route to get posts associated with a business profile
 router.get("/:idbusiness/posts", getBusinessPosts);
+router.get("/:idbusiness/numposts", getBusinessNumberPosts);
 
 module.exports = router;

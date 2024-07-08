@@ -7,13 +7,13 @@ import {
   StyleSheet,
   Alert,
   Image,
+  ScrollView,
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import { useAuth } from "../context/AuthContext";
 import * as ImagePicker from "expo-image-picker";
 import axios from "axios";
 import { useNavigation } from '@react-navigation/native';
-
 
 const CLOUDINARY_UPLOAD_PRESET = "discovery";
 const CLOUDINARY_UPLOAD_URL =
@@ -28,10 +28,9 @@ const SignupScreen = () => {
   const [businessName, setBusinessName] = useState("");
   const [BOid, setBOid] = useState("");
   const [credImg, setCredImg] = useState(null);
-  const [category, setCategory] = useState("Restaurant"); 
+  const [category, setCategory] = useState("Restaurant");
 
   const navigation = useNavigation();
-
 
   const Submit = async () => {
     try {
@@ -75,7 +74,7 @@ const SignupScreen = () => {
     setBusinessName("");
     setBOid("");
     setCredImg(null);
-    setCategory("Restaurant"); 
+    setCategory("Restaurant");
   };
 
   const selectImage = async () => {
@@ -158,114 +157,139 @@ const SignupScreen = () => {
   );
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.header}>Sign up</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Name"
-        value={name}
-        onChangeText={setName}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Email"
-        value={email}
-        onChangeText={setEmail}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Password"
-        secureTextEntry
-        value={password}
-        onChangeText={setPassword}
-      />
-      <Picker
-        selectedValue={role}
-        style={styles.input}
-        onValueChange={(itemValue) => setRole(itemValue)}
-      >
-        <Picker.Item label="Explorer" value="explorer" />
-        <Picker.Item label="Business" value="business" />
-      </Picker>
-      {role === "business" && (
-        <>
+    <ScrollView contentContainerStyle={styles.scrollViewContent}>
+      <View style={styles.container}>
+        <View style={styles.signupContainer}>
+          <Text style={styles.header}>Sign up for Discovery</Text>
+          <Text style={styles.subHeader}>Enter your details below</Text>
           <TextInput
             style={styles.input}
-            placeholder="Business Name"
-            value={businessName}
-            onChangeText={setBusinessName}
+            placeholder="Name"
+            value={name}
+            onChangeText={setName}
           />
           <TextInput
             style={styles.input}
-            placeholder="Business Owner ID"
-            value={BOid}
-            onChangeText={setBOid}
+            placeholder="Email"
+            value={email}
+            onChangeText={setEmail}
+            keyboardType="email-address"
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Password"
+            secureTextEntry
+            value={password}
+            onChangeText={setPassword}
           />
           <Picker
-            selectedValue={category}
+            selectedValue={role}
             style={styles.input}
-            onValueChange={(itemValue) => setCategory(itemValue)}
+            onValueChange={(itemValue) => setRole(itemValue)}
           >
-            <Picker.Item label="Restaurant" value="Restaurant" />
-            <Picker.Item label="Coffee Shop" value="Coffee Shop" />
-            <Picker.Item label="Nature" value="Nature" />
-            <Picker.Item label="Art" value="Art" />
-            <Picker.Item label="Camping" value="Camping" />
-            <Picker.Item label="Workout" value="Workout" />
-            <Picker.Item label="Cycling" value="Cycling" />
+            <Picker.Item label="Explorer" value="explorer" />
+            <Picker.Item label="Business" value="business" />
           </Picker>
-          {renderImageItem()}
-        </>
-      )}
-      <TouchableOpacity style={styles.button} onPress={Submit}>
-        <Text style={styles.buttonText}>Sign Up</Text>
-      </TouchableOpacity>
-    </View>
+          {role === "business" && (
+            <>
+              <TextInput
+                style={styles.input}
+                placeholder="Business Name"
+                value={businessName}
+                onChangeText={setBusinessName}
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Business Owner ID"
+                value={BOid}
+                onChangeText={(text) => setBOid(text.replace(/[^0-9]/g, ''))}
+                keyboardType="numeric"
+              />
+              <Picker
+                selectedValue={category}
+                style={styles.input}
+                onValueChange={(itemValue) => setCategory(itemValue)}
+              >
+                <Picker.Item label="Restaurant" value="Restaurant" />
+                <Picker.Item label="Coffee Shop" value="Coffee Shop" />
+                <Picker.Item label="Nature" value="Nature" />
+                <Picker.Item label="Art" value="Art" />
+                <Picker.Item label="Camping" value="Camping" />
+                <Picker.Item label="Workout" value="Workout" />
+                <Picker.Item label="Cycling" value="Cycling" />
+              </Picker>
+              {renderImageItem()}
+            </>
+          )}
+          <TouchableOpacity style={styles.button} onPress={Submit}>
+            <Text style={styles.buttonText}>Sign Up</Text>
+          </TouchableOpacity>
+        </View>
+        <TouchableOpacity onPress={() => navigation.navigate("Login")}>
+          <Text style={styles.loginText}>
+            Already have an account? <Text style={styles.loginLink}>Log In</Text>
+          </Text>
+        </TouchableOpacity>
+      </View>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
+  scrollViewContent: {
+    flexGrow: 1,
+  },
   container: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "#fff",
-    paddingHorizontal: 20,
+    paddingVertical: 20,
+  },
+  signupContainer: {
+    width: "80%",
+    maxWidth: 400,
   },
   header: {
     fontSize: 24,
+    fontWeight: "bold",
     marginBottom: 20,
+    textAlign: "center",
+  },
+  subHeader: {
+    fontSize: 16,
+    marginBottom: 20,
+    textAlign: "center",
   },
   input: {
-    width: "100%",
-    height: 40,
-    borderColor: "#ccc",
     borderWidth: 1,
-    borderRadius: 5,
-    paddingHorizontal: 10,
-    marginBottom: 10,
+    borderColor: "#ddd",
+    padding: 10,
+    fontSize: 18,
+    borderRadius: 6,
+    marginBottom: 20,
   },
   button: {
-    backgroundColor: "#007BFF",
-    padding: 10,
-    borderRadius: 5,
-    width: "100%",
+    backgroundColor: "#00aacc",
+    padding: 15,
+    borderRadius: 6,
     alignItems: "center",
-    marginTop: 20,
+    marginBottom: 20,
   },
   buttonText: {
     color: "#fff",
-    fontSize: 16,
+    fontSize: 18,
+    fontWeight: "bold",
   },
   imageContainer: {
     alignItems: "center",
     marginBottom: 20,
   },
   selectImageButton: {
-    backgroundColor: "#007BFF",
+    backgroundColor: "#00aacc",
     paddingVertical: 10,
     paddingHorizontal: 20,
-    borderRadius: 5,
+    borderRadius: 6,
     marginTop: 10,
   },
   removeImageButton: {
@@ -288,6 +312,14 @@ const styles = StyleSheet.create({
     height: 200,
     borderRadius: 10,
     marginBottom: 10,
+  },
+  loginText: {
+    textAlign: "center",
+  },
+  loginLink: {
+    color: "#007BFF",
+    fontWeight: "bold",
+    textDecorationLine: "underline",
   },
 });
 

@@ -24,11 +24,9 @@ import ExplorerEditProfileScreen from "./screens/ExplorerEditProfilScreen"
 import explorerProfil from "./screens/explorerProfil"
 import BusinessEditProfileScreen from "./screens/BusinessEditProfileScreen"
 import BusinessProfileScreen from "./screens/BusinessProfileScreen"
-import AllChats from './screens/AllChats'
-import Chats from './screens/Chats';
-import Chat from './screens/Chat'
-// import ChatCopie from './screens/ChatCopie'
- import ChatScreen from './screens/ChatScreen'
+import NotificationScreen from "./screens/NotificationScreen"
+
+
 
 
 
@@ -60,25 +58,17 @@ function MainNavigator() {
       <Tab.Screen name="explorerProfil" component={explorerProfil} options={{ tabBarLabel: () => null }} />
       <Tab.Screen name="ExplorerEditProfilScreen" component={ExplorerEditProfileScreen} options={{ tabBarLabel: () => null }} />
       <Tab.Screen name="ExplorerAddPostScreen" component={ExplorerAddPostScreen} options={{ tabBarLabel: () => null }} />
-     
-     <Tab.Screen name="BusinessddPostScreen" component={BusinessddPostScreen} options={{ tabBarLabel: () => null }} />
+      <Tab.Screen name="BusinessddPostScreen" component={BusinessddPostScreen} options={{ tabBarLabel: () => null }} />
      <Tab.Screen name="Onepost" component={OnepostScreen} options={{ tabBarLabel: () => null }} />
      <Tab.Screen name="Categories" component={CategoriesScreen} options={{ tabBarLabel: () => null }} />
-  
-      <Tab.Screen name="Favorites" component={FavoritesScreen} options={{ tabBarLabel: () => null }} />
+     <Tab.Screen name="Favorites" component={FavoritesScreen} options={{ tabBarLabel: () => null }} />
       <Tab.Screen name="ScheduleEvent" component={ScheduleEventScreen} options={{ tabBarLabel: () => null }} />
       <Tab.Screen name="EventList" component={EventListScreen} options={{ tabBarLabel: () => null }} />
-      <Tab.Screen name="Chat" component={Chat} options={{ tabBarLabel: () => null }} />
-      <Tab.Screen name="AllChats" component={AllChats} options={{ tabBarLabel: () => null }} />
-      <Tab.Screen name="Chats" component={Chats} options={{ tabBarLabel: () => null }} />
-      {/* <Tab.Screen name="ChatCopie" component={ChatCopie} options={{ tabBarLabel: () => null }} /> */}
-      <Tab.Screen name="ChatScreen" component={ChatScreen} options={{ tabBarLabel: () => null }} />
-
-
-
-
+      <Tab.Screen name="NotificationScreen" component={NotificationScreen} options={{ tabBarLabel: () => null }} />
+     
 
     </Tab.Navigator>
+    
   );
 }
 

@@ -1,34 +1,49 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { View, Text, Image, TouchableOpacity, FlatList, StyleSheet } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faPersonWalkingLuggage } from '@fortawesome/free-solid-svg-icons';
-import CustomModal from './CustomModal'; 
-
-const events = [
-  { id: 1, name: 'Bouselem', location: 'location.jpg', startDate: '16 July', endDate: '28 July', price: 'Free', image: require('../assets/eljem.jpg') },
-  { id: 2, name: 'Matmata', location: 'location.jpg', startDate: '20 Sep', endDate: '29 Sep', price: '20DT', image: require('../assets/camping.jpg') },
-  { id: 3, name: 'Hammamet', location: 'location.jpg', startDate: '14 Nov', endDate: '22 Nov', price: '25DT', image: require('../assets/souq.jpg') },
-  { id: 4, name: 'Sfax', location: 'location.jpg', startDate: '12 Dec', endDate: '18 Dec', price: 'Free', image: require('../assets/sidibousaid.jpg') },
-  { id: 5, name: 'tunis', location: 'location.jpg', startDate: '19 Dec', endDate: '18 Dec', price: 'Free', image: require('../assets/sidibousaid1.jpg') },
-];
+import CustomModal from './CustomModal';
+import axios from 'axios';
 
 const EventListScreen = () => {
   const navigation = useNavigation();
   const [showModal, setShowModal] = useState(false);
+  const [events, setEvents] = useState([]);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const fetchEvents = async () => {
+    try {
+      const response = await axios.get('http://192.168.1.19:3000/events/getAll');
+      setEvents(response.data);
+    } catch (error) {
+      console.error('Error fetching events:', error);
+    }
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchEvents();
+    }, [])
+  );
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    fetchEvents().then(() => setRefreshing(false));
+  }, []);
 
   const toggleModal = () => setShowModal(!showModal);
 
   const renderItem = ({ item }) => (
     <View style={styles.eventItem}>
-      <Image source={item.image} style={styles.eventImage} />
+      <Image source={require('../assets/event-placeholder.jpg')} style={styles.eventImage} />
       <View style={styles.eventDetails}>
         <View style={styles.eventTitleRow}>
-          <Text style={styles.eventName}>{item.name}</Text>
+          <Text style={styles.eventName}>{item.eventName}</Text>
           <Image source={require('../assets/location.jpg')} style={styles.locationIcon} />
         </View>
         <View style={styles.priceAndIconRow}>
-          <Text style={styles.eventPrice}>{item.price}</Text>
+          <Text style={styles.eventPrice}>{item.eventPrice} DT</Text>
           <TouchableOpacity style={styles.routeButton} onPress={toggleModal}>
             <FontAwesomeIcon icon={faPersonWalkingLuggage} size={25} color="#007BFF" />
           </TouchableOpacity>
@@ -37,12 +52,7 @@ const EventListScreen = () => {
           <Image source={require('../assets/date.jpg')} style={styles.dateIcon} />
           <Text style={styles.eventDates}>{item.startDate} - {item.endDate}</Text>
         </View>
-        <View style={styles.eventJoinedRow}>
-          <Image source={require('../assets/user.jpg')} style={styles.userIcon} />
-          <Image source={require('../assets/user.jpg')} style={styles.userIcon} />
-          <Image source={require('../assets/user.jpg')} style={styles.userIcon} />
-          <Text style={styles.joinedText}>9 People Joined</Text>
-        </View>
+        <Text style={styles.eventDescription}>{item.eventDescription}</Text>
       </View>
     </View>
   );
@@ -59,14 +69,22 @@ const EventListScreen = () => {
       <FlatList
         data={events}
         renderItem={renderItem}
-        keyExtractor={(item) => item.id.toString()}
+        keyExtractor={(item) => item.idevents.toString()}
         contentContainerStyle={styles.eventsContainer}
+        refreshing={refreshing}
+        onRefresh={onRefresh}
       />
       <CustomModal
         visible={showModal}
         onClose={toggleModal}
-        message="Event request was sent ! "
+        message="Event request was sent!"
       />
+      <TouchableOpacity
+        style={styles.addButton}
+        onPress={() => navigation.navigate('ScheduleEvent')}
+      >
+        <Text style={styles.addButtonText}>+ Add Event</Text>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -154,7 +172,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     alignSelf: 'flex-start',
     marginTop: 5,
-    
   },
   routeButton: {
     marginRight: 135, 
@@ -188,6 +205,23 @@ const styles = StyleSheet.create({
   joinedText: {
     color: 'grey',
     marginLeft: 20, 
+  },
+  eventDescription: {
+    color: 'grey',
+    marginTop: 5,
+  },
+  addButton: {
+    position: 'absolute',
+    right: 20,
+    bottom: 20,
+    backgroundColor: '#007BFF',
+    padding: 15,
+    borderRadius: 30,
+  },
+  addButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
 

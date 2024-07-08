@@ -145,7 +145,6 @@ const BusinessDeletePost = async (req, res) => {
       await post.destroy();
       res.status(200).json({ message: "Business post deleted successfully" });
     } else {
-      console.log("post",post);
       res.status(404).json({ error: "Business post not found or not associated with an business" });
     }
   } catch (error) {
@@ -168,6 +167,7 @@ const getAllPosts = async (req, res) => {
     res.status(500).json({ error: "Failed to fetch posts" });
   }
 };
+
 const getPostById = async (req, res) => {
   const { idposts } = req.params;
 
@@ -183,6 +183,116 @@ const getPostById = async (req, res) => {
   }
 };
 
+const ratePost = async (req, res) => {
+  const { idposts, rating } = req.body;
+
+  try {
+    const post = await Posts.findByPk(idposts);
+
+    if (!post) {
+      return res.status(404).json({ error: "Post not found" });
+    }
+
+    // Update total rating and number of ratings
+    const newTotalRating = post.totalRating + rating;
+    const newNumOfRatings = post.numOfRatings + 1;
+
+    // Calculate average rating
+    const averageRating = parseFloat((newTotalRating / newNumOfRatings).toFixed(1));
+
+
+    // Update post with new ratings data
+    post.totalRating = newTotalRating;
+    post.numOfRatings = newNumOfRatings;
+    post.averageRating = averageRating;
+
+    await post.save();
+
+    res.status(200).json(post);
+  } catch (error) {
+    console.error("Error rating post:", error);
+    res.status(500).json({ error: "Failed to rate post" });
+  }
+};
+
+const getAllExplorerPosts = async (req, res) => {
+  try {
+    const explorerPosts = await Posts.findAll({
+      where: {
+        explorer_idexplorer: { [db.Sequelize.Op.ne]: null } 
+      }
+    });
+    res.status(200).json(explorerPosts);
+  } catch (error) {
+    console.error("Error fetching explorer posts:", error);
+    res.status(500).json({ error: "Failed to fetch explorer posts" });
+  }
+};
+const getAllBusinessPosts = async (req, res) => {
+  try {
+    const businessPosts = await Posts.findAll({
+      where: {
+        business_idbusiness: { [db.Sequelize.Op.ne]: null } 
+      }
+    });
+    res.status(200).json(businessPosts);
+  } catch (error) {
+    console.error("Error fetching business posts:", error);
+    res.status(500).json({ error: "Failed to fetch business posts" });
+  }
+};
+const getTopFavoritePosts = async (req, res) => {
+  try {
+    const topFavoritePosts = await db.Favorites.findAll({
+      attributes: [
+        'posts_idposts',
+        [db.Sequelize.fn('COUNT', 'posts_idposts'), 'count']
+      ],
+      group: ['posts_idposts'],
+      order: [[db.Sequelize.literal('count'), 'DESC']],
+      limit: 5,
+      include: [
+        {
+          model: Posts,
+          attributes: ['idposts', 'title', 'description', 'hashtags', 'location', 'image1'],
+        },
+      ],
+    });
+
+    const formattedTopPosts = topFavoritePosts.map(favorite => ({
+      idposts: favorite.Post.idposts,
+      title: favorite.Post.title,
+      description: favorite.Post.description,
+      hashtags: favorite.Post.hashtags,
+      location: favorite.Post.location,
+      image1: favorite.Post.image1,
+      totalFavorites: favorite.get('count'),
+    }));
+
+    res.status(200).json(formattedTopPosts);
+  } catch (error) {
+    console.error("Error fetching top favorite posts:", error);
+    res.status(500).json({ error: "Failed to fetch top favorite posts" });
+  }
+};
+const deletePost = async (req, res) => {
+  const { idposts } = req.params;
+
+  try {
+    const post = await Posts.findOne({ where: { idposts } });
+
+    if (!post) {
+      return res.status(404).json({ error: "Post not found" });
+    }
+
+    await post.destroy();
+
+    res.status(200).json({ message: "Post deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting post:", error);
+    res.status(500).json({ error: "Failed to delete post" });
+  }
+};
 module.exports = {
   ExplorerCreatePost,
   BusinessCreatePost,
@@ -191,5 +301,10 @@ module.exports = {
   ExplorerDeletePost,
   BusinessDeletePost,
   getAllPosts,
-  getPostById
+  getPostById,
+  ratePost,
+  getAllExplorerPosts,
+  getAllBusinessPosts,
+  getTopFavoritePosts,
+  deletePost
 };

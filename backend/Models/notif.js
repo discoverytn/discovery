@@ -7,6 +7,10 @@ module.exports = (sequelize) => {
       primaryKey: true,
       autoIncrement: true,
     },
+    type: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
     message: DataTypes.STRING,
     business_idbusiness: {
       type: DataTypes.INTEGER,
@@ -21,6 +25,18 @@ module.exports = (sequelize) => {
         model: 'Explorers', 
         key: 'idexplorer',
       }
+    },
+    created_at: {
+      type: DataTypes.DATE,
+      defaultValue: DataTypes.NOW,
+    },
+    is_read: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
+    senderImage: {
+      type: DataTypes.STRING,
+      allowNull: true,
     }
   });
 };

@@ -15,16 +15,18 @@ const ExplorerProfile = () => {
   const [numLikes, setNumLikes] = useState(0);
   const [numTraveled, setNumTraveled] = useState(0);
   const [selectedValue, setSelectedValue] = useState("");
-
+  
   useEffect(() => {
     const fetchExplorerData = async () => {
       try {
-        const response = await axios.get(`http://192.168.1.19:3000/explorer/${explorer.id}`);
+        const response = await axios.get(`http://192.168.1.8:3000/explorer/${explorer.id}`);
         if (response.status === 200) {
-          setExplorer(response.data);
-          setNumPosts(response.data.Posts?.length || 0);
-          setNumLikes(response.data.Likes || 0);
-          setNumTraveled(response.data.Traveled || 0);
+          const explorerData = response.data;
+          // Set the explorer object and update numOfPosts based on posts length
+          setExplorer({ ...explorerData, numOfPosts: explorerData.Posts?.length || 0 });
+          setNumPosts(explorerData.Posts?.length || 0);
+          setNumLikes(explorerData.Likes || 0);
+          setNumTraveled(explorerData.Traveled || 0);
         } else {
           console.error('Failed to fetch explorer data');
         }
@@ -32,16 +34,17 @@ const ExplorerProfile = () => {
         console.error('Error fetching explorer data:', error.message);
       }
     };
-
+  
     if (explorer?.id) {
       fetchExplorerData();
     }
   }, [explorer?.id, setExplorer]);
+  
 
   useEffect(() => {
     const fetchExplorerPosts = async () => {
       try {
-        const response = await axios.get(`http://192.168.1.19:3000/explorer/${explorer.id}/posts`);
+        const response = await axios.get(`http://192.168.1.8:3000/explorer/${explorer.id}/posts`);
         if (response.status === 200) {
           const transformedPosts = response.data.map(post => ({
             id: post.idposts,
@@ -51,6 +54,9 @@ const ExplorerProfile = () => {
           }));
           setPosts(transformedPosts);
           setNumPosts(transformedPosts.length || 0);
+  
+          // Update explorer object with the correct number of posts
+          setExplorer(prev => ({ ...prev, numOfPosts: transformedPosts.length || 0 }));
         } else {
           console.error('Failed to fetch explorer posts');
           setPosts([]);
@@ -62,11 +68,12 @@ const ExplorerProfile = () => {
         setNumPosts(0);
       }
     };
-
+  
     if (activeTab === 'Posts' && explorer?.id) {
       fetchExplorerPosts();
     }
   }, [explorer?.id, activeTab, posts.length]);
+  
 
   const handleTabChange = (tabName) => {
     setActiveTab(tabName);
@@ -83,7 +90,7 @@ const ExplorerProfile = () => {
 
   const deleteExplorerPost = async (postId, token) => {
     try {
-      const response = await fetch(`http://192.168.1.19:3000/posts/explorer/delete/${postId}`, {
+      const response = await fetch(`http://192.168.1.8:3000/posts/explorer/delete/${postId}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -94,8 +101,13 @@ const ExplorerProfile = () => {
       if (response.ok) {
         console.log(data);
         Alert.alert('Explorer post deleted successfully');
-        setPosts(posts.filter(post => post.id !== postId));
-      
+        const updatedPosts = posts.filter(post => post.id !== postId);
+        setPosts(updatedPosts);
+  
+        // Update numPosts state and explorer object
+        setNumPosts(updatedPosts.length);
+        setExplorer(prev => ({ ...prev, numOfPosts: updatedPosts.length }));
+  
       } else {
         console.error('Error:', data);
         Alert.alert(`Error: ${data.message}`);
@@ -105,6 +117,7 @@ const ExplorerProfile = () => {
       Alert.alert(`Error: ${error.message}`);
     }
   };
+  
 
   if (!explorer) {
     return (
@@ -294,7 +307,7 @@ const styles = StyleSheet.create({
     color: '#555',
   },
   editButton: {
-    backgroundColor: '#007BFF',
+    backgroundColor: '#00aacc',
     borderRadius: 5,
     paddingVertical: 10,
     paddingHorizontal: 20,

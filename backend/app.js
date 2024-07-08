@@ -1,15 +1,24 @@
 require("dotenv").config();
 const express = require("express");
+const cors = require('cors');
 const adminRoutes = require("./routes/adminRoutes");
 const authRoutes = require("./Routes/authRoutes");
-const explorerRoutes = require("./routes/explorerRoutes"); 
+const explorerRoutes = require("./Routes/explorerRoutes"); 
 const businessRoutes = require("./routes/businessRoutes");
 const postRoutes = require('./Routes/postRoutes');
 const chatRoutes = require ('./Routes/chatRoutes')
 const db = require("./database/index");
 const app = express();
 const transporter = require("./resetCode"); 
+const ratingRoutes = require("./Routes/ratingRoutes");
+const commentRoutes = require('./Routes/commentRoutes');
+const eventRoutes = require('./Routes/eventRoutes');
+const notificationRoutes = require('./Routes/notificationRoutes');
 
+
+
+
+app.use(cors());
 app.use(express.json());
 
 app.use("/admin", adminRoutes);
@@ -17,7 +26,15 @@ app.use("/auth", authRoutes);
 app.use("/explorer", explorerRoutes); 
 app.use("/business", businessRoutes);
 app.use('/posts', postRoutes);
+<<<<<<< HEAD
 app.use('/chat',chatRoutes)
+=======
+app.use('/ratings', ratingRoutes);
+app.use('/comments', commentRoutes);
+app.use('/events', eventRoutes);
+app.use('/notifications', notificationRoutes);
+
+>>>>>>> f0897c32f7228a1b6707c5d138d1117a15689540
 app.post("/send-email", async (req, res) => {
   try {
     const { to, subject, text } = req.body;
