@@ -19,7 +19,7 @@ const NotificationScreen = () => {
     try {
       setIsLoading(true);
       const userId = explorer?.idexplorer || business?.idbusiness;
-      const userType = explorer ? 'explorer' : 'business';
+      const userType = explorer?.idexplorer ? 'explorer' : 'business';
       const response = await axios.get(`http://192.168.11.112:3000/notifications/user/${userId}?userType=${userType}`);
       setNotifications(response.data);
       // part to count unread notifications popup

@@ -168,7 +168,7 @@ module.exports = {
         type: 'favorite',
         message: `${explorer.firstname} ${explorer.lastname} added your post to favorites`,
         explorer_idexplorer: post.explorer_idexplorer,
-        business_idbusiness: null,
+        business_idbusiness: post.business_idbusiness,
         created_at: new Date(),
         is_read: false,
         senderImage: explorer.image
