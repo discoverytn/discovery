@@ -40,12 +40,12 @@ function WebsiteVisitors() {
     const fetchData = async () => {
       try {
         const explorersResponse = await axios.get(
-          "http://192.168.100.3:3000/admin/explorer"
+          "http://192.168.1.19:3000/admin/explorer"
         );
         console.log("Explorers response:", explorersResponse);
 
         const businessResponse = await axios.get(
-          "http://192.168.100.3:3000/admin/business"
+          "http://192.168.1.19:3000/admin/business"
         );
         console.log("Business response:", businessResponse);
 
