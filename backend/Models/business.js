@@ -97,6 +97,16 @@ module.exports = (sequelize) => {
     category: {
       type: DataTypes.STRING,
       allowNull: false,
+    },
+    approvalStatus: {
+      type: DataTypes.ENUM('pending', 'accepted'),
+      allowNull: false,
+      defaultValue: 'pending', 
+    },
+    subscribed: {
+      type: DataTypes.ENUM('no', 'yes'),
+      allowNull: false,
+      defaultValue: 'no', 
     }
   });
 };

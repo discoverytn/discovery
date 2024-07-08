@@ -6,7 +6,7 @@ const db = require("./database/index");
     const pw = "admin";
     const hashedPassword = await bcrypt.hash(pw, 10);
     const admin = await db.Admin.create({
-      name: "admin",
+      username: "admin",
       email :"admin@gmail.com",
       password: hashedPassword
       

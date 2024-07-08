@@ -28,7 +28,7 @@ function UsersView() {
   const [filteredBusinessOwners, setFilteredBusinessOwners] = useState([]);
 
   useEffect(() => {
-    fetch("http://192.168.11.112:3000/admin/explorer")
+    fetch("http://192.168.100.3:3000/admin/explorer")
       .then((response) => response.json())
       .then((data) => {
         if (Array.isArray(data)) {
@@ -41,7 +41,7 @@ function UsersView() {
   }, []);
 
   useEffect(() => {
-    fetch("http://192.168.11.112:3000/admin/business")
+    fetch("http://192.168.100.3:3000/admin/business")
       .then((response) => response.json())
       .then((data) => {
         if (Array.isArray(data)) {
@@ -81,7 +81,7 @@ function UsersView() {
   const deleteExplorer = async (idexplorer) => {
     try {
       const response = await fetch(
-        `http://192.168.11.112:3000/admin/delete/explorer/${idexplorer}`,
+        `http://192.168.100.3:3000/admin/delete/explorer/${idexplorer}`,
         {
           method: "DELETE",
         }
@@ -91,21 +91,19 @@ function UsersView() {
         throw new Error("Failed to delete explorer");
       }
 
-      
       const updatedExplorers = filteredExplorers.filter(
         (explorer) => explorer.idexplorer !== idexplorer
       );
       setFilteredExplorers(updatedExplorers);
     } catch (error) {
       console.error("Error deleting explorer:", error);
-      
     }
   };
 
   const deleteBusinessOwner = async (idbusiness) => {
     try {
       const response = await fetch(
-        `http://192.168.11.112:3000/admin/delete/business/${idbusiness}`,
+        `http://192.168.100.3:3000/admin/delete/business/${idbusiness}`,
         {
           method: "DELETE",
         }
@@ -115,19 +113,17 @@ function UsersView() {
         throw new Error("Failed to delete business owner");
       }
 
-      
       const updatedBusinessOwners = filteredBusinessOwners.filter(
         (owner) => owner.idbusiness !== idbusiness
       );
       setFilteredBusinessOwners(updatedBusinessOwners);
     } catch (error) {
       console.error("Error deleting business owner:", error);
-      
     }
   };
 
   return (
-    <Box sx={{ p: 10, flexGrow: 1, overflowY: 'auto' }}>
+    <Box sx={{ p: 10, flexGrow: 1, overflowY: "auto" }}>
       <Box sx={{ mb: 4 }}>
         <TextField
           label="Search Explorers"
@@ -147,7 +143,6 @@ function UsersView() {
                 <TableCell>First Name</TableCell>
                 <TableCell>Last Name</TableCell>
                 <TableCell>Email</TableCell>
-                <TableCell>Badges</TableCell>
                 <TableCell>Posts</TableCell>
                 <TableCell>Visits</TableCell>
                 <TableCell>Reviews</TableCell>
@@ -174,14 +169,13 @@ function UsersView() {
                       </TableCell>
                       <TableCell>{explorer.idexplorer}</TableCell>
                       <TableCell>{explorer.username}</TableCell>
-                      <TableCell>{explorer.firstName}</TableCell>
-                      <TableCell>{explorer.lastName}</TableCell>
+                      <TableCell>{explorer.firstname}</TableCell>
+                      <TableCell>{explorer.lastname}</TableCell>
                       <TableCell>{explorer.email}</TableCell>
-                      <TableCell>{explorer.badges}</TableCell>
                       <TableCell>{explorer.numOfPosts}</TableCell>
                       <TableCell>{explorer.numOfVisits}</TableCell>
                       <TableCell>{explorer.numOfReviews}</TableCell>
-                      <TableCell>{explorer.location}</TableCell>
+                      <TableCell>{explorer.governorate},{explorer.municipality}</TableCell>
                     </TableRow>
                   ))
               ) : (
@@ -223,7 +217,6 @@ function UsersView() {
                 <TableCell>First Name</TableCell>
                 <TableCell>Last Name</TableCell>
                 <TableCell>Email</TableCell>
-                <TableCell>Mobile Number</TableCell>
                 <TableCell>Reviews</TableCell>
                 <TableCell>Business Details</TableCell>
               </TableRow>
@@ -247,12 +240,11 @@ function UsersView() {
                         </Button>
                       </TableCell>
                       <TableCell>{owner.idbusiness}</TableCell>
-                      <TableCell>{owner.idNumber}</TableCell>
+                      <TableCell>{owner.BOid}</TableCell>
                       <TableCell>{owner.username}</TableCell>
-                      <TableCell>{owner.firstName}</TableCell>
-                      <TableCell>{owner.lastName}</TableCell>
+                      <TableCell>{owner.firstname}</TableCell>
+                      <TableCell>{owner.lastname}</TableCell>
                       <TableCell>{owner.email}</TableCell>
-                      <TableCell>{owner.mobileNumber}</TableCell>
                       <TableCell>{owner.numOfReviews}</TableCell>
                       <TableCell>
                         <Button
@@ -313,7 +305,7 @@ function UsersView() {
                   </TableRow>
                   <TableRow>
                     <TableCell>Description</TableCell>
-                    <TableCell>{selectedBusiness.description}</TableCell>
+                    <TableCell>{selectedBusiness.businessDesc}</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell>Category</TableCell>
@@ -321,15 +313,11 @@ function UsersView() {
                   </TableRow>
                   <TableRow>
                     <TableCell>Location</TableCell>
-                    <TableCell>{selectedBusiness.location}</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell>Contact Email</TableCell>
-                    <TableCell>{selectedBusiness.contactEmail}</TableCell>
+                    <TableCell>{selectedBusiness.governorate},{selectedBusiness.municipality}</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell>Contact Phone</TableCell>
-                    <TableCell>{selectedBusiness.contactPhone}</TableCell>
+                    <TableCell>{selectedBusiness.mobileNum}</TableCell>
                   </TableRow>
                 </TableBody>
               </Table>

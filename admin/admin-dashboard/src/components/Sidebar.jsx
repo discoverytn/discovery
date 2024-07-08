@@ -5,7 +5,8 @@ import PeopleIcon from '@mui/icons-material/People';
 import PostAddIcon from '@mui/icons-material/PostAdd';
 import EventIcon from '@mui/icons-material/Event';
 import SearchIcon from '@mui/icons-material/Search';
-import LogoDevIcon from '@mui/icons-material/LogoDev'; 
+import LogoDevIcon from '@mui/icons-material/LogoDev';
+import EmailIcon from '@mui/icons-material/Email';
 
 function Sidebar({ onChangeView }) {
   const handleItemClick = (view) => {
@@ -32,7 +33,8 @@ function Sidebar({ onChangeView }) {
           { text: 'Dashboard', icon: DashboardIcon, view: 'dashboard' },
           { text: 'Users', icon: PeopleIcon, view: 'users' },
           { text: 'Posts', icon: PostAddIcon, view: 'posts' },
-          { text: 'Events', icon: EventIcon, view: 'events' }
+          { text: 'Events', icon: EventIcon, view: 'events' },
+          { text: 'Requests', icon: EmailIcon, view: 'requests' }, // Added Requests view
         ].map((item, index) => (
           <ListItem button key={item.text} onClick={() => handleItemClick(item.view)}>
             <ListItemIcon sx={{ color: 'white' }}>

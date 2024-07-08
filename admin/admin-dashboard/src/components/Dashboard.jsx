@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Box, CssBaseline, ThemeProvider, createTheme } from '@mui/material';
+import { useAuth } from '../AuthContext';
 import Sidebar from './Sidebar';
 import TopBar from './TopBar';
 import AnalyticsOverview from './AnalyticsOverview';
@@ -9,6 +10,7 @@ import MostFavoritePosts from './MostFavoritePosts';
 import UpcomingEvents from './UpcomingEvents';
 import UsersView from './UsersView';
 import PostsView from './PostsView';
+import RequestsView from "./RequestsView"
 
 const darkTheme = createTheme({
   palette: {
@@ -22,6 +24,7 @@ const darkTheme = createTheme({
 
 function Dashboard() {
   const [currentView, setCurrentView] = useState('dashboard');
+  const { logout } = useAuth();
 
   const changeView = (view) => {
     setCurrentView(view);
@@ -45,9 +48,10 @@ function Dashboard() {
         );
       case 'users':
         return <UsersView />;
-        case 'posts':
-  return <PostsView />;
-      
+      case 'posts':
+        return <PostsView />;
+        case 'requests':
+        return <RequestsView />;
       default:
         return <div>View not found</div>;
     }
@@ -57,7 +61,7 @@ function Dashboard() {
     <ThemeProvider theme={darkTheme}>
       <CssBaseline />
       <Box sx={{ display: 'flex', height: '100vh', bgcolor: '#0a1929' }}>
-        <Sidebar onChangeView={changeView} />
+        <Sidebar onChangeView={changeView} onLogout={logout} />
         <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
           <TopBar />
           <Box component="main" sx={{ flexGrow: 1, p: 3, overflowY: 'auto' }}>

@@ -109,6 +109,18 @@ module.exports = {
       return res.status(500).json({ error: "Failed to fetch business posts" });
     }
   },
-};
+  getPendingBusinesses: async function(req, res) {
+    try {
+      const pendingBusinesses = await db.Business.findAll({
+        where: {
+          approvalStatus: 'pending'
+        }
+      });
+      return res.status(200).json(pendingBusinesses);
+    } catch (error) {
+      console.error("Error fetching pending businesses:", error);
+      return res.status(500).json({ error: "Failed to fetch pending businesses" });
+    }
+  }}
 
 

@@ -4,14 +4,18 @@ const {
   getBusinessById,
   editBusiness,
   getBusinessPosts,
-  getBusinessNumberPosts
+  getBusinessNumberPosts,
+  getPendingBusinesses
 } = require("../Controllers/businessController");
 const router = express.Router();
 
 
+// get all pending
+
+router.get("/pending", getPendingBusinesses);
+
 // route to get business profile by ID
 router.get("/:idbusiness", getBusinessById);
-
 // route to update business profile by ID
 router.put("/:idbusiness/edit", editBusiness);
 

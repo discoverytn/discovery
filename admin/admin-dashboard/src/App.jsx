@@ -1,12 +1,35 @@
 import React from 'react';
+import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import { AuthProvider, useAuth } from './AuthContext'; // Import useAuth from AuthContext
 import Dashboard from './components/Dashboard';
+import AdminLogin from './components/AdminLogin';
 
 function App() {
   return (
-    <div className="App">
-      <Dashboard />
-    </div>
+    <Router>
+      <AuthProvider>
+        <div className="App">
+          <Routes>
+            <Route path="/admin-login" element={<AdminLogin />} />
+            <Route 
+              path="/dashboard" 
+              element={
+                <ProtectedRoute>
+                  <Dashboard />
+                </ProtectedRoute>
+              } 
+            />
+            <Route path="*" element={<Navigate to="/admin-login" replace />} />
+          </Routes>
+        </div>
+      </AuthProvider>
+    </Router>
   );
 }
+
+const ProtectedRoute = ({ children }) => {
+  const { token } = useAuth(); // Ensure useAuth is correctly imported and used here
+  return token ? children : <Navigate to="/admin-login" replace />;
+};
 
 export default App;

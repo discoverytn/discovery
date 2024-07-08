@@ -1,18 +1,15 @@
-import React, { useState } from 'react';
-import { AppBar, Toolbar, IconButton, Box, Menu, MenuItem, Typography } from '@mui/material';
+import React from 'react';
+import { AppBar, Toolbar, IconButton, Box, Typography } from '@mui/material';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import ExitToAppIcon from '@mui/icons-material/ExitToApp';
+import { useAuth } from '../AuthContext';
 
 function TopBar() {
-  const [anchorEl, setAnchorEl] = useState(null);
-  const username = "Selim Ben Said "; 
+  const { username, logout } = useAuth();
 
-  const handleMenu = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleClose = () => {
-    setAnchorEl(null);
+  const handleLogout = () => {
+    logout();
   };
 
   return (
@@ -22,20 +19,15 @@ function TopBar() {
         <IconButton color="inherit">
           <NotificationsIcon />
         </IconButton>
-        <IconButton color="inherit" onClick={handleMenu}>
+        <IconButton color="inherit">
           <AccountCircleIcon />
         </IconButton>
         <Typography variant="body1" sx={{ ml: 2 }}>
           {username}
         </Typography>
-        <Menu
-          anchorEl={anchorEl}
-          open={Boolean(anchorEl)}
-          onClose={handleClose}
-        >
-          <MenuItem onClick={handleClose}>Profile</MenuItem>
-          <MenuItem onClick={handleClose}>Logout</MenuItem>
-        </Menu>
+        <IconButton color="inherit" onClick={handleLogout}>
+          <ExitToAppIcon />
+        </IconButton>
       </Toolbar>
     </AppBar>
   );
