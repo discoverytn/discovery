@@ -5,7 +5,7 @@ const Business = db.Business;
 
 // create a new notification
 const createNotification = async (req, res) => {
-  const { type, message, explorer_idexplorer, business_idbusiness } = req.body;
+  const { type, message, explorer_idexplorer, business_idbusiness,senderImage } = req.body;
 
   try {
     const notification = await Notif.create({
@@ -14,7 +14,8 @@ const createNotification = async (req, res) => {
       explorer_idexplorer,
       business_idbusiness,
       created_at: new Date(),
-      is_read: false
+      is_read: false,
+      senderImage 
     });
 
     res.status(201).json({
@@ -44,7 +45,9 @@ const getUserNotifications = async (req, res) => {
 
     const notifications = await Notif.findAll({
       where,
-      order: [['created_at', 'DESC']]
+      order: [['created_at', 'DESC']],
+      attributes: ['idnotif', 'type', 'message', 'created_at', 'is_read', 'senderImage'] // Include senderImage
+
     });
 
     res.status(200).json(notifications);

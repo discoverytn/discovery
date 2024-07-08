@@ -19,34 +19,38 @@ const createComment = async (req, res) => {
     // Fetch the post to get the post owner's ID
     const post = await Post.findByPk(idposts);
     
-    // Determine the commenter's name
-    let commenterName = '';
-    if (explorer_idexplorer) {
-      const explorer = await Explorer.findByPk(explorer_idexplorer);
-      commenterName = explorer.username;
-    } else if (business_idbusiness) {
-      const business = await Business.findByPk(business_idbusiness);
-      commenterName = business.businessname;
-    }
+// Determine the commenter's name and image
+let commenterName = '';
+let commenterImage = '';
+if (explorer_idexplorer) {
+  const explorer = await Explorer.findByPk(explorer_idexplorer);
+  commenterName = explorer.username;
+  commenterImage = explorer.image;
+} else if (business_idbusiness) {
+  const business = await Business.findByPk(business_idbusiness);
+  commenterName = business.businessname;
+  commenterImage = business.image;
+}
 
-    // Create a notification for the post owner
-    await Notif.create({
-      type: 'comment',
-      message: `${commenterName} commented on your post: "${post.title}"`,
-      explorer_idexplorer: post.explorer_idexplorer,
-      business_idbusiness: post.business_idbusiness,
-      created_at: new Date(),
-      is_read: false
-    });
+// Create a notification for the post owner
+await Notif.create({
+  type: 'comment',
+  message: `${commenterName} commented on your post: "${post.title}"`,
+  explorer_idexplorer: post.explorer_idexplorer,
+  business_idbusiness: post.business_idbusiness,
+  created_at: new Date(),
+  is_read: false,
+  senderImage: commenterImage
+});
 
-    res.status(201).json({
-      message: 'Comment created successfully',
-      comment
-    });
-  } catch (error) {
-    console.error('Error creating comment:', error);
-    res.status(500).json({ error: 'Failed to create comment' });
-  }
+res.status(201).json({
+  message: 'Comment created successfully',
+  comment
+});
+} catch (error) {
+console.error('Error creating comment:', error);
+res.status(500).json({ error: 'Failed to create comment' });
+}
 };
 
 

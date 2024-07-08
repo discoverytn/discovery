@@ -170,7 +170,8 @@ module.exports = {
         explorer_idexplorer: post.explorer_idexplorer,
         business_idbusiness: null,
         created_at: new Date(),
-        is_read: false
+        is_read: false,
+        senderImage: explorer.image
       });
 
       return res.status(200).json({ message: "Post added to favorites" });

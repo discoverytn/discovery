@@ -33,6 +33,10 @@ module.exports = (sequelize) => {
     is_read: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
+    },
+    senderImage: {
+      type: DataTypes.STRING,
+      allowNull: true,
     }
   });
 };
