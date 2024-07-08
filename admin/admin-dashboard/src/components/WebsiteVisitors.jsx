@@ -26,10 +26,10 @@ function WebsiteVisitors() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const explorersResponse = await axios.get('http://192.168.1.8:3000/admin/explorer');
+        const explorersResponse = await axios.get('http://192.168.11.112:3000/admin/explorer');
         console.log('Explorers response:', explorersResponse);
 
-        const businessResponse = await axios.get('http://192.168.1.8:3000/admin/business');
+        const businessResponse = await axios.get('http://192.168.11.112:3000/admin/business');
         console.log('Business response:', businessResponse);
 
         const newData = [

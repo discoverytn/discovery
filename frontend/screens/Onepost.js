@@ -38,7 +38,7 @@ const OnepostScreen = ({ route }) => {
 
   const fetchPostDetails = async (postId) => {
     try {
-      const response = await axios.get(`http://192.168.1.8:3000/posts/onepost/${postId}`);
+      const response = await axios.get(`http://192.168.11.112:3000/posts/onepost/${postId}`);
       setAverageRating(parseFloat(response.data.averageRating));
       setPostData(prevData => ({
         ...prevData,
@@ -96,7 +96,7 @@ const OnepostScreen = ({ route }) => {
   const checkIfPostFavorited = async (postId) => {
     try {
       const idexplorer = explorer.idexplorer;
-      const response = await axios.get(`http://192.168.1.8:3000/explorer/${idexplorer}/favourites/${postId}/check`);
+      const response = await axios.get(`http://192.168.11.112:3000/explorer/${idexplorer}/favourites/${postId}/check`);
       setIsFavorited(response.data.favorited);
     } catch (error) {
       console.error('Error checking if post is favorited:', error);
@@ -106,7 +106,7 @@ const OnepostScreen = ({ route }) => {
   const checkIfPostTraveled = async (postId) => {
     try {
       const idexplorer = explorer.idexplorer;
-      const response = await axios.get(`http://192.168.1.8:3000/explorer/${idexplorer}/traveled/${postId}/check`);
+      const response = await axios.get(`http://192.168.11.112:3000/explorer/${idexplorer}/traveled/${postId}/check`);
       setIsTraveled(response.data.traveled);
     } catch (error) {
       console.error('Error checking if post is traveled:', error);
@@ -114,19 +114,19 @@ const OnepostScreen = ({ route }) => {
   };
 
 
-  const addToFavorites = async () => {
-    try {
-      const idexplorer = explorer.idexplorer;
-      const response = await axios.post(`http://192.168.1.8:3000/explorer/${idexplorer}/favourites/${postId}/addOrRemove`, {
-        idposts: postId,
-      });
+const addToFavorites = async () => {
+  try {
+    const idexplorer = explorer.idexplorer;
+    const response = await axios.post(`http://192.168.11.112:3000/explorer/${idexplorer}/favourites/${postId}/addOrRemove`, {
+      idposts: postId,
+    });
 
     if (response.data.message === "Post added to favorites") {
       setIsFavorited(true);
       Alert.alert('Success', 'Post added to favorites');
       
       // Create a notification for the post owner
-      await axios.post('http://192.168.1.19:3000/notifications/create', {
+      await axios.post('http://192.168.11.112:3000/notifications/create', {
         type: 'favorite',
         message: `${explorer.firstname} ${explorer.lastname} added your post to favorites`,
         explorer_idexplorer: postDetails.explorer_idexplorer, // Assuming this is the post owner's ID
@@ -145,12 +145,12 @@ const OnepostScreen = ({ route }) => {
   }
 };
 
-  const addToTraveled = async () => {
-    try {
-      const idexplorer = explorer.idexplorer;
-      const response = await axios.post(`http://192.168.1.8:3000/explorer/${idexplorer}/traveled/${postId}/addOrRemove`, {
-        idposts: postId,
-      });
+const addToTraveled = async () => {
+  try {
+    const idexplorer = explorer.idexplorer;
+    const response = await axios.post(`http://192.168.11.112:3000/explorer/${idexplorer}/traveled/${postId}/addOrRemove`, {
+      idposts: postId,
+    });
 
     if (response.data.message === "Post added to traveled") {
       setIsTraveled(true);
@@ -185,19 +185,20 @@ const handleImagePress = (imageUri) => {
 const handleSeeMorePress = () => {
   setShowMoreReviews(!showMoreReviews);
 
-    if (!showMoreReviews && scrollViewRef.current) {
-      scrollViewRef.current.scrollToEnd({ animated: true });
-    }
-  };
-  const fetchComments = async (postId) => {
-    try {
-      const response = await axios.get(`http://192.168.1.8:3000/comments/post/${postId}`);
-      setComments(response.data);
-    } catch (error) {
-      console.error('Error fetching comments:', error);
-      Alert.alert('Error', 'Failed to fetch comments');
-    }
-  };
+  if (!showMoreReviews && scrollViewRef.current) {
+    scrollViewRef.current.scrollToEnd({ animated: true });
+  }
+};
+
+const fetchComments = async (postId) => {
+  try {
+    const response = await axios.get(`http://192.168.11.112:3000/comments/post/${postId}`);
+    setComments(response.data);
+  } catch (error) {
+    console.error('Error fetching comments:', error);
+    Alert.alert('Error', 'Failed to fetch comments');
+  }
+};
 
 const handleAddComment = async () => {
   if (!newComment.trim()) return;
@@ -210,37 +211,71 @@ const handleAddComment = async () => {
       business_idbusiness: business.idbusiness
     };
 
-      const response = await axios.post('http://192.168.1.8:3000/comments/create', commentData);
-      setComments([response.data.comment, ...comments]);
-      setNewComment('');
-    } catch (error) {
-      console.error('Error adding comment:', error);
-      Alert.alert('Error', 'Failed to add comment');
-    }
-  };
+    const response = await axios.post('http://192.168.11.112:3000/comments/create', commentData);
+    
+   
+    const newCommentWithUser = {
+      ...response.data.comment,
+      Explorer: explorer.idexplorer ? {
+        idexplorer: explorer.idexplorer,
+        firstname: explorer.firstname,
+        lastname: explorer.lastname,
+        username: explorer.username,
+        image: explorer.image
+      } : null,
+      Business: business.idbusiness ? {
+        idbusiness: business.idbusiness,
+        businessname: business.businessname,
+        firstname: business.firstname,
+        lastname: business.lastname,
+        username: business.username,
+        image: business.image
+      } : null
+    };
 
-  const handleEditComment = async (commentId, newContent) => {
-    try {
-      await axios.put(`http://192.168.1.8:3000/comments/${commentId}`, { content: newContent });
-      setComments(comments.map(comment => 
-        comment.idcomments === commentId ? { ...comment, content: newContent } : comment
-      ));
-      setEditingCommentId(null);
-    } catch (error) {
-      console.error('Error editing comment:', error);
-      Alert.alert('Error', 'Failed to edit comment');
-    }
-  };
+    setComments([newCommentWithUser, ...comments]);
+    setNewComment('');
+  } catch (error) {
+    console.error('Error adding comment:', error);
+    Alert.alert('Error', 'Failed to add comment');
+  }
+};
 
-  const handleDeleteComment = async (commentId) => {
-    try {
-      await axios.delete(`http://192.168.1.8:3000/comments/${commentId}`);
-      setComments(comments.filter(comment => comment.idcomments !== commentId));
-    } catch (error) {
-      console.error('Error deleting comment:', error);
-      Alert.alert('Error', 'Failed to delete comment');
-    }
-  };
+const handleEditComment = async (commentId, newContent) => {
+  try {
+    await axios.put(`http://192.168.11.112:3000/comments/${commentId}`, { content: newContent });
+    setComments(comments.map(comment => 
+      comment.idcomments === commentId ? { ...comment, content: newContent } : comment
+    ));
+    setEditingCommentId(null);
+  } catch (error) {
+    console.error('Error editing comment:', error);
+    Alert.alert('Error', 'Failed to edit comment');
+  }
+};
+
+const handleDeleteComment = async (commentId) => {
+  try {
+    await axios.delete(`http://192.168.11.112:3000/comments/${commentId}`);
+    setComments(comments.filter(comment => comment.idcomments !== commentId));
+  } catch (error) {
+    console.error('Error deleting comment:', error);
+    Alert.alert('Error', 'Failed to delete comment');
+  }
+};
+
+const getUserImage = (user) => {
+  if (!user) return require('../assets/user.jpg');
+  return user.image && user.image.startsWith('http') 
+    ? { uri: user.image } 
+    : require('../assets/user.jpg');
+};
+
+const getUserDisplayName = (user) => {
+  if (!user) return 'Unknown User';
+  if (user.firstname && user.lastname) return `${user.firstname} ${user.lastname}`;
+  return user.username || user.businessname || 'Unknown User';
+};
 
 if (!postData) {
   return (
