@@ -1,7 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import { Box, Paper, Typography } from '@mui/material';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import axios from 'axios';
+import React, { useState, useEffect } from "react";
+import { Box, Paper, Typography } from "@mui/material";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from "recharts";
+import axios from "axios";
 
 function PostsByUserType() {
   const [data, setData] = useState([]);
@@ -9,19 +18,22 @@ function PostsByUserType() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const businessPostsResponse = await axios.get('http://192.168.11.112:3000/posts/business/posts');
-        const explorerPostsResponse = await axios.get('http://192.168.11.112:3000/posts/explorer/posts');
+        const businessPostsResponse = await axios.get(
+          "http://192.168.100.3:3000/posts/business/posts"
+        );
+        const explorerPostsResponse = await axios.get(
+          "http://192.168.100.3:3000/posts/explorer/posts"
+        );
 
         const businessPosts = businessPostsResponse.data.length;
         const explorerPosts = explorerPostsResponse.data.length;
 
         setData([
-          { name: 'Business Owners', posts: businessPosts },
-          { name: 'Explorers', posts: explorerPosts },
+          { name: "Business Owners", posts: businessPosts },
+          { name: "Explorers", posts: explorerPosts },
         ]);
       } catch (error) {
-        console.error('Error fetching posts:', error);
-        
+        console.error("Error fetching posts:", error);
       }
     };
 
@@ -29,7 +41,7 @@ function PostsByUserType() {
   }, []);
 
   return (
-    <Box sx={{ flexBasis: '50%', pl: 2 }}>
+    <Box sx={{ flexBasis: "50%", pl: 2 }}>
       <Paper sx={{ p: 2, height: 400 }}>
         <Typography variant="h6">Posts by User Type</Typography>
         <ResponsiveContainer width="100%" height={300}>

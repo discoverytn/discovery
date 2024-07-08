@@ -1,7 +1,5 @@
 const db = require('../database/index');
 const Posts = db.Posts;
-const Explorer = db.Explorer;
-
 
 const ExplorerCreatePost = async (req, res) => {
   const { title, description, hashtags, location, long, latt, image1, image2, image3, image4, category, explorer_idexplorer } = req.body;
@@ -28,6 +26,7 @@ const ExplorerCreatePost = async (req, res) => {
     res.status(500).json({ error: "Failed to create explorer post" });
   }
 };
+
 const BusinessCreatePost = async (req, res) => {
   const { title, description, hashtags, location, long, latt, image1, image2, image3, image4, category, business_idbusiness } = req.body;
 
@@ -135,6 +134,7 @@ const ExplorerDeletePost = async (req, res) => {
     res.status(500).json({ error: "Failed to delete explorer post" });
   }
 };
+
 const BusinessDeletePost = async (req, res) => {
   const { id } = req.params;
 

@@ -1,4 +1,5 @@
 const db = require('../database/index');
+const { approveEmail,declineEmail } = require('../approveEmail'); 
 
 const getAllUsers = async (req, res) => {
   try {
@@ -155,6 +156,7 @@ const getBusinessById = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
 const deleteExplorer = async (req, res) => {
   const { explorerId } = req.params;
 
@@ -172,6 +174,7 @@ const deleteExplorer = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
 const deleteBusinessOwner = async (req, res) => {
   const { ownerId } = req.params;
 
@@ -190,6 +193,46 @@ const deleteBusinessOwner = async (req, res) => {
   }
 };
 
+const approveBusiness = async (req, res) => {
+  try {
+    const business = await db.Business.findByPk(req.params.idbusiness);
+    if (!business) {
+      return res.status(404).send("Business not found");
+    }
+
+    business.approvalStatus = 'accepted';
+    await business.save();
+
+    
+    const recipientEmail = business.email;
+    await approveEmail(recipientEmail);
+
+    return res.status(200).send("Business approved successfully");
+  } catch (error) {
+    console.error("Error approving business:", error);
+    return res.status(500).send("Failed to approve business");
+  }
+};
+
+const declineBusiness = async (req, res) => {
+  try {
+    const business = await db.Business.findByPk(req.params.idbusiness);
+    if (!business) {
+      return res.status(404).send("Business not found");
+    }
+
+    
+    const recipientEmail = business.email;
+    await declineEmail(recipientEmail);
+
+    await business.destroy();
+
+    return res.status(200).send("Business declined and deleted successfully");
+  } catch (error) {
+    console.error("Error declining business:", error);
+    return res.status(500).send("Failed to decline business");
+  }
+};
 
 module.exports = {
   getAllUsers,
@@ -200,5 +243,7 @@ module.exports = {
   getAllExplorers,
   getBusinessById,
   deleteExplorer,
-  deleteBusinessOwner
+  deleteBusinessOwner,
+  approveBusiness,
+  declineBusiness,
 };

@@ -14,7 +14,7 @@ import {jwtDecode} from "jwt-decode";
 
 const LoginScreen = () => {
   const navigation = useNavigation();
-  const { loginAction, token } = useAuth();
+  const { loginAction } = useAuth(); 
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -27,12 +27,12 @@ const LoginScreen = () => {
 
   const handleLogin = async () => {
     try {
-      const { token: authToken } = await loginAction({ email, password }); 
-
+      const { token: authToken } = await loginAction({ email, password });
+  
       if (authToken) {
         const decodedToken = jwtDecode(authToken);
         const userRole = decodedToken.role;
-
+  
         if (userRole === "explorer") {
           navigation.navigate("explorerProfil");
         } else if (userRole === "business") {
@@ -45,13 +45,20 @@ const LoginScreen = () => {
       }
     } catch (error) {
       console.error("Login error:", error);
-      Alert.alert("Login Failed", error.message || "Login failed!");
+      if (error.response && error.response.status === 401) {
+        Alert.alert(
+          "Your request has been sent, please wait for admin approval"
+        );
+      } else {
+        Alert.alert("Login Failed", error.message || "Login failed!");
+      }
     }
   };
+  
 
   const sendResetCode = async () => {
     try {
-      const endpoint = `http://192.168.11.112:3000/auth/send-reset-code`;
+      const endpoint = `http://192.168.100.3:3000/auth/send-reset-code`;
       const payload = { email: resetEmail };
 
       const response = await axios.post(endpoint, payload);
@@ -76,7 +83,7 @@ const LoginScreen = () => {
 
   const verifyResetCode = async () => {
     try {
-      const endpoint = `http://192.168.11.112:3000/auth/verify-code`;
+      const endpoint = `http://192.168.100.3:3000/auth/verify-code`;
       const payload = { email: resetEmail, code: resetCode };
 
       const response = await axios.post(endpoint, payload);
@@ -106,7 +113,7 @@ const LoginScreen = () => {
     }
 
     try {
-      const endpoint = `http://192.168.11.112:3000/auth/reset-password`;
+      const endpoint = `http://192.168.100.3:3000/auth/reset-password`;
       const payload = { email: resetEmail, newPassword };
 
       const response = await axios.post(endpoint, payload);
@@ -232,7 +239,8 @@ const LoginScreen = () => {
 
         <TouchableOpacity onPress={() => navigation.navigate("Signup")}>
           <Text style={styles.loginText}>
-            Don't have an account? <Text style={styles.loginLink}>Sign Up</Text>
+            Don't have an account?{" "}
+            <Text style={styles.loginLink}>Sign Up</Text>
           </Text>
         </TouchableOpacity>
       </View>
