@@ -36,7 +36,7 @@ const RequestsView = () => {
   useEffect(() => {
     const fetchPendingAccounts = async () => {
       try {
-        const response = await axios.get('http://192.168.1.19:3000/business/pending');
+        const response = await axios.get('http://192.168.100.4:3000/business/pending');
         setPendingAccounts(response.data);
         setLoading(false);
       } catch (error) {
@@ -58,7 +58,7 @@ const RequestsView = () => {
 
   const handleApprove = async (idbusiness) => {
     try {
-      await axios.put(`http://192.168.1.19:3000/admin/approve/${idbusiness}`);
+      await axios.put(`http://192.168.100.4:3000/admin/approve/${idbusiness}`);
       setPendingAccounts(pendingAccounts.filter(account => account.idbusiness !== idbusiness));
     } catch (error) {
       console.error('Error approving business:', error);
@@ -67,7 +67,7 @@ const RequestsView = () => {
 
   const handleDecline = async (idbusiness) => {
     try {
-      await axios.delete(`http://192.168.1.19:3000/admin/decline/${idbusiness}`);
+      await axios.delete(`http://192.168.100.4:3000/admin/decline/${idbusiness}`);
       setPendingAccounts(pendingAccounts.filter(account => account.idbusiness !== idbusiness));
     } catch (error) {
       console.error('Error declining business:', error);
