@@ -7,13 +7,11 @@ import {
   StyleSheet,
   Alert,
   Image,
-  ScrollView,
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import { useAuth } from "../context/AuthContext";
 import * as ImagePicker from "expo-image-picker";
 import axios from "axios";
-import { useNavigation } from '@react-navigation/native';
 
 const CLOUDINARY_UPLOAD_PRESET = "discovery";
 const CLOUDINARY_UPLOAD_URL =
@@ -28,11 +26,9 @@ const SignupScreen = () => {
   const [businessName, setBusinessName] = useState("");
   const [BOid, setBOid] = useState("");
   const [credImg, setCredImg] = useState(null);
-  const [category, setCategory] = useState("Restaurant");
+  const [category, setCategory] = useState("Restaurant"); 
 
-  const navigation = useNavigation();
-
-  const Submit = async () => {
+  const handleSubmit = async () => {
     try {
       let payload;
 
@@ -60,7 +56,6 @@ const SignupScreen = () => {
       console.log("Signup successful with token:", token);
       Alert.alert("Signup Successful", "You have successfully signed up!");
       clearFields();
-      navigation.navigate('Login');
     } catch (error) {
       console.error("Signup error:", error);
       Alert.alert("Signup Failed", "Failed to signup, please try again");
@@ -74,7 +69,7 @@ const SignupScreen = () => {
     setBusinessName("");
     setBOid("");
     setCredImg(null);
-    setCategory("Restaurant");
+    setCategory("Restaurant"); // Reset category to default
   };
 
   const selectImage = async () => {
@@ -151,145 +146,120 @@ const SignupScreen = () => {
         </>
       )}
       <TouchableOpacity style={styles.selectImageButton} onPress={selectImage}>
-        <Text style={styles.buttonText}>Business Doc Image</Text>
+        <Text style={styles.buttonText}>Select Business Image</Text>
       </TouchableOpacity>
     </View>
   );
 
   return (
-    <ScrollView contentContainerStyle={styles.scrollViewContent}>
-      <View style={styles.container}>
-        <View style={styles.signupContainer}>
-          <Text style={styles.header}>Sign up for Discovery</Text>
-          <Text style={styles.subHeader}>Enter your details below</Text>
+    <View style={styles.container}>
+      <Text style={styles.header}>Sign up</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="Name"
+        value={name}
+        onChangeText={setName}
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Email"
+        value={email}
+        onChangeText={setEmail}
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Password"
+        secureTextEntry
+        value={password}
+        onChangeText={setPassword}
+      />
+      <Picker
+        selectedValue={role}
+        style={styles.input}
+        onValueChange={(itemValue) => setRole(itemValue)}
+      >
+        <Picker.Item label="Explorer" value="explorer" />
+        <Picker.Item label="Business" value="business" />
+      </Picker>
+      {role === "business" && (
+        <>
           <TextInput
             style={styles.input}
-            placeholder="Name"
-            value={name}
-            onChangeText={setName}
+            placeholder="Business Name"
+            value={businessName}
+            onChangeText={setBusinessName}
           />
           <TextInput
             style={styles.input}
-            placeholder="Email"
-            value={email}
-            onChangeText={setEmail}
-            keyboardType="email-address"
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Password"
-            secureTextEntry
-            value={password}
-            onChangeText={setPassword}
+            placeholder="Business Organization ID (BOid)"
+            value={BOid}
+            onChangeText={setBOid}
           />
           <Picker
-            selectedValue={role}
+            selectedValue={category}
             style={styles.input}
-            onValueChange={(itemValue) => setRole(itemValue)}
+            onValueChange={(itemValue) => setCategory(itemValue)}
           >
-            <Picker.Item label="Explorer" value="explorer" />
-            <Picker.Item label="Business" value="business" />
+            <Picker.Item label="Restaurant" value="Restaurant" />
+            <Picker.Item label="Coffee Shop" value="Coffee Shop" />
+            <Picker.Item label="Nature" value="Nature" />
+            <Picker.Item label="Art" value="Art" />
+            <Picker.Item label="Camping" value="Camping" />
+            <Picker.Item label="Workout" value="Workout" />
+            <Picker.Item label="Cycling" value="Cycling" />
           </Picker>
-          {role === "business" && (
-            <>
-              <TextInput
-                style={styles.input}
-                placeholder="Business Name"
-                value={businessName}
-                onChangeText={setBusinessName}
-              />
-              <TextInput
-                style={styles.input}
-                placeholder="Business Owner ID"
-                value={BOid}
-                onChangeText={(text) => setBOid(text.replace(/[^0-9]/g, ''))}
-                keyboardType="numeric"
-              />
-              <Picker
-                selectedValue={category}
-                style={styles.input}
-                onValueChange={(itemValue) => setCategory(itemValue)}
-              >
-                <Picker.Item label="Restaurant" value="Restaurant" />
-                <Picker.Item label="Coffee Shop" value="Coffee Shop" />
-                <Picker.Item label="Nature" value="Nature" />
-                <Picker.Item label="Art" value="Art" />
-                <Picker.Item label="Camping" value="Camping" />
-                <Picker.Item label="Workout" value="Workout" />
-                <Picker.Item label="Cycling" value="Cycling" />
-              </Picker>
-              {renderImageItem()}
-            </>
-          )}
-          <TouchableOpacity style={styles.button} onPress={Submit}>
-            <Text style={styles.buttonText}>Sign Up</Text>
-          </TouchableOpacity>
-        </View>
-        <TouchableOpacity onPress={() => navigation.navigate("Login")}>
-          <Text style={styles.loginText}>
-            Already have an account? <Text style={styles.loginLink}>Log In</Text>
-          </Text>
-        </TouchableOpacity>
-      </View>
-    </ScrollView>
+          {renderImageItem()}
+        </>
+      )}
+      <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+        <Text style={styles.buttonText}>Sign Up</Text>
+      </TouchableOpacity>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  scrollViewContent: {
-    flexGrow: 1,
-  },
   container: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "#fff",
-    paddingVertical: 20,
-  },
-  signupContainer: {
-    width: "80%",
-    maxWidth: 400,
+    paddingHorizontal: 20,
   },
   header: {
     fontSize: 24,
-    fontWeight: "bold",
     marginBottom: 20,
-    textAlign: "center",
-  },
-  subHeader: {
-    fontSize: 16,
-    marginBottom: 20,
-    textAlign: "center",
   },
   input: {
+    width: "100%",
+    height: 40,
+    borderColor: "#ccc",
     borderWidth: 1,
-    borderColor: "#ddd",
-    padding: 10,
-    fontSize: 18,
-    borderRadius: 6,
-    marginBottom: 20,
+    borderRadius: 5,
+    paddingHorizontal: 10,
+    marginBottom: 10,
   },
   button: {
-    backgroundColor: "#00aacc",
-    padding: 15,
-    borderRadius: 6,
+    backgroundColor: "#007BFF",
+    padding: 10,
+    borderRadius: 5,
+    width: "100%",
     alignItems: "center",
-    marginBottom: 20,
+    marginTop: 20,
   },
   buttonText: {
     color: "#fff",
-    fontSize: 18,
-    fontWeight: "bold",
+    fontSize: 16,
   },
   imageContainer: {
     alignItems: "center",
     marginBottom: 20,
   },
   selectImageButton: {
-    backgroundColor: "#00aacc",
+    backgroundColor: "#007BFF",
     paddingVertical: 10,
     paddingHorizontal: 20,
-    borderRadius: 6,
+    borderRadius: 5,
     marginTop: 10,
   },
   removeImageButton: {
@@ -312,14 +282,6 @@ const styles = StyleSheet.create({
     height: 200,
     borderRadius: 10,
     marginBottom: 10,
-  },
-  loginText: {
-    textAlign: "center",
-  },
-  loginLink: {
-    color: "#007BFF",
-    fontWeight: "bold",
-    textDecorationLine: "underline",
   },
 });
 

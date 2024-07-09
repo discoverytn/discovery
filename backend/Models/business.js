@@ -1,28 +1,28 @@
 const { DataTypes } = require("sequelize");
-
-module.exports = (sequelize) => {
-  return sequelize.define("Business", {
-    idbusiness: {
-      type: DataTypes.INTEGER,
-      primaryKey: true,
-      autoIncrement: true,
+const { Business } = require("../database"); 
+module.exports=(sequelize)=>{
+  return sequelize.define('Business',{
+    idbusiness:{
+      type:DataTypes.INTEGER,
+      primaryKey:true,
+      autoIncrement:true,
     },
-    username: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      unique: true,
+    username : {
+      type:DataTypes.STRING,
+      allowNull:false,
+      unique:true 
     },
-    firstname: {
-      type: DataTypes.STRING,
-      allowNull: true,
+    firstname:{
+      type:DataTypes.STRING,
+      allowNull:true
     },
-    lastname: {
-      type: DataTypes.STRING,
-      allowNull: true,
+    lastname :{
+      type:DataTypes.STRING,
+      allowNull:true
     },
-    email: {
-      type: DataTypes.STRING,
-      allowNull: false,
+    email :{
+      type:DataTypes.STRING,
+  allowNull: false,
       unique: true,
     },
     password: {
@@ -34,6 +34,11 @@ module.exports = (sequelize) => {
       allowNull: true,
     },
     municipality: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+
+    location: {
       type: DataTypes.STRING,
       allowNull: true,
     },

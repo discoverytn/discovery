@@ -21,13 +21,6 @@ module.exports = (sequelize) => {
         model: 'Explorers', 
         key: 'idexplorer',
       }
-    },
-    business_idbusiness: {
-      type: DataTypes.INTEGER,
-      references: {
-        model: 'Businesses', 
-        key: 'idbusiness',
-      }
     }
   });
 };

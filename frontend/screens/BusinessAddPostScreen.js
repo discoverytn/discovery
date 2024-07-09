@@ -315,4 +315,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default BusinessAddPostScreen;
+export default BusinessAddPostScreen 

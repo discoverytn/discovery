@@ -33,7 +33,7 @@ module.exports = (sequelize) => {
     },
     image1: {
       type: DataTypes.STRING,
-      allowNull: false 
+      allowNull: true 
     },
     image2: {
       type: DataTypes.STRING,
@@ -58,21 +58,6 @@ module.exports = (sequelize) => {
     business_idbusiness: {
       type: DataTypes.INTEGER,
       allowNull: true
-    },
-    numOfRatings: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      defaultValue: 0
-    },
-    totalRating: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      defaultValue: 0
-    },
-    averageRating: {
-      type: DataTypes.FLOAT,
-      allowNull: false,
-      defaultValue: 0,
     }
   });
 };

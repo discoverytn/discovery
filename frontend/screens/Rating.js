@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { View, Image, TouchableOpacity, Text, StyleSheet } from 'react-native';
-import { useAuth } from '../context/AuthContext';
+import React from 'react';
+import { View, Image, TouchableOpacity, Text } from 'react-native';
 
 const starGrey = require('../assets/star_grey.jpg');
 const starGold = require('../assets/star_gold.jpg');
@@ -100,44 +99,13 @@ const Rating = ({ postId, onRate }) => {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.starsContainer}>
-        {renderStars(userRating || 0)}
+    <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 5 }}>
+      <View style={{ flexDirection: 'row', marginRight: 10 }}>
+        {stars}
       </View>
-      <Text style={styles.ratingText}>
-        {userRating ? userRating.toFixed(1) : 'Rate this'}
-      </Text>
-      <Text style={styles.averageRatingText}>
-        {averageRating ? `Avg: ${averageRating.toFixed(1)}` : ''}
-      </Text>
+      <Text style={{ fontWeight: 'bold' }}>{selectedRating}</Text>
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'column',
-    alignItems: 'center',
-    marginTop: 5,
-  },
-  starsContainer: {
-    flexDirection: 'row',
-    marginRight: 10,
-  },
-  star: {
-    width: 20,
-    height: 20,
-    marginRight: 3,
-  },
-  ratingText: {
-    fontWeight: 'bold',
-    fontSize: 16,
-    marginTop: 5, 
-  },
-  averageRatingText: {
-    fontSize: 12,
-    marginTop: 5,
-  },
-});
 
 export default Rating;

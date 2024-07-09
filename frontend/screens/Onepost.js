@@ -1,24 +1,13 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet, ScrollView, Alert, Linking, Platform, TextInput } from 'react-native';
+import React, { useState, useRef } from 'react';
+import { View, Text, Image, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faHeart, faPaperPlane, faCloudSunRain, faStar, faTrash, faEdit, faComment } from '@fortawesome/free-solid-svg-icons';
-import axios from 'axios';
-import { useNavigation } from '@react-navigation/native';
-import { useAuth } from '../context/AuthContext';
+import { faHeart, faPaperPlane, faCloudSunRain, faStar, faTrash, faEdit } from '@fortawesome/free-solid-svg-icons';
 
-const OnepostScreen = ({ route }) => {
-  const [postData, setPostData] = useState(null);
-  const [selectedImage, setSelectedImage] = useState(null);
+const OnepostScreen = () => {
+  const mainImage = require('../assets/onep.jpg');
+  const [selectedImage, setSelectedImage] = useState(mainImage);
   const [showFullDescription, setShowFullDescription] = useState(false);
-  const [isFavorited, setIsFavorited] = useState(false);
-  const [isTraveled, setIsTraveled] = useState(false); 
   const [showMoreReviews, setShowMoreReviews] = useState(false);
-  const [averageRating, setAverageRating] = useState(0);
-  const [weatherData, setWeatherData] = useState(null);
-  const [coordinates, setCoordinates] = useState(null);
-  const [comments, setComments] = useState([]);
-  const [newComment, setNewComment] = useState('');
-  const [editingCommentId, setEditingCommentId] = useState(null);
   const scrollViewRef = useRef(null);
   const { explorer, business } = useAuth();
   const navigation = useNavigation();
@@ -289,151 +278,67 @@ const getUserDisplayName = (user) => {
 
 if (!postData) {
   return (
-    <View style={styles.loadingContainer}>
-      <Text style={styles.loadingText}>Onepost</Text>
-      <Text style={styles.noPostsText}>No post selected yet !</Text>
-    </View>
-  );
-}
-
-const { postId, postDetails } = postData;
-const { name, location, image, image2, image3, image4, description } = postDetails;
-
-const shortDescription = description.slice(0, 100) + '...';
-
-return (
-  <ScrollView ref={scrollViewRef} style={styles.container}>
-    <View style={styles.imageContainer}>
-      <Image source={{ uri: selectedImage }} style={styles.mainImage} />
-      <View style={styles.iconsContainer}>
-        <TouchableOpacity onPress={addToFavorites} style={styles.iconContainer}>
-          <FontAwesomeIcon
-            icon={faHeart}
-            style={[styles.icon, isFavorited ? styles.favoriteIconActive : styles.favoriteIconInactive]}
-            size={26}
-          />
-        </TouchableOpacity>
-        <TouchableOpacity onPress={handleSendPost} style={styles.iconContainer}>
-          <FontAwesomeIcon
-            icon={faPaperPlane}
-            style={[styles.icon1, isTraveled ? styles.traveledIconActive : styles.traveledIconInactive]}
-            size={26}
-          />
-        </TouchableOpacity>
+    <ScrollView style={styles.container} ref={scrollViewRef}>
+      <View style={styles.imageContainer}>
+        <Image source={selectedImage} style={styles.mainImage} />
+        <View style={styles.iconsContainer}>
+          <FontAwesomeIcon icon={faHeart} style={styles.icon} size={26} />
+          <FontAwesomeIcon icon={faPaperPlane} style={styles.icon1} size={26} />
+        </View>
+        <View style={styles.thumbnailContainer}>
+          <TouchableOpacity onPress={() => setSelectedImage(require('../assets/cycling.jpg'))}>
+            <Image source={require('../assets/cycling.jpg')} style={styles.thumbnail} />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => setSelectedImage(require('../assets/eljem.jpg'))}>
+            <Image source={require('../assets/eljem.jpg')} style={styles.thumbnail} />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => setSelectedImage(require('../assets/kairouen1.jpg'))}>
+            <Image source={require('../assets/kairouen1.jpg')} style={styles.thumbnail} />
+          </TouchableOpacity>
+          {selectedImage !== mainImage && (
+            <TouchableOpacity onPress={() => setSelectedImage(mainImage)}>
+              <Image source={mainImage} style={styles.thumbnail} />
+            </TouchableOpacity>
+          )}
+        </View>
       </View>
-      <View style={styles.thumbnailContainer}>
-        {image2 && (
-          <TouchableOpacity onPress={() => handleImagePress(image2.uri)}>
-            <Image source={{ uri: image2.uri }} style={styles.thumbnail} />
-          </TouchableOpacity>
-        )}
-        {image3 && (
-          <TouchableOpacity onPress={() => handleImagePress(image3.uri)}>
-            <Image source={{ uri: image3.uri }} style={styles.thumbnail} />
-          </TouchableOpacity>
-        )}
-        {image4 && (
-          <TouchableOpacity onPress={() => handleImagePress(image4.uri)}>
-            <Image source={{ uri: image4.uri }} style={styles.thumbnail} />
-          </TouchableOpacity>
-        )}
-        {selectedImage !== image.uri && (
-          <TouchableOpacity onPress={() => handleImagePress(image.uri)}>
-            <Image source={{ uri: image.uri }} style={styles.thumbnail} />
-          </TouchableOpacity>
-        )}
-      </View>
-    </View>
-    <View style={styles.detailsContainer}>
-      <Text style={styles.title}>{name}</Text>
-      <View style={styles.infoRow}>
-        <TouchableOpacity onPress={openMap}>
+      <View style={styles.detailsContainer}>
+        <Text style={styles.title}>Nefza</Text>
+        <View style={styles.infoRow}>
           <View style={styles.infoItem}>
             <Image source={require('../assets/location.jpg')} style={styles.infoIcon} />
-            <Text style={styles.infoText}>{location}</Text>
+            <Text style={styles.infoText}>Location</Text>
           </View>
+          <View style={styles.infoItem}>
+            <FontAwesomeIcon icon={faCloudSunRain} style={styles.weatherIcon} size={32}/>
+            <Text style={styles.infoText}>25°C</Text>
+          </View>
+          <View style={styles.infoItem}>
+            <View style={styles.eventIconContainer}>
+              <Image source={require('../assets/calender.jpg')} style={styles.eventIcon} />
+            </View>
+          </View>
+        </View>
+        <Text style={styles.subtitle}>About Destination</Text>
+        <Text style={styles.description}>{showFullDescription ? description : shortDescription}</Text>
+        <TouchableOpacity onPress={() => setShowFullDescription(!showFullDescription)}>
+          <Text style={styles.readMore}>{showFullDescription ? 'Read Less' : 'Read More'}</Text>
         </TouchableOpacity>
-        <View style={styles.infoItem}>
-          <FontAwesomeIcon icon={faCloudSunRain} style={styles.weatherIcon} size={32} />
-          <Text style={styles.infoText}>
-            {weatherData ? `${Math.round(weatherData.temperature)}°C` : 'Loading...'}
-          </Text>
+        <View style={styles.ratingRow}>
+          <FontAwesomeIcon icon={faStar} style={styles.starIcon} />
+          <Text style={styles.ratingText}>Rating</Text>
+          <Text style={styles.ratingValue}>4.5 out of 5</Text>
         </View>
-        <View style={styles.infoItem}>
-          <View style={styles.eventIconContainer}>
-            <Image source={require('../assets/calender.jpg')} style={styles.eventIcon} />
+        <View style={styles.userRow}>
+          <Image source={require('../assets/user.jpg')} style={styles.profileImage} />
+          <View style={styles.userInfo}>
+            <Text style={styles.userName}>John Doe</Text>
+            <Text style={styles.userHandle}>@johndoe</Text>
+            <Text style={styles.comment}>Great place to visit! Highly recommend.</Text>
           </View>
+          <FontAwesomeIcon icon={faTrash} style={styles.userIcon} />
+          <FontAwesomeIcon icon={faEdit} style={styles.userIcon} />
         </View>
-      </View>
-      <Text style={styles.subtitle}>About Destination</Text>
-      <Text style={styles.description}>{showFullDescription ? description : shortDescription}</Text>
-      <TouchableOpacity onPress={() => setShowFullDescription(!showFullDescription)}>
-        <Text style={styles.readMore}>{showFullDescription ? 'Read Less' : 'Read More'}</Text>
-      </TouchableOpacity>
-      <View style={styles.ratingRow}>
-        <FontAwesomeIcon icon={faStar} style={styles.starIcon} />
-        <Text style={styles.ratingText}>Rating</Text>
-        <Text style={styles.ratingValue}>{averageRating.toFixed(1)} out of 5</Text>
-      </View>
-      
-      <View style={styles.commentsSection}>
-        <Text style={styles.commentsSectionTitle}>Comments</Text>
-        <View style={styles.addCommentContainer}>
-          <TextInput
-            style={styles.commentInput}
-            value={newComment}
-            onChangeText={setNewComment}
-            placeholder="Add a comment..."
-          />
-          <TouchableOpacity onPress={handleAddComment} style={styles.sendButton}>
-            <FontAwesomeIcon icon={faComment} style={styles.sendIcon} size={20} />
-          </TouchableOpacity>
-        </View>
-        {comments.map(comment => {
-  const user = comment.Explorer || comment.Business || {};
-  return (
-    <View key={comment.idcomments} style={styles.commentContainer}>
-      <Image 
-        source={getUserImage(user)} 
-        style={styles.commentUserImage} 
-      />
-      <View style={styles.commentContent}>
-        <Text style={styles.commentUserFullName}>
-          {getUserDisplayName(user)}
-        </Text>
-        <Text style={styles.commentUserName}>
-          @{user.username || user.businessname || 'unknown'}
-        </Text>
-                {editingCommentId === comment.idcomments ? (
-                    <TextInput
-                      style={styles.editCommentInput}
-                      value={comment.content}
-                      onChangeText={(text) => setComments(comments.map(c => 
-                        c.idcomments === comment.idcomments ? { ...c, content: text } : c
-                      ))}
-                      autoFocus
-                      onBlur={() => setEditingCommentId(null)}
-                      onSubmitEditing={() => handleEditComment(comment.idcomments, comment.content)}
-                    />
-                  ) : (
-                    <Text style={styles.commentText}>{comment.content}</Text>
-                  )}
-                </View>
-                {(explorer.idexplorer === comment.explorer_idexplorer || business.idbusiness === comment.business_idbusiness) && (
-                  <View style={styles.commentActions}>
-                    <TouchableOpacity onPress={() => setEditingCommentId(comment.idcomments)}>
-                      <FontAwesomeIcon icon={faEdit} style={styles.commentActionIcon} size={20} />
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={() => handleDeleteComment(comment.idcomments)}>
-                      <FontAwesomeIcon icon={faTrash} style={styles.commentActionIcon} size={20} />
-                    </TouchableOpacity>
-                  </View>
-                )}
-              </View>
-            );
-          })}
-        </View>
-  
         <TouchableOpacity style={styles.seeMoreButton} onPress={handleSeeMorePress}>
           <Text style={styles.seeMoreText}>{showMoreReviews ? 'Hide reviews' : 'See more reviews'}</Text>
         </TouchableOpacity>
@@ -442,7 +347,7 @@ return (
             <View style={styles.userRow}>
               <Image source={require('../assets/user.jpg')} style={styles.profileImage} />
               <View style={styles.userInfo}>
-                <Text style={styles.userName}>Yessmine nouri</Text>
+                <Text style={styles.userName}>Jane Smith</Text>
                 <Text style={styles.userHandle}>@janesmith</Text>
                 <Text style={styles.comment}>Amazing experience, will come back!</Text>
               </View>
@@ -450,7 +355,7 @@ return (
             <View style={styles.userRow}>
               <Image source={require('../assets/user.jpg')} style={styles.profileImage} />
               <View style={styles.userInfo}>
-                <Text style={styles.userName}>Amen jbeli</Text>
+                <Text style={styles.userName}>Alex Johnson</Text>
                 <Text style={styles.userHandle}>@alexjohnson</Text>
                 <Text style={styles.comment}>Beautiful scenery and great weather.</Text>
               </View>
@@ -466,19 +371,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  loadingText: {
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  noPostsText: {
-    marginTop: 20,
-    fontSize: 16,
   },
   imageContainer: {
     position: 'relative',
@@ -496,29 +388,14 @@ const styles = StyleSheet.create({
     right: 20,
     flexDirection: 'column',
   },
-  iconContainer: {
-    marginBottom: 10,
-  },
   icon: {
     color: '#DB81B6',
     marginBottom: 12,
-    marginTop: 11,
+    marginTop:11
   },
   icon1: {
     color: '#2ac00a',
     marginBottom: 12,
-  },
-  favoriteIconActive: {
-    color: 'red', 
-  },
-  favoriteIconInactive: {
-    color: 'darkgrey', 
-  },
-  traveledIconActive: {
-    color: 'green', 
-  },
-  traveledIconInactive: {
-    color: '#2ac00a', 
   },
   thumbnailContainer: {
     position: 'absolute',
@@ -541,30 +418,33 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 20,
+    marginBottom: 10,
   },
   infoRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 1,
+    marginBottom: 10,
   },
   infoItem: {
     flexDirection: 'row',
+    alignItems: 'center',
   },
   infoIcon: {
-    width: 24,
-    height: 25,
+    width: 20,
+    height: 20,
     marginRight: 5,
   },
   infoText: {
-    fontSize: 17,
+    fontSize: 16,
     color: 'grey',
-    marginRight: 5,
-    fontStyle: 'italic',
+    marginRight:5,
+    fontStyle:'italic'
   },
   weatherIcon: {
+   
     color: 'blue',
     marginRight: 8,
+    marginLeft:-22
   },
   eventIconContainer: {
     padding: 5,
@@ -606,88 +486,6 @@ const styles = StyleSheet.create({
   ratingValue: {
     color: 'grey',
   },
-  commentsSection: {
-    marginTop: 20,
-  },
-  commentsSectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 10,
-  },
-  addCommentContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 15,
-  },
-  commentInput: {
-    flex: 1,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 20,
-    paddingHorizontal: 15,
-    paddingVertical: 8,
-    marginRight: 10,
-  },
-  sendButton: {
-    padding: 10,
-  },
-  sendIcon: {
-    color: '#007AFF',
-  },
-  commentContainer: {
-    flexDirection: 'row',
-    marginBottom: 15,
-  },
-  commentUserImage: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    marginRight: 10,
-  },
-  commentContent: {
-    flex: 1,
-  },
-  commentUserFullName: {
-    fontWeight: 'bold',
-    marginBottom: 3,
-  },
-  commentUserName: {
-    color: 'grey',
-    marginBottom: 3,
-    fontSize: 12,
-  },
-  commentText: {
-    color: '#333',
-  },
-  editCommentInput: {
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 5,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-  },
-  commentActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  commentActionIcon: {
-    color: '#007AFF',
-    marginLeft: 10,
-  },
-  seeMoreButton: {
-    borderWidth: 1,
-    borderColor: 'grey',
-    borderRadius: 5,
-    padding: 10,
-    alignItems: 'center',
-    marginTop: 20,
-  },
-  seeMoreText: {
-    color: 'grey',
-  },
-  reviewsContainer: {
-    marginTop: 20,
-  },
   userRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -710,6 +508,25 @@ const styles = StyleSheet.create({
   },
   comment: {
     color: 'grey',
+  },
+  userIcon: {
+    color: 'grey',
+    marginLeft: 10,
+  },
+  seeMoreButton: {
+    borderWidth: 1,
+    borderColor: 'grey',
+    borderRadius: 5,
+    padding: 10,
+    alignItems: 'center',
+    marginTop: 20,
+  },
+
+  seeMoreText: {
+    color: 'grey',
+  },
+  reviewsContainer: {
+    marginTop: 20,
   },
 });
 

@@ -1,15 +1,18 @@
-import React, { useState, useCallback } from 'react';
-import { View, Text, Image, TouchableOpacity, FlatList, StyleSheet, ImageBackground, ActivityIndicator } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, Image, TouchableOpacity, FlatList, StyleSheet, ImageBackground } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import axios from 'axios';
-import { useAuth } from '../context/AuthContext';
-import { useFocusEffect } from '@react-navigation/native';
+
+const posts = [
+  { id: 1, name: 'Djem', location: 'Route Mahdia', image: require('../assets/djeem.jpg') },
+  { id: 2, name: 'Kairo mosque', location: 'Kairouen', image: require('../assets/kairouen1.jpg') },
+  { id: 3, name: 'souq tunis', location: 'Tunis ville', image: require('../assets/souq.jpg') },
+  { id: 4, name: 'Graffiti', location: 'jbel jloud', image: require('../assets/art.jpg') },
+  { id: 5, name: 'camping', location: 'ariana', image: require('../assets/camping.jpg') },
+  { id: 6, name: 'eljem', location: 'Mahdia', image: require('../assets/eljem.jpg') },
+];
 
 const FavoritesScreen = () => {
-  const { explorer } = useAuth();
-  const [explorerId, setExplorerId] = useState(null);
-  const [favorites, setFavorites] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [likedPosts, setLikedPosts] = useState([]);
   const navigation = useNavigation();
 
   React.useEffect(() => {
@@ -43,37 +46,35 @@ const FavoritesScreen = () => {
 
   const renderItem = ({ item }) => (
     <View style={styles.post}>
-      <TouchableOpacity activeOpacity={0.7}>
-        <Image source={{ uri: item.post_image1 }} style={styles.postImage} />
-        <View style={styles.heartIcon}>
-          <ImageBackground
-            source={require('../assets/hearted.jpg')}
-            style={styles.heartImage}
-            imageStyle={{ borderRadius: 15 }}
-          />
-        </View>
+      <TouchableOpacity
+        activeOpacity={0.7}
+        onPress={() => toggleLike(item.id)}
+        onLongPress={() => toggleLike(item.id)}
+      >
+        <Image source={item.image} style={styles.postImage} />
+        {likedPosts.includes(item.id) && (
+          <View style={styles.heartIcon}>
+            <ImageBackground
+              source={require('../assets/hearted.jpg')}
+              style={styles.heartImage}
+              imageStyle={{ borderRadius: 15 }} 
+            />
+          </View>
+        )}
       </TouchableOpacity>
-      <Text style={styles.postName}>{item.post_title}</Text>
+      <Text style={styles.postName}>{item.name}</Text>
       <View style={styles.locationContainer}>
         <View style={styles.locationIconContainer}>
           <ImageBackground
             source={require('../assets/location.jpg')}
             style={styles.locationIcon}
-            imageStyle={{ borderRadius: 7.5 }}
+            imageStyle={{ borderRadius: 7.5 }} 
           />
         </View>
-        <Text style={styles.postLocation}>{item.post_location}</Text>
+        <Text style={styles.postLocation}>{item.location}</Text>
       </View>
     </View>
   );
-
-  if (loading) {
-    return (
-      <View style={[styles.container, styles.loadingContainer]}>
-        <ActivityIndicator size="large" color="#007BFF" />
-      </View>
-    );
-  }
 
   return (
     <View style={styles.container}>
@@ -92,17 +93,13 @@ const FavoritesScreen = () => {
           <Image source={require('../assets/favoritesicon.gif')} style={styles.logo} />
         </View>
       </View>
-      {favorites.length === 0 ? (
-        <Text style={styles.noFavoritesText}>No favorites found.</Text>
-      ) : (
-        <FlatList
-          data={favorites}
-          renderItem={renderItem}
-          keyExtractor={(item) => item.idfavorites.toString()}
-          numColumns={2}
-          contentContainerStyle={styles.postsContainer}
-        />
-      )}
+      <FlatList
+        data={posts}
+        renderItem={renderItem}
+        keyExtractor={(item) => item.id.toString()}
+        numColumns={2}
+        contentContainerStyle={styles.postsContainer}
+      />
     </View>
   );
 };
@@ -112,10 +109,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
     paddingTop: 60,
-  },
-  loadingContainer: {
-    justifyContent: 'center',
-    alignItems: 'center',
   },
   header: {
     flexDirection: 'row',
@@ -142,9 +135,9 @@ const styles = StyleSheet.create({
   headerText: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#20281d',
+    color: '#20281d', 
     marginRight: 10,
-    textShadowColor: 'rgba(0, 0, 0, 0.75)',
+    textShadowColor: 'rgba(0, 0, 0, 0.75)', 
     textShadowOffset: { width: -1, height: 1 },
     textShadowRadius: 2,
   },
@@ -152,17 +145,12 @@ const styles = StyleSheet.create({
     width: 30,
     height: 30,
   },
-  noFavoritesText: {
-    fontSize: 18,
-    textAlign: 'center',
-    marginTop: 20,
-  },
   postsContainer: {
     paddingHorizontal: 10,
   },
   post: {
     flex: 1,
-    margin: 10,
+    margin: 10, 
     backgroundColor: '#fff',
     borderRadius: 15,
     overflow: 'hidden',
@@ -209,9 +197,9 @@ const styles = StyleSheet.create({
     width: 20,
     height: 20,
     marginRight: 5,
-    backgroundColor: 'white',
-    borderRadius: 10,
-    overflow: 'hidden',
+    backgroundColor: 'white', 
+    borderRadius: 10, 
+    overflow: 'hidden', 
   },
   locationIcon: {
     width: '100%',
