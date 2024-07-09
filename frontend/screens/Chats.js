@@ -44,7 +44,7 @@ const Chats = () => {
   };
 
   useEffect(() => {
-    const socketConnection = io("http://192.168.142.72:3000");
+    const socketConnection = io("http://192.168.100.4:3000");
     setSocket(socketConnection);
 
     socketConnection.on("connect", () => {

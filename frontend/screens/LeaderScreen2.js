@@ -18,7 +18,7 @@ const LeaderScreen2 = () => {
           <Text style={styles.rank}>1</Text>
           <View style={styles.profileImageContainer}>
              <Image
-              source={{ uri: 'https://i.postimg.cc/8zxC2J2N/Untitled-1.png' }}
+              source={{ uri: 'https://cdn.vectorstock.com/i/1000v/30/97/flat-business-man-user-profile-avatar-icon-vector-4333097.jpg' }}
               style={styles.profileImage}
             />
           </View>
@@ -32,11 +32,11 @@ const LeaderScreen2 = () => {
           <Text style={styles.rank}>2</Text>
           <View style={styles.profileImageContainer}>
             <Image
-              source={{ uri: 'https://i.postimg.cc/J0wTBqHt/Screenshot-2024-06-25-201110.png' }}
+              source={{ uri: 'https://cdn.vectorstock.com/i/1000v/30/97/flat-business-man-user-profile-avatar-icon-vector-4333097.jpg' }}
               style={styles.profileImage}
             />
           </View>
-          <Text style={styles.username}>Houssem</Text>
+          <Text style={styles.username}>Maher</Text>
           <Text style={styles.score}>19 posts</Text>
         </View>
 
@@ -46,11 +46,11 @@ const LeaderScreen2 = () => {
           <Text style={styles.rank}>3</Text>
           <View style={styles.profileImageContainer}>
             <Image
-              source={{ uri: 'https://i.postimg.cc/q7zQbY8z/Screenshot-2024-06-26-234920.png' }}
+              source={{ uri: 'https://cdn.vectorstock.com/i/1000v/30/97/flat-business-man-user-profile-avatar-icon-vector-4333097.jpg' }}
               style={styles.profileImage}
             />
           </View>
-          <Text style={styles.username}>Slim</Text>
+          <Text style={styles.username}>Sami</Text>
           <Text style={styles.score}>6 posts</Text>
         </View>
       </View>

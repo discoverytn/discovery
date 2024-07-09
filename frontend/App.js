@@ -26,7 +26,9 @@ import BusinessEditProfileScreen from "./screens/BusinessEditProfileScreen"
 import BusinessProfileScreen from "./screens/BusinessProfileScreen"
 import NotificationScreen from "./screens/NotificationScreen"
 import OneEventScreen from "./screens/OneEventScreen"
-
+import Chat from "./screens/Chat";
+import Chats from './screens/Chats';
+import ChatScreen from "./screens/ChatScreen"
 
 
 
