@@ -33,11 +33,7 @@ module.exports = (sequelize) => {
     },
     image1: {
       type: DataTypes.STRING,
-<<<<<<< HEAD
-      allowNull: false 
-=======
       allowNull: true 
->>>>>>> 9860a3bf0a78ca7211eda5d920fcd6980f3be129
     },
     image2: {
       type: DataTypes.STRING,
@@ -62,24 +58,6 @@ module.exports = (sequelize) => {
     business_idbusiness: {
       type: DataTypes.INTEGER,
       allowNull: true
-<<<<<<< HEAD
-    },
-    numOfRatings: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      defaultValue: 0
-    },
-    totalRating: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      defaultValue: 0
-    },
-    averageRating: {
-      type: DataTypes.FLOAT,
-      allowNull: false,
-      defaultValue: 0,
-=======
->>>>>>> 9860a3bf0a78ca7211eda5d920fcd6980f3be129
     }
   });
 };

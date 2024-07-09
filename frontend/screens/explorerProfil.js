@@ -16,7 +16,7 @@ const ExplorerProfile = () => {
   useEffect(() => {
     const fetchExplorerData = async () => {
       try {
-        const response = await axios.get(`http://192.168.92.72:3000/explorer/${explorer.id}`);
+        const response = await axios.get(`http://192.168.142.72:3000/explorer/${explorer.id}`);
         if (response.status === 200) {
           setExplorer(response.data);
           setNumPosts(response.data.Posts?.length || 0);
@@ -37,7 +37,7 @@ const ExplorerProfile = () => {
   useEffect(() => {
     const fetchExplorerPosts = async () => {
       try {
-        const response = await axios.get(`http://192.168.92.72:3000/explorer/${explorer.id}/posts`);
+        const response = await axios.get(`http://192.168.142.72:3000/explorer/${explorer.id}/posts`);
         if (response.status === 200) {
           const transformedPosts = response.data.map(post => ({
             id: post.id,

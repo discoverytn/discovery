@@ -28,7 +28,7 @@ function UsersView() {
   const [filteredBusinessOwners, setFilteredBusinessOwners] = useState([]);
 
   useEffect(() => {
-    fetch("http://192.168.1.8:3000/admin/explorer")
+    fetch("http://192.168.142.72:3000/admin/explorer")
       .then((response) => response.json())
       .then((data) => {
         if (Array.isArray(data)) {
@@ -41,7 +41,7 @@ function UsersView() {
   }, []);
 
   useEffect(() => {
-    fetch("http://192.168.1.8:3000/admin/business")
+    fetch("http://192.168.142.72:3000/admin/business")
       .then((response) => response.json())
       .then((data) => {
         if (Array.isArray(data)) {
@@ -81,7 +81,7 @@ function UsersView() {
   const deleteExplorer = async (idexplorer) => {
     try {
       const response = await fetch(
-        `http://192.168.1.8:3000/admin/delete/explorer/${idexplorer}`,
+        `http://192.168.142.72:3000/admin/delete/explorer/${idexplorer}`,
         {
           method: "DELETE",
         }
@@ -105,7 +105,7 @@ function UsersView() {
   const deleteBusinessOwner = async (idbusiness) => {
     try {
       const response = await fetch(
-        `http://192.168.1.8:3000/admin/delete/business/${idbusiness}`,
+        `http://192.168.142.72:3000/admin/delete/business/${idbusiness}`,
         {
           method: "DELETE",
         }

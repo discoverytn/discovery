@@ -18,7 +18,7 @@ const db = require('../database/index');
   }
 
   const getMessages= async (req, res) => {
-    const { explorer_idexplorer, business_idbusiness } = req.params;
+    const { explorer_idexplorer, business_idbusiness,message } = req.params;
 
     try {
       const messages = await db.Chat.findAll({

@@ -10,7 +10,7 @@ function PostsView() {
   const [selectedPost, setSelectedPost] = useState(null);
 
   useEffect(() => {
-    fetch("http://192.168.1.8:3000/posts/allposts")
+    fetch("http://192.168.142.72:3000/posts/allposts")
       .then((response) => response.json())
       .then((data) => {
         if (Array.isArray(data)) {
@@ -44,7 +44,7 @@ function PostsView() {
   const handleDelete = async (idposts) => {
     try {
       const response = await fetch(
-        `http://192.168.1.8:3000/posts/delete/${idposts}`,
+        `http://192.168.142.72:3000/posts/delete/${idposts}`,
         {
           method: "DELETE",
         }

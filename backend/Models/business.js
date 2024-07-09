@@ -1,6 +1,6 @@
 const { DataTypes } = require("sequelize");
 const { Business } = require("../database"); 
-mudule.exports=(sequelize)=>{
+module.exports=(sequelize)=>{
   return sequelize.define('Business',{
     idbusiness:{
       type:DataTypes.INTEGER,
@@ -34,6 +34,9 @@ mudule.exports=(sequelize)=>{
       allowNull: true,
     },
     municipality: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
 
     location: {
       type: DataTypes.STRING,
@@ -109,9 +112,7 @@ mudule.exports=(sequelize)=>{
       type: DataTypes.ENUM('no', 'yes'),
       allowNull:false,
       defaultValue:'no'
-    }
    
     },
-    // return Business
-})
+  })
 }

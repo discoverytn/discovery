@@ -9,8 +9,8 @@ function PostsByUserType() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const businessPostsResponse = await axios.get('http://192.168.1.8:3000/posts/business/posts');
-        const explorerPostsResponse = await axios.get('http://192.168.1.8:3000/posts/explorer/posts');
+        const businessPostsResponse = await axios.get('http://192.168.142.72:3000/posts/business/posts');
+        const explorerPostsResponse = await axios.get('http://192.168.142.72:3000/posts/explorer/posts');
 
         const businessPosts = businessPostsResponse.data.length;
         const explorerPosts = explorerPostsResponse.data.length;
