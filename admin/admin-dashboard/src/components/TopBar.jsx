@@ -13,7 +13,7 @@ function TopBar() {
   };
 
   return (
-    <AppBar position="static" sx={{ bgcolor: '#0a1929', boxShadow: 'none' }}>
+    <AppBar position="static" sx={{ width: '100%', bgcolor: '#0a1929', boxShadow: 'none' }}>
       <Toolbar>
         <Box sx={{ flexGrow: 1 }} />
         <IconButton color="inherit">
