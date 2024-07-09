@@ -23,7 +23,7 @@ function AnalyticsOverview() {
       try {
         const explorerResponse = await fetch(
 
-          "http://192.168.100.3:3000/admin/explorer"
+          "http://192.168.100.4:3000/admin/explorer"
 
         );
         const explorersData = await explorerResponse.json();
@@ -31,7 +31,7 @@ function AnalyticsOverview() {
 
         const businessResponse = await fetch(
 
-          "http://192.168.100.3:3000/admin/business"
+          "http://192.168.100.4:3000/admin/business"
 
         );
         const businessData = await businessResponse.json();
@@ -39,7 +39,7 @@ function AnalyticsOverview() {
 
         const postsResponse = await fetch(
 
-          "http://192.168.100.3:3000/posts/allposts"
+          "http://192.168.100.4:3000/posts/allposts"
 
         );
         const postsData = await postsResponse.json();
@@ -47,7 +47,7 @@ function AnalyticsOverview() {
 
         const eventsResponse = await fetch(
 
-          "http://192.168.100.3:3000/events/getAll"
+          "http://192.168.100.4:3000/events/getAll"
 
         );
         const eventsData = await eventsResponse.json();

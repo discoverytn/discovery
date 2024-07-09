@@ -14,12 +14,7 @@ const approveEmail = async (recipientEmail) => {
       from: process.env.SenderEmail,
       to: recipientEmail,
       subject: 'Your Application Approval',
-      html: `
-        <p>Dear Applicant,</p>
-        <p>Your application to Discovery TN has been approved. Congratulations!</p>
-        <p>Best regards,</p>
-        <p>The Discovery TN Team</p>
-      `,
+      text: "Your application to Discovery TN has been approved. Congratulations!",
     });
     console.log('Approval email sent:', info.messageId);
     return info; 
@@ -34,13 +29,8 @@ const declineEmail = async (recipientEmail) => {
     const info = await transporter.sendMail({
       from: process.env.SenderEmail,
       to: recipientEmail,
-      subject: 'Application Declined',
-      html: `
-        <p>Dear Applicant,</p>
-        <p>We regret to inform you that your application to Discovery TN has been declined.</p>
-        <p>Best regards,</p>
-        <p>The Discovery TN Team</p>
-      `,
+      subject: 'Application Declined', 
+      text: "We regret to inform you that your application to Discovery TN has been declined",
     });
     console.log('Decline email sent:', info.messageId);
     return info; 

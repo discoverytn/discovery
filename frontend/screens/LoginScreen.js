@@ -49,16 +49,14 @@ const LoginScreen = () => {
         Alert.alert(
           "Your request has been sent, please wait for admin approval"
         );
-      } else {
-        Alert.alert("Login Failed", error.message || "Login failed!");
-      }
+      } 
     }
   };
   
 
   const sendResetCode = async () => {
     try {
-      const endpoint = `http://192.168.100.3:3000/auth/send-reset-code`;
+      const endpoint = `http://192.168.100.4:3000/auth/send-reset-code`;
 
       const payload = { email: resetEmail };
 
@@ -84,7 +82,7 @@ const LoginScreen = () => {
 
   const verifyResetCode = async () => {
     try {
-      const endpoint = `http://192.168.100.3:3000/auth/verify-code`;
+      const endpoint = `http://192.168.100.4:3000/auth/verify-code`;
 
       const payload = { email: resetEmail, code: resetCode };
 
@@ -115,7 +113,7 @@ const LoginScreen = () => {
     }
 
     try {
-      const endpoint = `http://192.168.100.3:3000/auth/reset-password`;
+      const endpoint = `http://192.168.100.4:3000/auth/reset-password`;
 
       const payload = { email: resetEmail, newPassword };
 

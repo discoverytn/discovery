@@ -45,7 +45,7 @@ function PostsView() {
   const [businessPosts, setBusinessPosts] = useState([]);
 
   useEffect(() => {
-    fetch("http://192.168.100.3:3000/posts/explorer/posts")
+    fetch("http://192.168.100.4:3000/posts/explorer/posts")
 
       .then((response) => response.json())
       .then((data) => {
@@ -58,7 +58,7 @@ function PostsView() {
       .catch((error) => console.error("Error fetching explorer posts:", error));
 
 
-    fetch("http://192.168.100.3:3000/posts/business/posts")
+    fetch("http://192.168.100.4:3000/posts/business/posts")
 
       .then((response) => response.json())
       .then((data) => {
@@ -94,7 +94,7 @@ function PostsView() {
   const handleDelete = async (idposts, isExplorer) => {
     try {
       const response = await fetch(
-        `http://192.168.100.3:3000/posts/delete/${idposts}`,
+        `http://192.168.100.4:3000/posts/delete/${idposts}`,
 
         {
           method: "DELETE",
