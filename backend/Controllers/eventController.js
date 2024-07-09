@@ -5,7 +5,7 @@ const Business = db.Business;
 
 // Create a new event
 const createEvent = async (req, res) => {
-  const { eventName, startDate, endDate, eventDescription, eventPrice, explorer_idexplorer, business_idbusiness } = req.body;
+  const { eventName, startDate, endDate, eventDescription, eventPrice, eventLocation, image, explorer_idexplorer, business_idbusiness } = req.body;
 
   try {
     const event = await Events.create({
@@ -14,6 +14,8 @@ const createEvent = async (req, res) => {
       endDate,
       eventDescription,
       eventPrice,
+      eventLocation,
+      image,
       explorer_idexplorer,
       business_idbusiness
     });
