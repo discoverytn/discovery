@@ -125,6 +125,9 @@ function UsersView() {
   return (
     <Box sx={{ p: 10, flexGrow: 1, overflowY: "auto" }}>
       <Box sx={{ mb: 4 }}>
+        <Typography variant="h5" component="h2" sx={{ mb: 2 }}>
+          Explorers Table
+        </Typography>
         <TextField
           label="Search Explorers"
           variant="outlined"
@@ -200,6 +203,9 @@ function UsersView() {
       </Box>
 
       <Box>
+        <Typography variant="h5" component="h2" sx={{ mb: 2 }}>
+          Business Table
+        </Typography>
         <TextField
           label="Search Business Owners"
           variant="outlined"

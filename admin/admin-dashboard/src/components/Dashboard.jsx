@@ -11,6 +11,7 @@ import UpcomingEvents from './UpcomingEvents';
 import UsersView from './UsersView';
 import PostsView from './PostsView';
 import RequestsView from "./RequestsView"
+import EventsView from './EventsView';
 
 const darkTheme = createTheme({
   palette: {
@@ -52,6 +53,8 @@ function Dashboard() {
         return <PostsView />;
         case 'requests':
         return <RequestsView />;
+        case 'events':
+        return <EventsView />;
       default:
         return <div>View not found</div>;
     }
