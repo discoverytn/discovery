@@ -17,25 +17,25 @@ import {
 
 const FullWidthBox = styled(Box)({
   flex: 1,
-  height: '100vh',
-  padding: '20px',
-  boxSizing: 'border-box',
-  overflowY: 'auto',
-  display: 'flex',
-  flexDirection: 'column',
-  width: '100%', // Ensure it stretches horizontally
+  height: "100vh",
+  padding: "20px",
+  boxSizing: "border-box",
+  overflowY: "auto",
+  display: "flex",
+  flexDirection: "column",
+  width: "100%", // Ensure it stretches horizontally
 });
 
 const FullWidthPaper = styled(Paper)({
-  width: '100%',
-  marginBottom: '20px',
-  overflowX: 'auto',
+  width: "100%",
+  marginBottom: "20px",
+  overflowX: "auto",
   flexGrow: 1, // Take up remaining vertical space
 });
 
 const FullWidthTextField = styled(TextField)({
-  width: '100%',
-  marginBottom: '20px',
+  width: "100%",
+  marginBottom: "20px",
 });
 
 function PostsView() {
@@ -120,7 +120,7 @@ function PostsView() {
 
   const renderTable = (posts, page, handleChangePage, search) => (
     <FullWidthPaper elevation={3}>
-      <TableContainer sx={{ width: '100%', overflowX: 'auto' }}>
+      <TableContainer sx={{ width: "100%", overflowX: "auto" }}>
         <Table sx={{ minWidth: 650 }}>
           <TableHead>
             <TableRow>
@@ -177,12 +177,14 @@ function PostsView() {
 
   return (
     <FullWidthBox>
-      <Box sx={{ 
-        display: 'flex', 
-        flexDirection: 'column', 
-        height: '100%', 
-        overflow: 'hidden'
-      }}>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          height: "100%",
+          overflow: "hidden",
+        }}
+      >
         <Typography variant="h4" gutterBottom align="center">
           Explorer Posts
         </Typography>
@@ -192,7 +194,7 @@ function PostsView() {
           value={explorerSearch}
           onChange={(e) => setExplorerSearch(e.target.value)}
         />
-        <Box sx={{ flexGrow: 1, overflow: 'auto', mb: 4 }}>
+        <Box sx={{ flexGrow: 1, overflow: "auto", mb: 4 }}>
           {renderTable(
             explorerPosts,
             explorerPage,
@@ -210,7 +212,7 @@ function PostsView() {
           value={businessSearch}
           onChange={(e) => setBusinessSearch(e.target.value)}
         />
-        <Box sx={{ flexGrow: 1, overflow: 'auto' }}>
+        <Box sx={{ flexGrow: 1, overflow: "auto" }}>
           {renderTable(
             businessPosts,
             businessPage,

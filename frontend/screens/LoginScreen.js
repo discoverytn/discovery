@@ -49,9 +49,7 @@ const LoginScreen = () => {
         Alert.alert(
           "Your request has been sent, please wait for admin approval"
         );
-      } else {
-        Alert.alert("Login Failed", error.message || "Login failed!");
-      }
+      } 
     }
   };
   

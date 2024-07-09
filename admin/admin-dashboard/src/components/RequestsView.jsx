@@ -39,7 +39,7 @@ const RequestsView = () => {
     const fetchPendingAccounts = async () => {
       try {
         const response = await axios.get(
-          "http://192.168.100.3:3000/business/pending"
+          "http://192.168.100.4:3000/business/pending"
         );
         setPendingAccounts(response.data);
         setLoading(false);
@@ -76,7 +76,7 @@ const RequestsView = () => {
   const handleDecline = async (idbusiness) => {
     try {
       await axios.delete(
-        `http://192.168.100.3:3000/admin/decline/${idbusiness}`
+        `http://192.168.100.4:3000/admin/decline/${idbusiness}`
       );
       setPendingAccounts(
         pendingAccounts.filter((account) => account.idbusiness !== idbusiness)
@@ -108,11 +108,16 @@ const RequestsView = () => {
   };
 
   return (
-    <Box sx={{ p: 4, width: '100%', maxWidth: '1400px', margin: '0 auto' }}>
+    <Box sx={{ p: 4, width: "100%", maxWidth: "1400px", margin: "0 auto" }}>
       <Typography variant="h4" gutterBottom>
         Pending Business Accounts
       </Typography>
-      <Box mb={2} display="flex" alignItems="center" justifyContent="space-between">
+      <Box
+        mb={2}
+        display="flex"
+        alignItems="center"
+        justifyContent="space-between"
+      >
         <TextField
           label="Search by Username"
           variant="outlined"
@@ -158,8 +163,11 @@ const RequestsView = () => {
           {filteredAccounts.length === 0 && (
             <Typography variant="body1">No pending accounts found.</Typography>
           )}
-          <TableContainer component={Paper} sx={{ width: '100%', overflowX: 'auto' }}>
-            <Table sx={{ minWidth: '100%' }}>
+          <TableContainer
+            component={Paper}
+            sx={{ width: "100%", overflowX: "auto" }}
+          >
+            <Table sx={{ minWidth: "100%" }}>
               <TableHead>
                 <TableRow>
                   <TableCell>ID</TableCell>
