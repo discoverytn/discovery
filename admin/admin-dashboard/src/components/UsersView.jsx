@@ -11,59 +11,70 @@ import {
   TablePagination,
   Paper,
   Button,
-  Modal,
   Typography,
+  styled,
 } from "@mui/material";
 
-function UsersView() {
-  const [explorerSearch, setExplorerSearch] = useState("");
-  const [businessSearch, setBusinessSearch] = useState("");
-  const [openModal, setOpenModal] = useState(false);
-  const [selectedBusiness, setSelectedBusiness] = useState(null);
+const FullWidthBox = styled(Box)({
+  flex: 1,
+  height: "100vh",
+  padding: "20px",
+  boxSizing: "border-box",
+  overflowY: "auto",
+  display: "flex",
+  flexDirection: "column",
+  width: "100%", // Ensure it stretches horizontally
+});
+
+const FullWidthPaper = styled(Paper)({
+  width: "100%",
+  marginBottom: "20px",
+  overflowX: "auto",
+  flexGrow: 1, // Take up remaining vertical space
+});
+
+const FullWidthTextField = styled(TextField)({
+  width: "100%",
+  marginBottom: "20px",
+});
+
+function PostsView() {
   const [explorerPage, setExplorerPage] = useState(0);
   const [businessPage, setBusinessPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
-
-  const [filteredExplorers, setFilteredExplorers] = useState([]);
-  const [filteredBusinessOwners, setFilteredBusinessOwners] = useState([]);
+  const [explorerSearch, setExplorerSearch] = useState("");
+  const [businessSearch, setBusinessSearch] = useState("");
+  const [explorerPosts, setExplorerPosts] = useState([]);
+  const [businessPosts, setBusinessPosts] = useState([]);
 
   useEffect(() => {
-    fetch("http://192.168.100.4:3000/admin/explorer")
-
+    fetch("http://192.168.100.3:3000/posts/explorer/posts")
       .then((response) => response.json())
       .then((data) => {
         if (Array.isArray(data)) {
-          setFilteredExplorers(data);
+          setExplorerPosts(data);
         } else {
-          console.error("Invalid data format for explorers:", data);
+          console.error("Invalid data format for explorer posts:", data);
         }
       })
-      .catch((error) => console.error("Error fetching explorers:", error));
-  }, []);
+      .catch((error) => console.error("Error fetching explorer posts:", error));
 
-  useEffect(() => {
-    fetch("http://192.168.100.4:3000/admin/business")
-
+    fetch("http://192.168.100.3:3000/posts/business/posts")
       .then((response) => response.json())
       .then((data) => {
         if (Array.isArray(data)) {
-          setFilteredBusinessOwners(data);
+          setBusinessPosts(data);
         } else {
-          console.error("Invalid data format for business owners:", data);
+          console.error("Invalid data format for business posts:", data);
         }
       })
-      .catch((error) =>
-        console.error("Error fetching business owners:", error)
-      );
+      .catch((error) => console.error("Error fetching business posts:", error));
   }, []);
 
-  const handleOpenModal = (business) => {
-    setSelectedBusiness(business);
-    setOpenModal(true);
-  };
-
-  const handleCloseModal = () => {
-    setOpenModal(false);
+  const filterPosts = (posts, search) => {
+    return posts.filter((post) =>
+      post.title.toLowerCase().includes(search.toLowerCase())
+    );
   };
 
   const handleChangeExplorerPage = (event, newPage) => {
@@ -80,262 +91,138 @@ function UsersView() {
     setBusinessPage(0);
   };
 
-  const deleteExplorer = async (idexplorer) => {
+  const handleDelete = async (idposts, isExplorer) => {
     try {
       const response = await fetch(
-        `http://192.168.100.4:3000/admin/delete/explorer/${idexplorer}`,
-
+        `http://192.168.100.3:3000/posts/delete/${idposts}`,
         {
           method: "DELETE",
         }
       );
 
       if (!response.ok) {
-        throw new Error("Failed to delete explorer");
+        throw new Error("Failed to delete post");
       }
 
-      const updatedExplorers = filteredExplorers.filter(
-        (explorer) => explorer.idexplorer !== idexplorer
-      );
-      setFilteredExplorers(updatedExplorers);
+      if (isExplorer) {
+        setExplorerPosts(
+          explorerPosts.filter((post) => post.idposts !== idposts)
+        );
+      } else {
+        setBusinessPosts(
+          businessPosts.filter((post) => post.idposts !== idposts)
+        );
+      }
     } catch (error) {
-      console.error("Error deleting explorer:", error);
+      console.error("Error deleting post:", error);
     }
   };
 
-  const deleteBusinessOwner = async (idbusiness) => {
-    try {
-      const response = await fetch(
-        `http://192.168.100.4:3000/admin/delete/business/${idbusiness}`,
-
-        {
-          method: "DELETE",
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to delete business owner");
-      }
-
-      const updatedBusinessOwners = filteredBusinessOwners.filter(
-        (owner) => owner.idbusiness !== idbusiness
-      );
-      setFilteredBusinessOwners(updatedBusinessOwners);
-    } catch (error) {
-      console.error("Error deleting business owner:", error);
-    }
-  };
+  const renderTable = (posts, page, handleChangePage, search) => (
+    <FullWidthPaper elevation={3}>
+      <TableContainer sx={{ width: "100%", overflowX: "auto" }}>
+        <Table sx={{ minWidth: 650 }}>
+          <TableHead>
+            <TableRow>
+              <TableCell>Delete</TableCell>
+              <TableCell>ID</TableCell>
+              <TableCell>Title</TableCell>
+              <TableCell>Location</TableCell>
+              <TableCell>Category</TableCell>
+              <TableCell>Average Rating</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {filterPosts(posts, search)
+              .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+              .map((post) => (
+                <TableRow key={post.idposts}>
+                  <TableCell>
+                    <Button
+                      variant="contained"
+                      color="secondary"
+                      onClick={() =>
+                        handleDelete(
+                          post.idposts,
+                          post.explorer_idexplorer !== null
+                        )
+                      }
+                    >
+                      Delete
+                    </Button>
+                  </TableCell>
+                  <TableCell>{post.idposts}</TableCell>
+                  <TableCell>{post.title}</TableCell>
+                  <TableCell>{post.location}</TableCell>
+                  <TableCell>{post.category}</TableCell>
+                  <TableCell>
+                    {post.averageRating ? post.averageRating.toFixed(1) : "N/A"}
+                  </TableCell>
+                </TableRow>
+              ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+      <TablePagination
+        rowsPerPageOptions={[5, 10, 25]}
+        component="div"
+        count={filterPosts(posts, search).length}
+        rowsPerPage={rowsPerPage}
+        page={page}
+        onPageChange={handleChangePage}
+        onRowsPerPageChange={handleChangeRowsPerPage}
+      />
+    </FullWidthPaper>
+  );
 
   return (
-    <Box sx={{ p: 10, flexGrow: 1, overflowY: "auto" }}>
-      <Box sx={{ mb: 4 }}>
-        <TextField
-          label="Search Explorers"
+    <FullWidthBox>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          height: "100%",
+          overflow: "hidden",
+        }}
+      >
+        <Typography variant="h4" gutterBottom align="center">
+          Explorer Posts
+        </Typography>
+        <FullWidthTextField
+          label="Search Explorer Posts"
           variant="outlined"
-          fullWidth
           value={explorerSearch}
           onChange={(e) => setExplorerSearch(e.target.value)}
-          sx={{ mb: 2 }}
         />
-        <TableContainer component={Paper}>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell>Actions</TableCell>
-                <TableCell>ID</TableCell>
-                <TableCell>Username</TableCell>
-                <TableCell>First Name</TableCell>
-                <TableCell>Last Name</TableCell>
-                <TableCell>Email</TableCell>
-                <TableCell>Posts</TableCell>
-                <TableCell>Visits</TableCell>
-                <TableCell>Reviews</TableCell>
-                <TableCell>Location</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {filteredExplorers.length > 0 ? (
-                filteredExplorers
-                  .slice(
-                    explorerPage * rowsPerPage,
-                    explorerPage * rowsPerPage + rowsPerPage
-                  )
-                  .map((explorer) => (
-                    <TableRow key={explorer.idexplorer}>
-                      <TableCell>
-                        <Button
-                          variant="contained"
-                          color="error"
-                          onClick={() => deleteExplorer(explorer.idexplorer)}
-                        >
-                          Delete
-                        </Button>
-                      </TableCell>
-                      <TableCell>{explorer.idexplorer}</TableCell>
-                      <TableCell>{explorer.username}</TableCell>
-                      <TableCell>{explorer.firstname}</TableCell>
-                      <TableCell>{explorer.lastname}</TableCell>
-                      <TableCell>{explorer.email}</TableCell>
-                      <TableCell>{explorer.numOfPosts}</TableCell>
-                      <TableCell>{explorer.numOfVisits}</TableCell>
-                      <TableCell>{explorer.numOfReviews}</TableCell>
-                      <TableCell>
-                        {explorer.governorate},{explorer.municipality}
-                      </TableCell>
-                    </TableRow>
-                  ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={11}>No explorers found</TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </TableContainer>
-        <TablePagination
-          rowsPerPageOptions={[5, 10, 25]}
-          component="div"
-          count={filteredExplorers.length}
-          rowsPerPage={rowsPerPage}
-          page={explorerPage}
-          onPageChange={handleChangeExplorerPage}
-          onRowsPerPageChange={handleChangeRowsPerPage}
-        />
-      </Box>
-
-      <Box>
-        <TextField
-          label="Search Business Owners"
-          variant="outlined"
-          fullWidth
-          value={businessSearch}
-          onChange={(e) => setBusinessSearch(e.target.value)}
-          sx={{ mb: 2 }}
-        />
-        <TableContainer component={Paper}>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell>Actions</TableCell>
-                <TableCell>ID</TableCell>
-                <TableCell>ID Number</TableCell>
-                <TableCell>Username</TableCell>
-                <TableCell>First Name</TableCell>
-                <TableCell>Last Name</TableCell>
-                <TableCell>Email</TableCell>
-                <TableCell>Reviews</TableCell>
-                <TableCell>Business Details</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {filteredBusinessOwners.length > 0 ? (
-                filteredBusinessOwners
-                  .slice(
-                    businessPage * rowsPerPage,
-                    businessPage * rowsPerPage + rowsPerPage
-                  )
-                  .map((owner) => (
-                    <TableRow key={owner.idbusiness}>
-                      <TableCell>
-                        <Button
-                          variant="contained"
-                          color="error"
-                          onClick={() => deleteBusinessOwner(owner.idbusiness)}
-                        >
-                          Delete
-                        </Button>
-                      </TableCell>
-                      <TableCell>{owner.idbusiness}</TableCell>
-                      <TableCell>{owner.BOid}</TableCell>
-                      <TableCell>{owner.username}</TableCell>
-                      <TableCell>{owner.firstname}</TableCell>
-                      <TableCell>{owner.lastname}</TableCell>
-                      <TableCell>{owner.email}</TableCell>
-                      <TableCell>{owner.numOfReviews}</TableCell>
-                      <TableCell>
-                        <Button
-                          variant="contained"
-                          onClick={() => handleOpenModal(owner)}
-                        >
-                          Show Details
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={10}>No business owners found</TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </TableContainer>
-        <TablePagination
-          rowsPerPageOptions={[5, 10, 25]}
-          component="div"
-          count={filteredBusinessOwners.length}
-          rowsPerPage={rowsPerPage}
-          page={businessPage}
-          onPageChange={handleChangeBusinessPage}
-          onRowsPerPageChange={handleChangeRowsPerPage}
-        />
-      </Box>
-
-      <Modal
-        open={openModal}
-        onClose={handleCloseModal}
-        aria-labelledby="business-details-modal"
-      >
-        <Box
-          sx={{
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            width: 400,
-            bgcolor: "background.paper",
-            boxShadow: 24,
-            p: 4,
-          }}
-        >
-          <Typography variant="h6" component="h2" sx={{ mb: 2 }}>
-            Business Details
-          </Typography>
-          {selectedBusiness && (
-            <TableContainer component={Paper}>
-              <Table>
-                <TableBody>
-                  <TableRow>
-                    <TableCell>Business Name</TableCell>
-                    <TableCell>{selectedBusiness.businessName}</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell>Description</TableCell>
-                    <TableCell>{selectedBusiness.businessDesc}</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell>Category</TableCell>
-                    <TableCell>{selectedBusiness.category}</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell>Location</TableCell>
-                    <TableCell>
-                      {selectedBusiness.governorate},
-                      {selectedBusiness.municipality}
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell>Contact Phone</TableCell>
-                    <TableCell>{selectedBusiness.mobileNum}</TableCell>
-                  </TableRow>
-                </TableBody>
-              </Table>
-            </TableContainer>
+        <Box sx={{ flexGrow: 1, overflow: "auto", mb: 4 }}>
+          {renderTable(
+            explorerPosts,
+            explorerPage,
+            handleChangeExplorerPage,
+            explorerSearch
           )}
         </Box>
-      </Modal>
-    </Box>
+
+        <Typography variant="h4" gutterBottom align="center">
+          Business Posts
+        </Typography>
+        <FullWidthTextField
+          label="Search Business Posts"
+          variant="outlined"
+          value={businessSearch}
+          onChange={(e) => setBusinessSearch(e.target.value)}
+        />
+        <Box sx={{ flexGrow: 1, overflow: "auto" }}>
+          {renderTable(
+            businessPosts,
+            businessPage,
+            handleChangeBusinessPage,
+            businessSearch
+          )}
+        </Box>
+      </Box>
+    </FullWidthBox>
   );
 }
 
-export default UsersView;
+export default PostsView;

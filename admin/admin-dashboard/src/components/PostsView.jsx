@@ -23,11 +23,13 @@ const FullWidthBox = styled(Box)({
   overflowY: 'auto',
   display: 'flex',
   flexDirection: 'column',
+  width: '100%',
 });
 
 const FullWidthPaper = styled(Paper)({
   width: '100%',
   marginBottom: '20px',
+  overflowX: 'auto',
 });
 
 const FullWidthTextField = styled(TextField)({
@@ -45,8 +47,7 @@ function PostsView() {
   const [businessPosts, setBusinessPosts] = useState([]);
 
   useEffect(() => {
-    fetch("http://192.168.100.4:3000/posts/explorer/posts")
-
+    fetch("http://192.168.100.3:3000/posts/explorer/posts")
       .then((response) => response.json())
       .then((data) => {
         if (Array.isArray(data)) {
@@ -57,9 +58,7 @@ function PostsView() {
       })
       .catch((error) => console.error("Error fetching explorer posts:", error));
 
-
-    fetch("http://192.168.100.4:3000/posts/business/posts")
-
+    fetch("http://192.168.100.3:3000/posts/business/posts")
       .then((response) => response.json())
       .then((data) => {
         if (Array.isArray(data)) {
@@ -94,8 +93,7 @@ function PostsView() {
   const handleDelete = async (idposts, isExplorer) => {
     try {
       const response = await fetch(
-        `http://192.168.100.4:3000/posts/delete/${idposts}`,
-
+        `http://192.168.100.3:3000/posts/delete/${idposts}`,
         {
           method: "DELETE",
         }
@@ -121,8 +119,8 @@ function PostsView() {
 
   const renderTable = (posts, page, handleChangePage, search) => (
     <FullWidthPaper elevation={3}>
-      <TableContainer sx={{ width: '100%' }}>
-        <Table size="small">
+      <TableContainer sx={{ width: '100%', overflowX: 'auto', flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
+        <Table sx={{ flexGrow: 1 }}>
           <TableHead>
             <TableRow>
               <TableCell>Delete</TableCell>
@@ -178,37 +176,48 @@ function PostsView() {
 
   return (
     <FullWidthBox>
-      <Typography variant="h4" gutterBottom align="center">
-        Explorer Posts
-      </Typography>
-      <FullWidthTextField
-        label="Search Explorer Posts"
-        variant="outlined"
-        value={explorerSearch}
-        onChange={(e) => setExplorerSearch(e.target.value)}
-      />
-      {renderTable(
-        explorerPosts,
-        explorerPage,
-        handleChangeExplorerPage,
-        explorerSearch
-      )}
+      <Box sx={{ 
+        display: 'flex', 
+        flexDirection: 'column', 
+        height: '100%', 
+        overflow: 'hidden'
+      }}>
+        <Typography variant="h4" gutterBottom align="center">
+          Explorer Posts
+        </Typography>
+        <FullWidthTextField
+          label="Search Explorer Posts"
+          variant="outlined"
+          value={explorerSearch}
+          onChange={(e) => setExplorerSearch(e.target.value)}
+        />
+        <Box sx={{ flexGrow: 1, overflow: 'auto', mb: 4 }}>
+          {renderTable(
+            explorerPosts,
+            explorerPage,
+            handleChangeExplorerPage,
+            explorerSearch
+          )}
+        </Box>
 
-      <Typography variant="h4" gutterBottom align="center" sx={{ mt: 4 }}>
-        Business Posts
-      </Typography>
-      <FullWidthTextField
-        label="Search Business Posts"
-        variant="outlined"
-        value={businessSearch}
-        onChange={(e) => setBusinessSearch(e.target.value)}
-      />
-      {renderTable(
-        businessPosts,
-        businessPage,
-        handleChangeBusinessPage,
-        businessSearch
-      )}
+        <Typography variant="h4" gutterBottom align="center">
+          Business Posts
+        </Typography>
+        <FullWidthTextField
+          label="Search Business Posts"
+          variant="outlined"
+          value={businessSearch}
+          onChange={(e) => setBusinessSearch(e.target.value)}
+        />
+        <Box sx={{ flexGrow: 1, overflow: 'auto' }}>
+          {renderTable(
+            businessPosts,
+            businessPage,
+            handleChangeBusinessPage,
+            businessSearch
+          )}
+        </Box>
+      </Box>
     </FullWidthBox>
   );
 }

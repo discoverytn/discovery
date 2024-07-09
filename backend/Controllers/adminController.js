@@ -175,10 +175,29 @@ const deleteExplorer = async (req, res) => {
 
     await Promise.all(comments.map(comment => comment.destroy()));
 
+    const posts = await db.Posts.findAll({
+      where: {
+        explorer_idexplorer: explorerId,
+      }
+    });
+
+    await Promise.all(posts.map(post => post.destroy()));
+
+    const comments = await db.Comments.findAll({
+      where: {
+        explorer_idexplorer: explorerId,
+      }
+    });
+
+    await Promise.all(comments.map(comment => comment.destroy()));
+
     await explorer.destroy();
+
+    res.json({ message: 'Explorer, associated comments, and posts deleted successfully' });
 
     res.json({ message: 'Explorer and associated comments deleted successfully' });
   } catch (error) {
+    console.error('Error deleting explorer, comments, and posts:', error);
     console.error('Error deleting explorer and comments:', error);
     res.status(500).json({ error: error.message });
   }
@@ -202,10 +221,29 @@ const deleteBusinessOwner = async (req, res) => {
 
     await Promise.all(comments.map(comment => comment.destroy()));
 
+    const posts = await db.Posts.findAll({
+      where: {
+        business_idbusiness: ownerId,
+      }
+    });
+
+    await Promise.all(posts.map(post => post.destroy()));
+
+    const comments = await db.Comments.findAll({
+      where: {
+        business_idbusiness: ownerId,
+      }
+    });
+
+    await Promise.all(comments.map(comment => comment.destroy()));
+
     await businessOwner.destroy();
+
+    res.json({ message: 'Business owner, associated comments, and posts deleted successfully' });
 
     res.json({ message: 'Business owner and associated comments deleted successfully' });
   } catch (error) {
+    console.error('Error deleting business owner, comments, and posts:', error);
     console.error('Error deleting business owner and comments:', error);
     res.status(500).json({ error: error.message });
   }

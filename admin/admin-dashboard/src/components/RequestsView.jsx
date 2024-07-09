@@ -24,7 +24,7 @@ import {
 import SearchIcon from "@mui/icons-material/Search";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
-import 'react-toastify/dist/ReactToastify.css';
+import "react-toastify/dist/ReactToastify.css";
 
 const RequestsView = () => {
   const [pendingAccounts, setPendingAccounts] = useState([]);
@@ -41,7 +41,6 @@ const RequestsView = () => {
         const response = await axios.get(
           "http://192.168.100.4:3000/business/pending"
         );
-
         setPendingAccounts(response.data);
         setLoading(false);
       } catch (error) {
@@ -63,12 +62,11 @@ const RequestsView = () => {
 
   const handleApprove = async (idbusiness) => {
     try {
-      await axios.put(`http://192.168.100.4:3000/admin/approve/${idbusiness}`);
+      await axios.put(`http://192.168.100.3:3000/admin/approve/${idbusiness}`);
       setPendingAccounts(
         pendingAccounts.filter((account) => account.idbusiness !== idbusiness)
       );
       toast.success("Business has been accepted");
-
     } catch (error) {
       console.error("Error approving business:", error);
       toast.error("Error approving business");
@@ -84,7 +82,6 @@ const RequestsView = () => {
         pendingAccounts.filter((account) => account.idbusiness !== idbusiness)
       );
       toast.info("Business has been declined");
-
     } catch (error) {
       console.error("Error declining business:", error);
       toast.error("Error declining business");
@@ -110,16 +107,17 @@ const RequestsView = () => {
     setPage(0);
   };
 
-  if (loading) {
-    return <CircularProgress />;
-  }
-
   return (
-    <Box>
+    <Box sx={{ p: 4, width: "100%", maxWidth: "1400px", margin: "0 auto" }}>
       <Typography variant="h4" gutterBottom>
         Pending Business Accounts
       </Typography>
-      <Box mb={2} display="flex" justifyContent="space-between">
+      <Box
+        mb={2}
+        display="flex"
+        alignItems="center"
+        justifyContent="space-between"
+      >
         <TextField
           label="Search by Username"
           variant="outlined"
@@ -132,7 +130,7 @@ const RequestsView = () => {
               </InputAdornment>
             ),
           }}
-          sx={{ width: "300px" }}
+          sx={{ width: "40%" }}
         />
         <TextField
           select
@@ -140,7 +138,7 @@ const RequestsView = () => {
           value={selectedCategory}
           onChange={(e) => setSelectedCategory(e.target.value)}
           variant="outlined"
-          sx={{ minWidth: "200px" }}
+          sx={{ width: "200px" }}
         >
           <MenuItem value="">All Categories</MenuItem>
           {[
@@ -158,12 +156,18 @@ const RequestsView = () => {
           ))}
         </TextField>
       </Box>
-      {filteredAccounts.length === 0 ? (
-        <Typography variant="body1">No pending accounts found.</Typography>
+      {loading ? (
+        <CircularProgress />
       ) : (
-        <React.Fragment>
-          <TableContainer component={Paper}>
-            <Table>
+        <>
+          {filteredAccounts.length === 0 && (
+            <Typography variant="body1">No pending accounts found.</Typography>
+          )}
+          <TableContainer
+            component={Paper}
+            sx={{ width: "100%", overflowX: "auto" }}
+          >
+            <Table sx={{ minWidth: "100%" }}>
               <TableHead>
                 <TableRow>
                   <TableCell>ID</TableCell>
@@ -172,6 +176,7 @@ const RequestsView = () => {
                   <TableCell>Email</TableCell>
                   <TableCell>Business Name</TableCell>
                   <TableCell>Category</TableCell>
+                  <TableCell>Cred Image</TableCell>
                   <TableCell>Actions</TableCell>
                 </TableRow>
               </TableHead>
@@ -193,6 +198,8 @@ const RequestsView = () => {
                           style={{ width: "50px", cursor: "pointer" }}
                           onClick={() => handleShowCredImg(account.credImg)}
                         />
+                      </TableCell>
+                      <TableCell>
                         <Button
                           variant="contained"
                           color="success"
@@ -225,7 +232,7 @@ const RequestsView = () => {
             onRowsPerPageChange={handleChangeRowsPerPage}
             sx={{ mt: 2 }}
           />
-        </React.Fragment>
+        </>
       )}
       <Dialog open={Boolean(selectedCredImg)} onClose={handleCloseDialog}>
         <DialogTitle>Credential Image</DialogTitle>
