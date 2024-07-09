@@ -17,7 +17,7 @@ const EventListScreen = () => {
 
   const fetchEvents = async () => {
     try {
-      const response = await axios.get('http://192.168.100.3:3000/events/getAll');
+      const response = await axios.get('http://192.168.100.4:3000/events/getAll');
 
       setEvents(response.data);
     } catch (error) {

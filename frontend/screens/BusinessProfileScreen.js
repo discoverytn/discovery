@@ -20,7 +20,7 @@ const BusinessProfileScreen = () => {
   useEffect(() => {
     const fetchBusinessData = async () => {
       try {
-        const response = await axios.get(`http://192.168.100.3:3000/business/${business.id}`);
+        const response = await axios.get(`http://192.168.100.4:3000/business/${business.id}`);
 
         if (response.status === 200) {
           setBusiness(response.data);
@@ -42,7 +42,7 @@ const BusinessProfileScreen = () => {
   useEffect(() => {
     const fetchBusinessPosts = async () => {
       try {
-        const response = await axios.get(`http://192.168.100.3:3000/business/${business.id}/posts`);
+        const response = await axios.get(`http://192.168.100.4:3000/business/${business.id}/posts`);
 
         if (response.status === 200) 
         
@@ -71,7 +71,7 @@ const BusinessProfileScreen = () => {
     console.log("the posts",posts);
     const fetchBusinessEvents = async () => {
       try {
-        const response = await axios.get(`http://192.168.100.3:3000/business/${business.id}/events`);
+        const response = await axios.get(`http://192.168.100.4:3000/business/${business.id}/events`);
 
         if (response.status === 200) {
           const transformedEvents = response.data.map(event => ({
@@ -117,7 +117,7 @@ const BusinessProfileScreen = () => {
 
   const deleteBusinessPost = async (postId, token) => {
     try {
-      const response = await fetch(`http://192.168.100.3:3000/posts/business/delete/${postId}`, {
+      const response = await fetch(`http://192.168.100.4:3000/posts/business/delete/${postId}`, {
 
         method: 'DELETE',
         headers: {
