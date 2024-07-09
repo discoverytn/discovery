@@ -1,33 +1,28 @@
 const { DataTypes } = require("sequelize");
-const { Business } = require("../database");
-
-module.exports = (sequelize,DataTypes) => {
-  const Business =  sequelize.define("Business", {
-
-
-module.exports = (sequelize) => {
-  return sequelize.define("Business", {
-    idbusiness: {
-      type: DataTypes.INTEGER,
-      primaryKey: true,
-      autoIncrement: true,
+const { Business } = require("../database"); 
+mudule.exports=(sequelize)=>{
+  return sequelize.define('Business',{
+    idbusiness:{
+      type:DataTypes.INTEGER,
+      primaryKey:true,
+      autoIncrement:true,
     },
-    username: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      unique: true,
+    username : {
+      type:DataTypes.STRING,
+      allowNull:false,
+      unique:true 
     },
-    firstname: {
-      type: DataTypes.STRING,
-      allowNull: true,
+    firstname:{
+      type:DataTypes.STRING,
+      allowNull:true
     },
-    lastname: {
-      type: DataTypes.STRING,
-      allowNull: true,
+    lastname :{
+      type:DataTypes.STRING,
+      allowNull:true
     },
-    email: {
-      type: DataTypes.STRING,
-      allowNull: false,
+    email :{
+      type:DataTypes.STRING,
+  allowNull: false,
       unique: true,
     },
     password: {
@@ -105,11 +100,18 @@ module.exports = (sequelize) => {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    category: { 
-      type: DataTypes.STRING,
-      allowNull: false,
+    approvalStatus:{
+      type: DataTypes.ENUM('pending','accepted'),
+      allowNull:false,
+      defaultValue:'pending'
     },
-    return business
+    subscribed:{
+      type: DataTypes.ENUM('no', 'yes'),
+      allowNull:false,
+      defaultValue:'no'
     }
-}
+   
+    },
+    // return Business
+})
 }
