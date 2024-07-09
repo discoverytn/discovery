@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Text, View, FlatList, TextInput, Pressable, StyleSheet, KeyboardAvoidingView, Platform, SafeAreaView } from 'react-native';
-import { APP_API_URL } from '../env';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { io } from 'socket.io-client';
 import AllChats from './AllChats';
@@ -14,7 +13,7 @@ const Chats = () => {
   const [socket, setSocket] = useState(null);
 
   const getMessage = () => {
-    axios.get(`${APP_API_URL}/chat/getmsg/${idexplorer}/${idbusiness}`)
+    axios.get(`http://192.168.100.4:3000/api/chat/getmsg/${idexplorer}/${idbusiness}`)
       .then((res) => {
         setChatMessages(res.data);
       })
@@ -25,7 +24,7 @@ const Chats = () => {
     if (socket) {
       socket.emit("send-message", message);
     }
-    axios.post(`${APP_API_URL}/chat/send`, { 
+    axios.post(`http://192.168.100.4:3000/api/chat/send`, { 
       message, 
       idexplorer: idexplorer, 
       idbusiness: idbusiness 

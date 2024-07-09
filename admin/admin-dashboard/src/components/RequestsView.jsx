@@ -62,7 +62,7 @@ const RequestsView = () => {
 
   const handleApprove = async (idbusiness) => {
     try {
-      await axios.put(`http://192.168.100.3:3000/admin/approve/${idbusiness}`);
+      await axios.put(`http://192.168.100.4:3000/admin/approve/${idbusiness}`);
       setPendingAccounts(
         pendingAccounts.filter((account) => account.idbusiness !== idbusiness)
       );

@@ -64,7 +64,7 @@ db.Explorer.belongsToMany(db.Posts, { through: db.Favorites, foreignKey: 'explor
 
 db.Favorites.belongsTo(db.Posts, { foreignKey: 'posts_idposts' });
 db.Favorites.belongsTo(db.Explorer, { foreignKey: 'explorer_idexplorer' });
-//
+
 db.Posts.belongsToMany(db.Explorer, { through: db.Traveled, foreignKey: 'posts_idposts' });
 db.Explorer.belongsToMany(db.Posts, { through: db.Traveled, foreignKey: 'explorer_idexplorer' });
 
