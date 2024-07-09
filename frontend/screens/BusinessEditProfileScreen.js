@@ -93,6 +93,7 @@ const BusinessEditProfileScreen = () => {
     try {
       const response = await axios.put(`http://192.168.100.3:3000/business/${businessId}/edit`, payload);
 
+
       if (response.status === 200) {
         setBusiness(response.data)
         Alert.alert('Success', 'Profile updated successfully');

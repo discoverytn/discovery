@@ -21,6 +21,7 @@ const BusinessProfileScreen = () => {
     const fetchBusinessData = async () => {
       try {
         const response = await axios.get(`http://192.168.100.3:3000/business/${business.id}`);
+
         if (response.status === 200) {
           setBusiness(response.data);
           setNumPosts(response.data.Posts?.length || 0);
@@ -42,6 +43,7 @@ const BusinessProfileScreen = () => {
     const fetchBusinessPosts = async () => {
       try {
         const response = await axios.get(`http://192.168.100.3:3000/business/${business.id}/posts`);
+
         if (response.status === 200) 
         
           {
@@ -70,6 +72,7 @@ const BusinessProfileScreen = () => {
     const fetchBusinessEvents = async () => {
       try {
         const response = await axios.get(`http://192.168.100.3:3000/business/${business.id}/events`);
+
         if (response.status === 200) {
           const transformedEvents = response.data.map(event => ({
             id: event.id,
@@ -115,6 +118,7 @@ const BusinessProfileScreen = () => {
   const deleteBusinessPost = async (postId, token) => {
     try {
       const response = await fetch(`http://192.168.100.3:3000/posts/business/delete/${postId}`, {
+
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',

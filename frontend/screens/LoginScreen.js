@@ -59,6 +59,7 @@ const LoginScreen = () => {
   const sendResetCode = async () => {
     try {
       const endpoint = `http://192.168.100.3:3000/auth/send-reset-code`;
+
       const payload = { email: resetEmail };
 
       const response = await axios.post(endpoint, payload);
@@ -84,6 +85,7 @@ const LoginScreen = () => {
   const verifyResetCode = async () => {
     try {
       const endpoint = `http://192.168.100.3:3000/auth/verify-code`;
+
       const payload = { email: resetEmail, code: resetCode };
 
       const response = await axios.post(endpoint, payload);
@@ -114,6 +116,7 @@ const LoginScreen = () => {
 
     try {
       const endpoint = `http://192.168.100.3:3000/auth/reset-password`;
+
       const payload = { email: resetEmail, newPassword };
 
       const response = await axios.post(endpoint, payload);

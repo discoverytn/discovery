@@ -41,6 +41,7 @@ const RequestsView = () => {
         const response = await axios.get(
           "http://192.168.100.3:3000/business/pending"
         );
+
         setPendingAccounts(response.data);
         setLoading(false);
       } catch (error) {
@@ -67,6 +68,7 @@ const RequestsView = () => {
         pendingAccounts.filter((account) => account.idbusiness !== idbusiness)
       );
       toast.success("Business has been accepted");
+
     } catch (error) {
       console.error("Error approving business:", error);
       toast.error("Error approving business");
@@ -82,6 +84,7 @@ const RequestsView = () => {
         pendingAccounts.filter((account) => account.idbusiness !== idbusiness)
       );
       toast.info("Business has been declined");
+
     } catch (error) {
       console.error("Error declining business:", error);
       toast.error("Error declining business");

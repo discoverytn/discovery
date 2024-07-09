@@ -3,3 +3,4 @@ Notification get request : http://192.168.100.3:3000/notifications/user/1?userTy
                            http://192.168.100.3:3000/notifications/user/1?userType=business
 
 
+

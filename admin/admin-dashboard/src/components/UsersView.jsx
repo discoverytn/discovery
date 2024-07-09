@@ -29,6 +29,7 @@ function UsersView() {
 
   useEffect(() => {
     fetch("http://192.168.100.3:3000/admin/explorer")
+
       .then((response) => response.json())
       .then((data) => {
         if (Array.isArray(data)) {
@@ -42,6 +43,7 @@ function UsersView() {
 
   useEffect(() => {
     fetch("http://192.168.100.3:3000/admin/business")
+
       .then((response) => response.json())
       .then((data) => {
         if (Array.isArray(data)) {
@@ -82,6 +84,7 @@ function UsersView() {
     try {
       const response = await fetch(
         `http://192.168.100.3:3000/admin/delete/explorer/${idexplorer}`,
+
         {
           method: "DELETE",
         }
@@ -104,6 +107,7 @@ function UsersView() {
     try {
       const response = await fetch(
         `http://192.168.100.3:3000/admin/delete/business/${idbusiness}`,
+
         {
           method: "DELETE",
         }

@@ -1,10 +1,13 @@
 import React, { useState, useCallback } from 'react';
 import { View, Text, Image, TouchableOpacity, FlatList, StyleSheet } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import LottieView from 'lottie-react-native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faPersonWalkingLuggage, faLocationDot, faCalendarDays, faUser } from '@fortawesome/free-solid-svg-icons';
 import CustomModal from './CustomModal';
 import axios from 'axios';
+import join from '../assets/join.gif'
+
 
 const EventListScreen = () => {
   const navigation = useNavigation();
@@ -15,6 +18,7 @@ const EventListScreen = () => {
   const fetchEvents = async () => {
     try {
       const response = await axios.get('http://192.168.100.3:3000/events/getAll');
+
       setEvents(response.data);
     } catch (error) {
       console.error('Error fetching events:', error);
@@ -35,7 +39,10 @@ const EventListScreen = () => {
   const toggleModal = () => setShowModal(!showModal);
 
   const renderItem = ({ item }) => (
-    <View style={styles.eventItem}>
+    <TouchableOpacity 
+      style={styles.eventItem}
+      onPress={() => navigation.navigate('OneEvent', { event: item })}
+    >
       <Image 
         source={item.image ? { uri: item.image } : require('../assets/event-placeholder.jpg')} 
         style={styles.eventImage} 
@@ -60,11 +67,12 @@ const EventListScreen = () => {
         <View style={styles.footer}>
           <Text style={styles.eventPrice}>{item.eventPrice} DT</Text>
           <TouchableOpacity style={styles.joinButton} onPress={toggleModal}>
-            <FontAwesomeIcon icon={faPersonWalkingLuggage} size={20} color="#FFFFFF" />
+          <Image source={join} style={styles.gif} />
+
           </TouchableOpacity>
         </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 
   return (
@@ -75,7 +83,15 @@ const EventListScreen = () => {
         </TouchableOpacity>
         <Text style={styles.headerText}></Text>
       </View>
-      <Text style={styles.subHeaderText}>Available Events 🌠</Text>
+      <View style={styles.subHeader}>
+        <Text style={styles.subHeaderText}>Available Events </Text>
+        <LottieView
+          source={require('../assets/sand-clock.json')}
+          autoPlay
+          loop
+          style={styles.sandClockAnimation}
+        />
+      </View>
       <FlatList
         data={events}
         renderItem={renderItem}
@@ -117,13 +133,21 @@ const styles = StyleSheet.create({
     flex: 1,
     textAlign: 'center',
   },
+  subHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 20,
+  },
   subHeaderText: {
     fontSize: 20,
     fontWeight: 'bold',
-    paddingHorizontal: 20,
-    marginBottom: 20,
     color: '#32CD32',
     textAlign: 'center',
+  },
+  sandClockAnimation: {
+    width: 50,
+    height: 50,
   },
   eventsContainer: {
     paddingHorizontal: 20,
@@ -181,8 +205,13 @@ const styles = StyleSheet.create({
   },
   joinButton: {
     backgroundColor: '#32CD32',
-    padding: 10,
+    padding: 2,
     borderRadius: 20,
+  },
+  gif: {
+    width: 40,
+    height: 40,
+    resizeMode: 'contain',
   },
 });
 

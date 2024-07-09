@@ -46,6 +46,7 @@ function PostsView() {
 
   useEffect(() => {
     fetch("http://192.168.100.3:3000/posts/explorer/posts")
+
       .then((response) => response.json())
       .then((data) => {
         if (Array.isArray(data)) {
@@ -56,7 +57,9 @@ function PostsView() {
       })
       .catch((error) => console.error("Error fetching explorer posts:", error));
 
+
     fetch("http://192.168.100.3:3000/posts/business/posts")
+
       .then((response) => response.json())
       .then((data) => {
         if (Array.isArray(data)) {
@@ -92,6 +95,7 @@ function PostsView() {
     try {
       const response = await fetch(
         `http://192.168.100.3:3000/posts/delete/${idposts}`,
+
         {
           method: "DELETE",
         }

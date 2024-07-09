@@ -21,6 +21,7 @@ const DiscoverScreen = () => {
       setIsLoading(true);
       setError(null);
       const response = await fetch('http://192.168.100.3:3000/posts/allposts');
+
       if (!response.ok) throw new Error('Failed to fetch posts');
       const posts = await response.json();
       const categorizedPosts = categorizePosts(posts);
@@ -74,6 +75,7 @@ const DiscoverScreen = () => {
   const handleRating = useCallback(async (postId, rating) => {
     try {
       const response = await fetch(`http://192.168.100.3:3000/ratings/rate`, {
+
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 

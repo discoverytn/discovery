@@ -83,6 +83,7 @@ const AuthProvider = ({ children }) => {
   const loginAction = async (data) => {
     try {
       const response = await axios.post("http://192.168.100.3:3000/auth/login", data);
+
   
       if (response.status === 200) {
         const { token } = response.data;
@@ -124,6 +125,7 @@ const AuthProvider = ({ children }) => {
         data.role === "explorer"
           ? "http://192.168.100.3:3000/auth/register/explorer"
           : "http://192.168.100.3:3000/auth/register/business";
+
 
       const response = await axios.post(endpoint, data);
 

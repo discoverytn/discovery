@@ -133,6 +133,7 @@ const ScheduleEventScreen = ({ navigation }) => {
 
     try {
       const response = await axios.post('http://192.168.100.3:3000/events/create', eventData);
+
       console.log('Event Data:', response.data);
       Alert.alert('Success', 'Your event has been posted successfully!', [
         { text: "OK", onPress: () => navigation.navigate('EventList') }

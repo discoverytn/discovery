@@ -45,6 +45,7 @@ const NotificationScreen = () => {
   const markAsRead = async (notificationId) => {
     try {
       await axios.put(`http://192.168.100.3:3000/notifications/${notificationId}/read`);
+
       setNotifications(notifications.map(notif => 
         notif.idnotif === notificationId ? { ...notif, is_read: true } : notif
       ));
