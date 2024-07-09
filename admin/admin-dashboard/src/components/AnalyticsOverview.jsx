@@ -22,25 +22,25 @@ function AnalyticsOverview() {
     async function fetchData() {
       try {
         const explorerResponse = await fetch(
-          "http://192.168.1.19:3000/admin/explorer"
+          "http://192.168.100.3:3000/admin/explorer"
         );
         const explorersData = await explorerResponse.json();
         setExplorersCount(explorersData.length);
 
         const businessResponse = await fetch(
-          "http://192.168.1.19:3000/admin/business"
+          "http://192.168.100.3:3000/admin/business"
         );
         const businessData = await businessResponse.json();
         setBusinessOwnersCount(businessData.length);
 
         const postsResponse = await fetch(
-          "http://192.168.1.19:3000/posts/allposts"
+          "http://192.168.100.3:3000/posts/allposts"
         );
         const postsData = await postsResponse.json();
         setPostsCount(postsData.length);
 
         const eventsResponse = await fetch(
-          "http://192.168.1.19:3000/events/getAll"
+          "http://192.168.100.3:3000/events/getAll"
         );
         const eventsData = await eventsResponse.json();
         setEventsCount(eventsData.length);
