@@ -16,8 +16,6 @@ const eventRoutes = require('./Routes/eventRoutes');
 const notificationRoutes = require('./Routes/notificationRoutes');
 
 
-
-
 app.use(cors());
 app.use(express.json());
 app.use("/admin", adminRoutes);
@@ -29,7 +27,7 @@ app.use('/ratings', ratingRoutes);
 app.use('/comments', commentRoutes);
 app.use('/events', eventRoutes);
 app.use('/notifications', notificationRoutes);
-
+app.use('/chat',chatRoutes)
 app.use(express.json());
 const http = require("http").Server(app)
 const socketIO = require('socket.io')(http, {

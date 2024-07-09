@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Text, View, FlatList, TextInput, Pressable, StyleSheet, KeyboardAvoidingView, Platform, SafeAreaView } from 'react-native';
 import { APP_API_URL } from '../env';
-import SessionStorage from 'react-native-session-storage';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { io } from 'socket.io-client';
 import AllChats from './AllChats';
 import axios from 'axios';
 
 const Chats = () => {
-  const idexplorer = SessionStorage.getItem("idexplorer");
-  const idbusiness = SessionStorage.getItem("idbusiness");
+  const [idexplorer, setIdExplorer] = useState(null);
+  const [idbusiness, setIdBusiness] = useState(null);
   const [message, setMessage] = useState("");
   const [chatMessages, setChatMessages] = useState([]);
   const [socket, setSocket] = useState(null);
@@ -63,6 +63,14 @@ const Chats = () => {
   }, []);
 
   useEffect(() => {
+    const fetchSessionData = async () => {
+      const storedIdExplorer = await AsyncStorage.getItem("idexplorer");
+      const storedIdBusiness = await AsyncStorage.getItem("idbusiness");
+      setIdExplorer(storedIdExplorer);
+      setIdBusiness(storedIdBusiness);
+    };
+
+    fetchSessionData();
     getMessage();
   }, []);
 

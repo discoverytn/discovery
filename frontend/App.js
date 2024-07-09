@@ -25,10 +25,11 @@ import explorerProfil from "./screens/explorerProfil"
 import BusinessEditProfileScreen from "./screens/BusinessEditProfileScreen"
 import BusinessProfileScreen from "./screens/BusinessProfileScreen"
 import NotificationScreen from "./screens/NotificationScreen"
-
-
-
-
+import Chats from './screens/Chats';
+// import AllChats from './screens/AllChats';
+// import ChatCopie from './screens/ChatCopie';
+import ChatScreen from './screens/ChatScreen'
+import Chat from './screens/Chat'
 
 enableScreens();
 
@@ -44,7 +45,13 @@ function MainNavigator() {
       }}
       
     >
-      
+                  <Tab.Screen name="Chat" component={Chat} options={{ tabBarLabel: () => null }} />
+
+            <Tab.Screen name="Chats" component={Chats} options={{ tabBarLabel: () => null }} />
+            {/* <Tab.Screen name="AllChats" component={AllChats} options={{ tabBarLabel: () => null }} /> */}
+      {/* <Tab.Screen name="ChatCopie" component={ChatCopie} options={{ tabBarLabel: () => null }} /> */}
+      <Tab.Screen name="ChatScreen" component={ChatScreen} options={{ tabBarLabel: () => null }} />
+
        <Tab.Screen name="Home" component={HomeScreen} options={{ tabBarLabel: () => null }} />
        <Tab.Screen name="Intro1" component={Intro1} options={{ tabBarLabel: () => null }} />
       <Tab.Screen name="Intro2" component={Intro2} options={{ tabBarLabel: () => null }} />
@@ -65,7 +72,8 @@ function MainNavigator() {
       <Tab.Screen name="ScheduleEvent" component={ScheduleEventScreen} options={{ tabBarLabel: () => null }} />
       <Tab.Screen name="EventList" component={EventListScreen} options={{ tabBarLabel: () => null }} />
       <Tab.Screen name="NotificationScreen" component={NotificationScreen} options={{ tabBarLabel: () => null }} />
-     
+
+
 
     </Tab.Navigator>
     
