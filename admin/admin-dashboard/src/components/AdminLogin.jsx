@@ -19,7 +19,7 @@ const AdminLogin = () => {
     setError('');
 
     try {
-      const response = await axios.post('http://192.168.1.19:3000/auth/login', {
+      const response = await axios.post('http://192.168.100.4:3000/auth/login', {
         email,
         password
       });
