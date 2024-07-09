@@ -102,12 +102,12 @@ const login = async (req, res) => {
     }
 
     if (!user) {
-      return res.status(401).json({ error: "Please re-check your info" });
+      return res.status(402).json({ error: "Please re-check your info" });
     }
 
     const pwChecker = await bcrypt.compare(password, user.password);
     if (!pwChecker) {
-      return res.status(401).json({ error: "Wrong password" });
+      return res.status(403).json({ error: "Wrong password" });
     }
 
     let role;

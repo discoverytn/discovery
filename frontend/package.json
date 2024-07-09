@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "expo/AppEntry.js",
   "scripts": {
-    "start": "expo start -c",
+    "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web"
@@ -26,9 +26,11 @@
     "cloudinary-react-native": "^1.0.0",
     "expo": "~51.0.14",
     "expo-image-picker": "^15.0.5",
+    "expo-linear-gradient": "~13.0.2",
     "expo-secure-store": "^13.0.1",
     "expo-status-bar": "~1.12.1",
     "jwt-decode": "^4.0.0",
+    "lottie-react-native": "6.7.0",
     "nodemailer": "^6.9.14",
     "react": "18.2.0",
     "react-native": "0.74.2",
@@ -46,9 +48,8 @@
     "react-native-svg": "^15.3.0",
     "react-native-vector-icons": "^10.1.0",
     "react-native-virtualized-view": "^1.0.0",
-    "tailwind-rn": "^4.2.0",
-    "expo-linear-gradient": "~13.0.2",
-    "lottie-react-native": "6.7.0"
+    "socket.io-client": "^4.7.5",
+    "tailwind-rn": "^4.2.0"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"

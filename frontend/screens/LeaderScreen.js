@@ -15,11 +15,11 @@ const LeaderScreen = () => {
         {/* Profile Card 1 */}
         <View style={[styles.profileContainer, styles.sideProfileContainer]}>
           <Image
-            source={{ uri: 'https://i.postimg.cc/J0wTBqHt/Screenshot-2024-06-25-201110.png' }}
+            source={{ uri: 'https://static.vecteezy.com/system/resources/thumbnails/029/271/062/small_2x/avatar-profile-icon-in-flat-style-male-user-profile-illustration-on-isolated-background-man-profile-sign-business-concept-vector.jpg' }}
             style={[styles.profileImage, styles.second]}
           />
-          <Text style={styles.username}>Houssem</Text>
-          <Text style={styles.score}>70</Text>
+          <Text style={styles.username}>Alex</Text>
+          <Text style={styles.score}>270</Text>
           <Text style={styles.usernameTag}>@matrix</Text>
         </View>
 
@@ -28,24 +28,24 @@ const LeaderScreen = () => {
           <View style={styles.profileImageContainer}>
             <FontAwesome5 name="crown" size={50} color="#FFD700" style={styles.crownIcon} />
             <Image
-              source={{ uri: 'https://i.postimg.cc/8zxC2J2N/Untitled-1.png' }}
+              source={{ uri: 'https://static.vecteezy.com/system/resources/thumbnails/029/271/062/small_2x/avatar-profile-icon-in-flat-style-male-user-profile-illustration-on-isolated-background-man-profile-sign-business-concept-vector.jpg' }}
               style={[styles.profileImage, styles.first]}
             />
           </View>
-          <Text style={styles.username}>Lamjed</Text>
-          <Text style={styles.score}>1000</Text>
+          <Text style={styles.username}>Fraj</Text>
+          <Text style={styles.score}>700</Text>
           <Text style={styles.usernameTag}>@chad</Text>
         </View>
 
         {/* Profile Card 3 */}
         <View style={[styles.profileContainer, styles.sideProfileContainer]}>
           <Image
-            source={{ uri: 'https://i.postimg.cc/q7zQbY8z/Screenshot-2024-06-26-234920.png' }}
+            source={{ uri: 'https://static.vecteezy.com/system/resources/thumbnails/029/271/062/small_2x/avatar-profile-icon-in-flat-style-male-user-profile-illustration-on-isolated-background-man-profile-sign-business-concept-vector.jpg' }}
             style={[styles.profileImage, styles.third, styles.bronzeBorder]}
           />
-          <Text style={styles.username}>Ahmed Slim</Text>
-          <Text style={styles.score}>69</Text>
-          <Text style={styles.usernameTag}>@bhim</Text>
+          <Text style={styles.username}>Amine</Text>
+          <Text style={styles.score}>150</Text>
+          <Text style={styles.usernameTag}>@mramine</Text>
         </View>
       </View>
     </View>

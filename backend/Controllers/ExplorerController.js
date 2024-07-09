@@ -1,8 +1,8 @@
-const bcrypt = require('bcrypt');
-const db = require('../database/index'); 
+const bcrypt = require("bcrypt");
+const db = require("../database/index");
 
 module.exports = {
-  getExplorerById: async function(req, res) {
+  getExplorerById: async function (req, res) {
     try {
       const explorer = await db.Explorer.findByPk(req.params.idexplorer);
       if (!explorer) {
@@ -15,7 +15,7 @@ module.exports = {
     }
   },
 
-  editExplorer: async function(req, res) {
+  editExplorer: async function (req, res) {
     try {
       const explorer = await db.Explorer.findByPk(req.params.idexplorer);
       if (!explorer) {
@@ -26,7 +26,10 @@ module.exports = {
         return res.status(400).send("Current password is required");
       }
 
-      const isPasswordValid = await bcrypt.compare(req.body.currentPassword, explorer.password);
+      const isPasswordValid = await bcrypt.compare(
+        req.body.currentPassword,
+        explorer.password
+      );
       if (!isPasswordValid) {
         return res.status(401).send("Invalid password");
       }
@@ -41,19 +44,20 @@ module.exports = {
         municipality: req.body.municipality || explorer.municipality,
       };
 
-      
       if (req.body.newPassword) {
         const hashedPassword = await bcrypt.hash(req.body.newPassword, 10);
         updateFields.password = hashedPassword;
       }
 
-      
       const result = await db.Explorer.update(updateFields, {
-        where: { idexplorer: req.params.idexplorer }
+        where: { idexplorer: req.params.idexplorer },
       });
 
       if (result[0] === 1) {
-        return res.status(200).send("Explorer updated successfully");
+        const newData = await db.Explorer.findOne({
+          where: { idexplorer: req.params.idexplorer },
+        });
+        return res.status(200).send(newData);
       } else {
         return res.status(500).send("Failed to update explorer");
       }
@@ -63,8 +67,7 @@ module.exports = {
     }
   },
 
-  
-  getExplorerPosts: async function(req, res) {
+  getExplorerPosts: async function (req, res) {
     const { idexplorer } = req.params;
 
     try {
@@ -75,7 +78,7 @@ module.exports = {
 
       const posts = await db.Posts.findAll({
         where: { explorer_idexplorer: idexplorer },
-        order: [['createdAt', 'DESC']], 
+        order: [["createdAt", "DESC"]],
       });
 
       return res.status(200).json(posts);

@@ -30,7 +30,7 @@ const AdminLogin = () => {
     try {
 
       const response = await axios.post(
-        "http://192.168.142.72/auth/login",
+        "http://192.168.100.4:3000/auth/login",
         {
           email,
           password,

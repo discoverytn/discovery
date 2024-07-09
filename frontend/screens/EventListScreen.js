@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import { View, Text, Image, TouchableOpacity, FlatList, StyleSheet } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import LottieView from 'lottie-react-native';
@@ -95,7 +95,7 @@ const EventListScreen = () => {
       <FlatList
         data={events}
         renderItem={renderItem}
-        keyExtractor={(item) => item.id.toString()}
+        keyExtractor={(item) => item.idevents.toString()}
         contentContainerStyle={styles.eventsContainer}
         refreshing={refreshing}
         onRefresh={onRefresh}

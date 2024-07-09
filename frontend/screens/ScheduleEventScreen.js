@@ -169,34 +169,34 @@ const ScheduleEventScreen = ({ navigation }) => {
               />
             )}
 
-        <TouchableOpacity onPress={() => setShowEndDatePicker(true)}>
-          <Text style={styles.dateText}>End Date: {endDate.toDateString()}</Text>
-        </TouchableOpacity>
-        {showEndDatePicker && (
-          <DateTimePicker
-            value={endDate}
-            mode="date"
-            display="default"
-            onChange={handleEndDateChange}
+            <TouchableOpacity onPress={() => setShowEndDatePicker(true)}>
+              <Text style={styles.dateText}>End Date: {endDate.toDateString()}</Text>
+            </TouchableOpacity>
+            {showEndDatePicker && (
+              <DateTimePicker
+                value={endDate}
+                mode="date"
+                display="default"
+                onChange={handleEndDateChange}
+              />
+            )}
+          </View>
+
+          <Text style={styles.label}>Event Name</Text>
+          <TextInput
+            style={styles.input}
+            onChangeText={setEventName}
+            value={eventName}
+            placeholder="Enter event name"
           />
-        )}
-      </View>
 
-      <Text style={styles.label}>Event Name</Text>
-      <TextInput
-        style={styles.input}
-        onChangeText={setEventName}
-        value={eventName}
-        placeholder="Enter event name"
-      />
-
-      <Text style={styles.label}>Event Description</Text>
-      <TextInput
-        style={styles.input}
-        onChangeText={setEventDescription}
-        value={eventDescription}
-        placeholder="Enter event description"
-      />
+          <Text style={styles.label}>Event Description</Text>
+          <TextInput
+            style={styles.input}
+            onChangeText={setEventDescription}
+            value={eventDescription}
+            placeholder="Enter event description"
+          />
 
           <Text style={styles.label}>Event Price Fee</Text>
           <TextInput

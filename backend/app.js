@@ -32,7 +32,7 @@ app.use(express.json());
 const http = require("http").Server(app)
 const socketIO = require('socket.io')(http, {
   cors: {
-      origin: "<http://localhost:3000>"
+      origin: "<http://192.168.100.4:3000>"
   }
 });
 

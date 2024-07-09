@@ -10,6 +10,7 @@ import {
 import { useNavigation } from "@react-navigation/native";
 import { useAuth } from "../context/AuthContext";
 import axios from "axios";
+import {jwtDecode} from "jwt-decode"; 
 
 const LoginScreen = () => {
   const navigation = useNavigation();

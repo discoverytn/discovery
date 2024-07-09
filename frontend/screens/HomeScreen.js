@@ -1,10 +1,17 @@
 import 'react-native-gesture-handler';
-import React from 'react';
-import { StyleSheet, Text, View, ImageBackground, TouchableOpacity } from 'react-native';
+import React, { useEffect } from 'react';
+import { StyleSheet, Text, View, ImageBackground, TouchableOpacity, LogBox } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
 export default function HomeScreen() {
   const navigation = useNavigation();
+
+  useEffect(() => {
+   
+    LogBox.ignoreLogs([
+      'VirtualizedLists should never be nested inside plain ScrollViews with the same orientation',
+    ]);
+  }, []);
 
   return (
     <ImageBackground
