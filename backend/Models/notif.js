@@ -7,10 +7,13 @@ module.exports = (sequelize) => {
       primaryKey: true,
       autoIncrement: true,
     },
+<<<<<<< HEAD
     type: {
       type: DataTypes.STRING,
       allowNull: false,
     },
+=======
+>>>>>>> 9860a3bf0a78ca7211eda5d920fcd6980f3be129
     message: DataTypes.STRING,
     business_idbusiness: {
       type: DataTypes.INTEGER,
@@ -25,6 +28,7 @@ module.exports = (sequelize) => {
         model: 'Explorers', 
         key: 'idexplorer',
       }
+<<<<<<< HEAD
     },
     created_at: {
       type: DataTypes.DATE,
@@ -40,3 +44,8 @@ module.exports = (sequelize) => {
     }
   });
 };
+=======
+    }
+  });
+};
+>>>>>>> 9860a3bf0a78ca7211eda5d920fcd6980f3be129

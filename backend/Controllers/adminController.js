@@ -155,41 +155,6 @@ const getBusinessById = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
-const deleteExplorer = async (req, res) => {
-  const { explorerId } = req.params;
-
-  try {
-    const explorer = await db.Explorer.findByPk(explorerId);
-
-    if (!explorer) {
-      return res.status(404).json({ error: 'Explorer not found' });
-    }
-
-    await explorer.destroy();
-    res.json({ message: 'Explorer deleted successfully' });
-  } catch (error) {
-    console.error('Error deleting explorer:', error);
-    res.status(500).json({ error: error.message });
-  }
-};
-const deleteBusinessOwner = async (req, res) => {
-  const { ownerId } = req.params;
-
-  try {
-    const businessOwner = await db.Business.findByPk(ownerId);
-
-    if (!businessOwner) {
-      return res.status(404).json({ error: 'Business owner not found' });
-    }
-
-    await businessOwner.destroy();
-    res.json({ message: 'Business owner deleted successfully' });
-  } catch (error) {
-    console.error('Error deleting business owner:', error);
-    res.status(500).json({ error: error.message });
-  }
-};
-
 
 module.exports = {
   getAllUsers,
@@ -198,7 +163,5 @@ module.exports = {
   editUserRole,
   getAllBO,
   getAllExplorers,
-  getBusinessById,
-  deleteExplorer,
-  deleteBusinessOwner
+  getBusinessById
 };

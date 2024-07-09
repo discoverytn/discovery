@@ -9,7 +9,6 @@ const AuthContext = createContext({
   explorer: {},
   business: {},
   setExplorer: () => {},
-  setBusiness: () => {},
   loginAction: () => {},
   signupAction: () => {},
   logOut: () => {},
@@ -39,22 +38,9 @@ const AuthProvider = ({ children }) => {
       const storedBusiness = await SecureStore.getItemAsync("business");
       const storedToken = await SecureStore.getItemAsync("token");
 
-      if (storedExplorer) {
-        const parsedExplorer = JSON.parse(storedExplorer);
-        setExplorer(parsedExplorer);
-        console.log("Retrieved Explorer:", parsedExplorer);
-      }
-
-      if (storedBusiness) {
-        const parsedBusiness = JSON.parse(storedBusiness);
-        setBusiness(parsedBusiness);
-        console.log("Retrieved Business:", parsedBusiness);
-      }
-
-      if (storedToken) {
-        setToken(storedToken);
-        console.log("Retrieved Token:", storedToken);
-      }
+      if (storedExplorer) setExplorer(JSON.parse(storedExplorer));
+      if (storedBusiness) setBusiness(JSON.parse(storedBusiness));
+      if (storedToken) setToken(storedToken);
     } catch (error) {
       console.error("Error retrieving data:", error);
     }
@@ -64,15 +50,19 @@ const AuthProvider = ({ children }) => {
     if (token) {
       try {
         const decodedToken = jwtDecode(token);
+        console.log('Decoded Token:', decodedToken);
+  
         if ('id' in decodedToken) {
           const idValue = decodedToken['id'];
           if (decodedToken.role === 'explorer') {
             setExplorer((prev) => ({ ...prev, id: idValue }));
-            console.log("Explorer ID set from context:", idValue);
+            console.log('Explorer ID set from context:', idValue);
           } else if (decodedToken.role === 'business') {
             setBusiness((prev) => ({ ...prev, id: idValue }));
-            console.log("Business ID set from context:", idValue);
+            console.log('Business ID set from context:', idValue);
           }
+        } else {
+          console.error('ID not found in decoded token');
         }
       } catch (error) {
         console.error('Error decoding token:', error);
@@ -82,39 +72,36 @@ const AuthProvider = ({ children }) => {
 
   const loginAction = async (data) => {
     try {
-      const response = await axios.post("http://192.168.1.8:3000/auth/login", data);
-  
+      const response = await axios.post(
+        "http://192.168.1.8:3000/auth/login",
+        data
+      );
+
       if (response.status === 200) {
         const { token } = response.data;
         Alert.alert("Success", response.data.message);
-  
-        setToken(token);
-        await storeData("token", token);
-  
-        
-        console.log("Login response data:", response.data);
-  
-        if (response.data.explorer) {
-          setExplorer(response.data.explorer);
-          await storeData("explorer", response.data.explorer);
-          console.log("Explorer from response:", response.data.explorer);
-        } else if (response.data.business) {
+
+        if (response.data.business) {
           setBusiness(response.data.business);
           await storeData("business", response.data.business);
-          console.log("Business from response:", response.data.business);
+        } else if (response.data.explorer) {
+          setExplorer(response.data.explorer);
+          await storeData("explorer", response.data.explorer);
         } else {
-          console.log("Unknown role or missing user data in response");
+          console.log("Unknown role or missing user data");
         }
-  
+
+        setToken(token);
+        await storeData("token", token);
+
         return { token };
       }
     } catch (err) {
-      console.error("Login error:", err);
+      console.error(err);
       Alert.alert("Error", err.response?.data?.message || "Login failed!");
       throw err;
     }
   };
-  
 
   const signupAction = async (data) => {
     console.log('Signup Data:', data);
@@ -131,9 +118,6 @@ const AuthProvider = ({ children }) => {
         const { token } = response.data;
         Alert.alert("Success", "Signup successful!");
 
-        setToken(token);
-        await storeData("token", token);
-
         return { token };
       } else {
         console.error("Unexpected response:", response);
@@ -149,6 +133,7 @@ const AuthProvider = ({ children }) => {
       throw error;
     }
   };
+  
 
   const logOut = async () => {
     try {
@@ -167,7 +152,7 @@ const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider
-      value={{ token, explorer, business, loginAction, signupAction, setExplorer,setBusiness, logOut }}
+      value={{ token, explorer, business, loginAction, signupAction,setExplorer, logOut }}
     >
       {children}
     </AuthContext.Provider>

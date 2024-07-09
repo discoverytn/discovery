@@ -1,7 +1,7 @@
 const { DataTypes } = require("sequelize");
-const db = require ('../database/index')
-module.exports = (sequelize,DataTypes) => {
-  const Explorer =  sequelize.define("Explorer", {
+
+module.exports = (sequelize) => {
+  return sequelize.define("Explorer", {
     idexplorer: {
       type: DataTypes.INTEGER,
       primaryKey: true,
@@ -78,5 +78,4 @@ module.exports = (sequelize,DataTypes) => {
       allowNull: true,
     },
   });
-  return Explorer
 };

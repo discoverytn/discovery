@@ -1,8 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, Image, TouchableOpacity, TextInput, StyleSheet, Alert } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, Image, TouchableOpacity, TextInput, Button, StyleSheet, Alert } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import axios from 'axios';
-import { useAuth } from '../context/AuthContext';
 
 const ScheduleEventScreen = ({ navigation }) => {
   const [startDate, setStartDate] = useState(new Date());
@@ -11,35 +9,7 @@ const ScheduleEventScreen = ({ navigation }) => {
   const [showEndDatePicker, setShowEndDatePicker] = useState(false);
   const [eventName, setEventName] = useState('');
   const [eventDescription, setEventDescription] = useState('');
-  const [eventPrice, setEventPrice] = useState('');
-  const [canPostEvent, setCanPostEvent] = useState(false);
-  const [notEligibleReason, setNotEligibleReason] = useState('');
-
-  const { explorer, business } = useAuth();
-
-  useEffect(() => {
-    checkEligibility();
-  }, [explorer, business]);
-
-  const checkEligibility = () => {
-    if (explorer && Object.keys(explorer).length > 0) {
-      console.log("Explorer object in schedule:", explorer);
-      if (explorer.numOfPosts >= 5) {
-        setCanPostEvent(true);
-        setNotEligibleReason('');
-      } else {
-        setCanPostEvent(false);
-        setNotEligibleReason(`You need to have at least 5 posts to schedule an event. You currently have ${explorer.numOfPosts} posts.`);
-      }
-    } else if (business && Object.keys(business).length > 0) {
-      setCanPostEvent(true);
-      setNotEligibleReason('');
-    } else {
-      setCanPostEvent(false);
-      setNotEligibleReason('Unable to verify user. Please log in again.');
-      navigation.navigate('Login');
-    }
-  };
+  const [eventPriceFee, setEventPriceFee] = useState('');
 
   const handleStartDateChange = (event, selectedDate) => {
     const currentDate = selectedDate || startDate;
@@ -52,36 +22,19 @@ const ScheduleEventScreen = ({ navigation }) => {
     setShowEndDatePicker(false);
     setEndDate(currentDate);
   };
-
-  const Submit = async () => {
-    if (!canPostEvent) {
-      return;
-    }
-
+//testing in front
+  const handleSubmit = () => {
     const eventData = {
       eventName,
       eventDescription,
-      eventPrice: parseInt(eventPrice),
-      startDate: startDate.toISOString().split('T')[0],
-      endDate: endDate.toISOString().split('T')[0],
+      eventPriceFee,
+      startDate,
+      endDate,
     };
 
-    if (explorer && explorer.id) {
-      eventData.explorer_idexplorer = explorer.id;
-    } else if (business && business.id) {
-      eventData.business_idbusiness = business.id;
-    }
-
-    try {
-      const response = await axios.post('http://192.168.1.19:3000/events/create', eventData);
-      console.log('Event Data:', response.data);
-      Alert.alert('Success', 'Your event has been posted successfully!', [
-        { text: "OK", onPress: () => navigation.navigate('EventList') }
-      ]);
-    } catch (error) {
-      console.error('Error posting event:', error);
-      Alert.alert('Error', 'Failed to post event. Please try again.');
-    }
+   
+    console.log('Event Data:', eventData);
+    Alert.alert('Event Posted', 'Your event has been posted successfully!');
   };
 
   return (
@@ -94,66 +47,60 @@ const ScheduleEventScreen = ({ navigation }) => {
         <Image source={require('../assets/notification.jpg')} style={styles.icon} />
       </View>
 
-      {canPostEvent ? (
-        <>
-          <View style={styles.datePickerContainer}>
-            <TouchableOpacity onPress={() => setShowStartDatePicker(true)}>
-              <Text style={styles.dateText}>Start Date: {startDate.toDateString()}</Text>
-            </TouchableOpacity>
-            {showStartDatePicker && (
-              <DateTimePicker
-                value={startDate}
-                mode="date"
-                display="default"
-                onChange={handleStartDateChange}
-              />
-            )}
-
-            <TouchableOpacity onPress={() => setShowEndDatePicker(true)}>
-              <Text style={styles.dateText}>End Date: {endDate.toDateString()}</Text>
-            </TouchableOpacity>
-            {showEndDatePicker && (
-              <DateTimePicker
-                value={endDate}
-                mode="date"
-                display="default"
-                onChange={handleEndDateChange}
-              />
-            )}
-          </View>
-
-          <Text style={styles.label}>Event Name</Text>
-          <TextInput
-            style={styles.input}
-            onChangeText={setEventName}
-            value={eventName}
-            placeholder="Enter event name"
+      <View style={styles.datePickerContainer}>
+        <TouchableOpacity onPress={() => setShowStartDatePicker(true)}>
+          <Text style={styles.dateText}>Start Date: {startDate.toDateString()}</Text>
+        </TouchableOpacity>
+        {showStartDatePicker && (
+          <DateTimePicker
+            value={startDate}
+            mode="date"
+            display="default"
+            onChange={handleStartDateChange}
           />
+        )}
 
-          <Text style={styles.label}>Event Description</Text>
-          <TextInput
-            style={styles.input}
-            onChangeText={setEventDescription}
-            value={eventDescription}
-            placeholder="Enter event description"
+        <TouchableOpacity onPress={() => setShowEndDatePicker(true)}>
+          <Text style={styles.dateText}>End Date: {endDate.toDateString()}</Text>
+        </TouchableOpacity>
+        {showEndDatePicker && (
+          <DateTimePicker
+            value={endDate}
+            mode="date"
+            display="default"
+            onChange={handleEndDateChange}
           />
+        )}
+      </View>
 
-          <Text style={styles.label}>Event Price Fee</Text>
-          <TextInput
-            style={styles.input}
-            onChangeText={setEventPrice}
-            value={eventPrice}
-            placeholder="Enter event price fee"
-            keyboardType="numeric"
-          />
+      <Text style={styles.label}>Event Name</Text>
+      <TextInput
+        style={styles.input}
+        onChangeText={setEventName}
+        value={eventName}
+        placeholder="Enter event name"
+      />
 
-          <TouchableOpacity style={styles.button} onPress={Submit}>
-            <Text style={styles.buttonText}>Post Event</Text>
-          </TouchableOpacity>
-        </>
-      ) : (
-        <Text style={styles.notEligibleText}>{notEligibleReason}</Text>
-      )}
+      <Text style={styles.label}>Event Description</Text>
+      <TextInput
+        style={styles.input}
+        onChangeText={setEventDescription}
+        value={eventDescription}
+        placeholder="Enter event description"
+      />
+
+      <Text style={styles.label}>Event Price Fee</Text>
+      <TextInput
+        style={styles.input}
+        onChangeText={setEventPriceFee}
+        value={eventPriceFee}
+        placeholder="Enter event price fee"
+        keyboardType="numeric"
+      />
+
+      <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+        <Text style={styles.buttonText}>Post Event</Text>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -215,12 +162,6 @@ const styles = StyleSheet.create({
   buttonText: {
     color: '#fff',
     fontSize: 18,
-  },
-  notEligibleText: {
-    fontSize: 18,
-    textAlign: 'center',
-    marginTop: 20,
-    color: 'red',
   },
 });
 

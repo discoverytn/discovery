@@ -1,32 +1,27 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, View, Image, TouchableOpacity, FlatList, Alert } from 'react-native';
+import { StyleSheet, Text, View, Image, TouchableOpacity, FlatList } from 'react-native';
 import axios from 'axios';
 import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../context/AuthContext';
-import { Picker } from '@react-native-picker/picker';
-import Icon from 'react-native-vector-icons/FontAwesome';
 
 const ExplorerProfile = () => {
   const { explorer, setExplorer, logOut } = useAuth();
   const navigation = useNavigation();
   const [activeTab, setActiveTab] = useState('Posts');
-  const [posts, setPosts] = useState([]);
-  const [numPosts, setNumPosts] = useState(0);
-  const [numLikes, setNumLikes] = useState(0);
+  const [posts, setPosts] = useState([])
+  const [numPosts, setNumPosts] = useState(0)
+  const [numLikes, setNumLikes] = useState(0)
   const [numTraveled, setNumTraveled] = useState(0);
-  const [selectedValue, setSelectedValue] = useState("");
-  
+
   useEffect(() => {
     const fetchExplorerData = async () => {
       try {
-        const response = await axios.get(`http://192.168.1.8:3000/explorer/${explorer.id}`);
+        const response = await axios.get(`http://192.168.92.72:3000/explorer/${explorer.id}`);
         if (response.status === 200) {
-          const explorerData = response.data;
-          // Set the explorer object and update numOfPosts based on posts length
-          setExplorer({ ...explorerData, numOfPosts: explorerData.Posts?.length || 0 });
-          setNumPosts(explorerData.Posts?.length || 0);
-          setNumLikes(explorerData.Likes || 0);
-          setNumTraveled(explorerData.Traveled || 0);
+          setExplorer(response.data);
+          setNumPosts(response.data.Posts?.length || 0);
+          setNumLikes(response.data.Likes || 0);
+          setNumTraveled(response.data.Traveled || 0);
         } else {
           console.error('Failed to fetch explorer data');
         }
@@ -34,29 +29,24 @@ const ExplorerProfile = () => {
         console.error('Error fetching explorer data:', error.message);
       }
     };
-  
     if (explorer?.id) {
       fetchExplorerData();
     }
   }, [explorer?.id, setExplorer]);
-  
 
   useEffect(() => {
     const fetchExplorerPosts = async () => {
       try {
-        const response = await axios.get(`http://192.168.1.8:3000/explorer/${explorer.id}/posts`);
+        const response = await axios.get(`http://192.168.92.72:3000/explorer/${explorer.id}/posts`);
         if (response.status === 200) {
           const transformedPosts = response.data.map(post => ({
-            id: post.idposts,
+            id: post.id,
             title: post.title,
             description: post.description,
             image1: post.image1
           }));
           setPosts(transformedPosts);
           setNumPosts(transformedPosts.length || 0);
-  
-          // Update explorer object with the correct number of posts
-          setExplorer(prev => ({ ...prev, numOfPosts: transformedPosts.length || 0 }));
         } else {
           console.error('Failed to fetch explorer posts');
           setPosts([]);
@@ -68,56 +58,24 @@ const ExplorerProfile = () => {
         setNumPosts(0);
       }
     };
-  
+
     if (activeTab === 'Posts' && explorer?.id) {
       fetchExplorerPosts();
     }
-  }, [explorer?.id, activeTab, posts.length]);
-  
+  }, [explorer?.id, activeTab]);
 
   const handleTabChange = (tabName) => {
     setActiveTab(tabName);
   };
 
   const navigateToEditProfile = () => {
-    navigation.navigate('ExplorerEditProfilScreen');
+    navigation.navigate('ExplorerEditProfile');
   };
 
   const handleLogout = () => {
     logOut();
     navigation.navigate('Login');
   };
-
-  const deleteExplorerPost = async (postId, token) => {
-    try {
-      const response = await fetch(`http://192.168.1.8:3000/posts/explorer/delete/${postId}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-      const data = await response.json();
-      if (response.ok) {
-        console.log(data);
-        Alert.alert('Explorer post deleted successfully');
-        const updatedPosts = posts.filter(post => post.id !== postId);
-        setPosts(updatedPosts);
-  
-        // Update numPosts state and explorer object
-        setNumPosts(updatedPosts.length);
-        setExplorer(prev => ({ ...prev, numOfPosts: updatedPosts.length }));
-  
-      } else {
-        console.error('Error:', data);
-        Alert.alert(`Error: ${data.message}`);
-      }
-    } catch (error) {
-      console.error('Error:', error);
-      Alert.alert(`Error: ${error.message}`);
-    }
-  };
-  
 
   if (!explorer) {
     return (
@@ -132,20 +90,8 @@ const ExplorerProfile = () => {
       <Image source={{ uri: item.image1 }} style={styles.postImage} />
       <Text style={styles.postTitle}>{item.title}</Text>
       <Text style={styles.postDescription}>{item.description}</Text>
-      <TouchableOpacity style={styles.deleteButton} onPress={() => { deleteExplorerPost(item.id), console.log("item", item) }}>
-        <Text style={styles.deleteButtonText}>Delete</Text>
-      </TouchableOpacity>
     </View>
   );
-
-  const handlePickerChange = (value) => {
-    setSelectedValue(value);
-    if (value === 'Home') {
-      navigation.navigate('Main');
-    } else if (value === 'AddPost') {
-      navigation.navigate('ExplorerAddPostScreen');
-    }
-  };
 
   return (
     <View style={styles.container}>
@@ -208,19 +154,6 @@ const ExplorerProfile = () => {
           <Text style={styles.navBarText}>Visited</Text>
         </TouchableOpacity>
       </View>
-      <View style={styles.pickerContainer}>
-        <Icon name="bars" size={20} color="#333" style={styles.icon} />
-        <Picker
-          selectedValue={selectedValue}
-          onValueChange={handlePickerChange}
-          style={styles.picker}
-          mode="dropdown"
-        >
-          <Picker.Item label="Select an option" value="" />
-          <Picker.Item label="Home" value="Home" />
-          <Picker.Item label="Add Post" value="AddPost" />
-        </Picker>
-      </View>
       {activeTab === 'Posts' && (
         <FlatList
           data={posts}
@@ -260,7 +193,8 @@ const styles = StyleSheet.create({
   descriptionText: {
     fontSize: 16,
     textAlign: 'center',
-    color: '#666',
+    color: '#555',
+    lineHeight: 22,
     marginBottom: 10,
   },
   statsContainer: {
@@ -295,123 +229,95 @@ const styles = StyleSheet.create({
   infoItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
     marginBottom: 10,
   },
   labelText: {
     fontSize: 16,
+    color: '#777',
     fontWeight: 'bold',
-    color: '#333',
   },
   valueText: {
     fontSize: 16,
-    color: '#555',
-  },
-  editButton: {
-    backgroundColor: '#00aacc',
-    borderRadius: 5,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    marginTop: 20,
-  },
-  editButtonText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#fff',
-    textAlign: 'center',
-  },
-  logoutButton: {
-    marginTop: 10,
-  },
-  logoutButtonText: {
-    fontSize: 16,
-    color: '#007BFF',
-    textAlign: 'center',
+    color: '#333',
   },
   navBar: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    marginBottom: 10,
+    alignItems: 'center',
+    borderTopWidth: 1,
+    borderTopColor: '#ccc',
+    paddingTop: 10,
+    marginTop: 10,
   },
   navBarItem: {
+    flex: 1,
+    alignItems: 'center',
     paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderBottomWidth: 2,
-    borderBottomColor: 'transparent',
   },
   activeTab: {
-    borderBottomColor: '#007BFF',
+    borderBottomWidth: 2,
+    borderBottomColor: '#333',
   },
   navBarText: {
     fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
+    color: '#555',
   },
   postsContainer: {
-    flexGrow: 1,
-    justifyContent: 'flex-start',
+    marginTop: 20,
+    paddingHorizontal: 10,
   },
   postItem: {
     flex: 1,
-    margin: 10,
     backgroundColor: '#f0f0f0',
-    borderRadius: 10,
-    overflow: 'hidden',
+    borderRadius: 8,
+    margin: 5,
+    padding: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   postImage: {
     width: '100%',
-    height: 150,
-    borderTopLeftRadius: 10,
-    borderTopRightRadius: 10,
+    height: 120,
+    borderRadius: 8,
     marginBottom: 5,
   },
   postTitle: {
     fontSize: 16,
     fontWeight: 'bold',
     color: '#333',
-    paddingHorizontal: 10,
-    marginTop: 5,
+    marginBottom: 5,
   },
   postDescription: {
     fontSize: 14,
     color: '#555',
-    paddingHorizontal: 10,
-    marginBottom: 10,
+    textAlign: 'center',
   },
-  deleteButton: {
-    backgroundColor: '#dc3545',
-    padding: 10,
-    alignItems: 'center',
-    borderBottomLeftRadius: 10,
-    borderBottomRightRadius: 10,
+  editButton: {
+    backgroundColor: '#007bff',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 8,
+    marginTop: 10,
   },
-  deleteButtonText: {
-    fontSize: 14,
-    fontWeight: 'bold',
+  editButtonText: {
+    fontSize: 16,
     color: '#fff',
+    fontWeight: 'bold',
+  },
+  logoutButton: {
+    marginTop: 10,
+  },
+  logoutButtonText: {
+    fontSize: 16,
+    color: '#dc3545',
+    fontWeight: 'bold',
   },
   errorText: {
     fontSize: 18,
     color: 'red',
     textAlign: 'center',
     marginTop: 20,
-  },
-  pickerContainer: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-    position: 'absolute',
-    top: 30,
-    right: 10,
-    backgroundColor: '#f0f0f0',
-    borderRadius: 8,
-    padding: 5,
-  },
-  icon: {
-    marginRight: 5,
-  },
-  picker: {
-    width: 30,
-    height: 20,
   },
 });
 

@@ -3,14 +3,21 @@ import { StyleSheet, Text, TextInput, TouchableOpacity, View, Alert, Image, Scro
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import * as ImagePicker from 'expo-image-picker';
+<<<<<<< HEAD
 import { useNavigation } from '@react-navigation/native';
+=======
+>>>>>>> 9860a3bf0a78ca7211eda5d920fcd6980f3be129
 
 const CLOUDINARY_UPLOAD_PRESET = 'discovery';
 const CLOUDINARY_UPLOAD_URL = 'https://api.cloudinary.com/v1_1/dflixnywo/image/upload';
 
 const BusinessAddPostScreen = () => {
+<<<<<<< HEAD
   const { business, setBusiness } = useAuth();
   const [businessId, setBusinessId] = useState(null);
+=======
+  const { business } = useAuth();
+>>>>>>> 9860a3bf0a78ca7211eda5d920fcd6980f3be129
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [hashtags, setHashtags] = useState('');
@@ -19,9 +26,13 @@ const BusinessAddPostScreen = () => {
   const [latt, setLatt] = useState('');
   const [images, setImages] = useState({ image1: null, image2: null, image3: null, image4: null });
   const [category, setCategory] = useState('');
+<<<<<<< HEAD
 
   const navigation = useNavigation();
 
+=======
+  const [businessId, setBusinessId] = useState('');
+>>>>>>> 9860a3bf0a78ca7211eda5d920fcd6980f3be129
 
   useEffect(() => {
     if (business && business.id) {
@@ -36,7 +47,11 @@ const BusinessAddPostScreen = () => {
   const fetchBusinessDetails = async (businessId) => {
     try {
       console.log('Fetching business details for ID:', businessId);
+<<<<<<< HEAD
       const response = await axios.get(`http://192.168.1.8:3000/admin/business/${businessId}`);
+=======
+      const response = await axios.get(`http://192.168.1.19:3000/admin/business/${businessId}`);
+>>>>>>> 9860a3bf0a78ca7211eda5d920fcd6980f3be129
       if (response.status === 200) {
         const businessData = response.data;
         console.log('Business Data:', businessData);
@@ -53,7 +68,11 @@ const BusinessAddPostScreen = () => {
     }
   };
 
+<<<<<<< HEAD
   const Submit = async () => {
+=======
+  const handleSubmit = async () => {
+>>>>>>> 9860a3bf0a78ca7211eda5d920fcd6980f3be129
     const Hashtags = hashtags.split(',').map(hashtag => hashtag.trim());
   
     const payload = {
@@ -74,6 +93,7 @@ const BusinessAddPostScreen = () => {
     console.log('Payload:', payload);
   
     try {
+<<<<<<< HEAD
       const response = await axios.post('http://192.168.1.8:3000/posts/business/add', payload);
   
       if (response.status === 201) {
@@ -83,6 +103,13 @@ const BusinessAddPostScreen = () => {
         clearFields();
         navigation.navigate("Login");
 
+=======
+      const response = await axios.post('http://192.168.1.19:3000/posts/business/add', payload);
+  
+      if (response.status === 201) {
+        Alert.alert('Success', 'Post created successfully');
+        clearFields();
+>>>>>>> 9860a3bf0a78ca7211eda5d920fcd6980f3be129
       } else {
         Alert.alert('Error', 'Failed to create post');
       }
@@ -225,7 +252,11 @@ const BusinessAddPostScreen = () => {
         <View style={styles.imagesContainer}>
           {Object.keys(images).map(key => renderImageItem(images[key], key))}
         </View>
+<<<<<<< HEAD
         <TouchableOpacity style={styles.button} onPress={Submit}>
+=======
+        <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+>>>>>>> 9860a3bf0a78ca7211eda5d920fcd6980f3be129
           <Text style={styles.buttonText}>Submit Post</Text>
         </TouchableOpacity>
       </View>
@@ -260,7 +291,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   button: {
+<<<<<<< HEAD
     backgroundColor: '#00aacc',
+=======
+    backgroundColor: '#007BFF',
+>>>>>>> 9860a3bf0a78ca7211eda5d920fcd6980f3be129
     padding: 15,
     borderRadius: 8,
     alignItems: 'center',

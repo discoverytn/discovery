@@ -3,6 +3,10 @@ const { Business } = require("../database");
 
 module.exports = (sequelize,DataTypes) => {
   const Business =  sequelize.define("Business", {
+
+
+module.exports = (sequelize) => {
+  return sequelize.define("Business", {
     idbusiness: {
       type: DataTypes.INTEGER,
       primaryKey: true,
@@ -35,6 +39,8 @@ module.exports = (sequelize,DataTypes) => {
       allowNull: true,
     },
     municipality: {
+
+    location: {
       type: DataTypes.STRING,
       allowNull: true,
     },
@@ -99,6 +105,11 @@ module.exports = (sequelize,DataTypes) => {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    });
-  return Business
-};
+    category: { 
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    return business
+    }
+}
+}
