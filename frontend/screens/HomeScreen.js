@@ -2,6 +2,7 @@ import 'react-native-gesture-handler';
 import React, { useEffect } from 'react';
 import { StyleSheet, Text, View, ImageBackground, TouchableOpacity, LogBox } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { DB_HOST, PORT } from "@env";
 
 export default function HomeScreen() {
   const navigation = useNavigation();

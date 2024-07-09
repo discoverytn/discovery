@@ -7,6 +7,7 @@ import { faPersonWalkingLuggage, faLocationDot, faCalendarDays, faUser } from '@
 import CustomModal from './CustomModal';
 import axios from 'axios';
 import join from '../assets/join.gif'
+import { DB_HOST, PORT } from "@env";
 
 
 const EventListScreen = () => {
@@ -17,7 +18,7 @@ const EventListScreen = () => {
 
   const fetchEvents = async () => {
     try {
-      const response = await axios.get('http://192.168.100.4:3000/events/getAll');
+      const response = await axios.get(`http://${DB_HOST}:${PORT}/events/getAll`);
 
       setEvents(response.data);
     } catch (error) {

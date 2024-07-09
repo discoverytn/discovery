@@ -4,6 +4,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import * as ImagePicker from 'expo-image-picker';
+import { DB_HOST, PORT } from "@env";
 
 const CLOUDINARY_UPLOAD_PRESET = 'discovery';
 const CLOUDINARY_UPLOAD_URL = 'https://api.cloudinary.com/v1_1/dflixnywo/image/upload';
@@ -132,7 +133,7 @@ const ScheduleEventScreen = ({ navigation }) => {
     }
 
     try {
-      const response = await axios.post('http://192.168.100.4:3000/events/create', eventData);
+      const response = await axios.post('http://${DB_HOST}:${PORT}/events/create', eventData);
 
       console.log('Event Data:', response.data);
       Alert.alert('Success', 'Your event has been posted successfully!', [

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, Image, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
+import { DB_HOST, PORT } from "@env";
 import { useNavigation } from '@react-navigation/native';
 
 import selectedLogo from '../assets/selectedLogo.gif';
