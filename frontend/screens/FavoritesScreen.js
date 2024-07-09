@@ -15,10 +15,33 @@ const FavoritesScreen = () => {
   const [likedPosts, setLikedPosts] = useState([]);
   const navigation = useNavigation();
 
-  const toggleLike = (id) => {
-    setLikedPosts((prevLiked) =>
-      prevLiked.includes(id) ? prevLiked.filter((postId) => postId !== id) : [...prevLiked, id]
-    );
+  React.useEffect(() => {
+    if (explorer && explorer.idexplorer) {
+      setExplorerId(explorer.idexplorer);
+    }
+  }, [explorer]);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (explorerId) {
+        fetchFavorites(explorerId);
+      }
+    }, [explorerId])
+  );
+
+  const fetchFavorites = async (explorerId) => {
+    setLoading(true);
+    try {
+      const url = `http://192.168.100.4:3000/explorer/${explorerId}/favourites`;
+
+      const response = await axios.get(url);
+      console.log('Favorites fetched:', response.data);
+      setFavorites(response.data);
+    } catch (error) {
+      console.error('Error fetching favorites:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const renderItem = ({ item }) => (

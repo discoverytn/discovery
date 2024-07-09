@@ -9,18 +9,274 @@ const OnepostScreen = () => {
   const [showFullDescription, setShowFullDescription] = useState(false);
   const [showMoreReviews, setShowMoreReviews] = useState(false);
   const scrollViewRef = useRef(null);
+  const { explorer, business } = useAuth();
+  const navigation = useNavigation();
 
-  const description = "this place was recommended to me by one of my friends, after i you get there the locals will help guide you , it's one of the best natural places i got to visit and had a blast on my time there";
-  const shortDescription = description.slice(0, 100) + '...';
+  useEffect(() => {
+    if (route.params) {
+      const { postId, postDetails } = route.params;
+      setPostData({ postId, postDetails });
+      setSelectedImage(postDetails.image.uri);
+      checkIfPostFavorited(postId);
+      checkIfPostTraveled(postId);
+      fetchPostDetails(postId);
+      fetchWeatherData(postDetails.location);
+      fetchComments(postId);
+    }
+  }, [route.params]);
 
-  const handleSeeMorePress = () => {
-    setShowMoreReviews(!showMoreReviews);
-  
-    if (!showMoreReviews && scrollViewRef.current) {
-      scrollViewRef.current.scrollToEnd({ animated: true });
+  const fetchPostDetails = async (postId) => {
+    try {
+      const response = await axios.get(`http://192.168.100.4:3000/posts/onepost/${postId}`);
+
+      setAverageRating(parseFloat(response.data.averageRating));
+      setPostData(prevData => ({
+        ...prevData,
+        postDetails: {
+          ...prevData.postDetails,
+          averageRating: parseFloat(response.data.averageRating),
+        },
+      }));
+    } catch (error) {
+      console.error('Error fetching post details:', error);
+      Alert.alert('Error', 'Failed to fetch post details');
     }
   };
 
+  const fetchWeatherData = async (location) => {
+    const options = {
+      method: 'GET',
+      url: 'https://api.tomorrow.io/v4/weather/realtime',
+      params: {
+        location: location,
+        units: 'metric',
+        apikey: '7FU1FI9CTOulnIYgaTTCHHOIXyfS4WlF'
+      },
+      headers: {accept: 'application/json'}
+    };
+
+    try {
+      const response = await axios.request(options);
+      setWeatherData(response.data.data.values);
+      setCoordinates({
+        latitude: response.data.location.lat,
+        longitude: response.data.location.lon
+      });
+    } catch (error) {
+      console.error('Error fetching weather data:', error);
+    }
+  };
+
+  const openMap = () => {
+    if (coordinates) {
+      const scheme = Platform.select({ ios: 'maps:0,0?q=', android: 'geo:0,0?q=' });
+      const latLng = `${coordinates.latitude},${coordinates.longitude}`;
+      const label = postData.postDetails.location;
+      const url = Platform.select({
+        ios: `${scheme}${label}@${latLng}`,
+        android: `${scheme}${latLng}(${label})`
+      });
+
+      Linking.openURL(url);
+    } else {
+      Alert.alert('Error', 'Location coordinates are not available');
+    }
+  };
+
+  const checkIfPostFavorited = async (postId) => {
+    try {
+      const idexplorer = explorer.idexplorer;
+      const response = await axios.get(`http://192.168.100.4:3000/explorer/${idexplorer}/favourites/${postId}/check`);
+
+      setIsFavorited(response.data.favorited);
+    } catch (error) {
+      console.error('Error checking if post is favorited:', error);
+    }
+  };
+
+  const checkIfPostTraveled = async (postId) => {
+    try {
+      const idexplorer = explorer.idexplorer;
+      const response = await axios.get(`http://192.168.100.4:3000/explorer/${idexplorer}/traveled/${postId}/check`);
+
+      setIsTraveled(response.data.traveled);
+    } catch (error) {
+      console.error('Error checking if post is traveled:', error);
+    }
+  };
+
+
+const addToFavorites = async () => {
+  try {
+    const idexplorer = explorer.idexplorer;
+    const response = await axios.post(`http://192.168.100.4:3000/explorer/${idexplorer}/favourites/${postId}/addOrRemove`, {
+
+      idposts: postId,
+    });
+
+    if (response.data.message === "Post added to favorites") {
+      setIsFavorited(true);
+      Alert.alert('Success', 'Post added to favorites');
+      
+      // Create a notification for the post owner
+      await axios.post('http://192.168.100.4:3000/notifications/create', {
+
+        type: 'favorite',
+        message: `${explorer.firstname} ${explorer.lastname} added your post to favorites`,
+        explorer_idexplorer: postDetails.explorer_idexplorer, // Assuming this is the post owner's ID
+        business_idbusiness: null,
+        senderImage: explorer.image
+      });
+    } else if (response.data.message === "Post removed from favorites") {
+      setIsFavorited(false);
+      Alert.alert('Success', 'Post removed from favorites');
+    } else {
+      Alert.alert('Error', 'Unexpected response from server');
+    }
+  } catch (error) {
+    console.error('Error adding/removing post to/from favorites:', error);
+    Alert.alert('Error', 'Failed to update favorites');
+  }
+};
+
+const addToTraveled = async () => {
+  try {
+    const idexplorer = explorer.idexplorer;
+    const response = await axios.post(`http://192.168.100.4:3000/explorer/${idexplorer}/traveled/${postId}/addOrRemove`, {
+
+      idposts: postId,
+    });
+
+    if (response.data.message === "Post added to traveled") {
+      setIsTraveled(true);
+      Alert.alert('Success', 'Post added to traveled');
+    } else if (response.data.message === "Post removed from traveled") {
+      setIsTraveled(false);
+      Alert.alert('Success', 'Post removed from traveled');
+    } else {
+      Alert.alert('Error', 'Unexpected response from server');
+    }
+  } catch (error) {
+    console.error('Error adding/removing post to/from traveled:', error);
+    Alert.alert('Error', 'Failed to update traveled');
+  }
+};
+
+const handleScrollToTop = () => {
+  if (scrollViewRef.current) {
+    scrollViewRef.current.scrollTo({ y: 0, animated: true });
+  }
+};
+
+const handleSendPost = () => {
+  addToTraveled(); 
+};
+
+const handleImagePress = (imageUri) => {
+  setSelectedImage(imageUri);
+  handleScrollToTop();
+};
+
+const handleSeeMorePress = () => {
+  setShowMoreReviews(!showMoreReviews);
+
+  if (!showMoreReviews && scrollViewRef.current) {
+    scrollViewRef.current.scrollToEnd({ animated: true });
+  }
+};
+
+const fetchComments = async (postId) => {
+  try {
+    const response = await axios.get(`http://192.168.100.4:3000/comments/post/${postId}`);
+
+    setComments(response.data);
+  } catch (error) {
+    console.error('Error fetching comments:', error);
+    Alert.alert('Error', 'Failed to fetch comments');
+  }
+};
+
+const handleAddComment = async () => {
+  if (!newComment.trim()) return;
+
+  try {
+    const commentData = {
+      idposts: postData.postId,
+      content: newComment,
+      explorer_idexplorer: explorer.idexplorer,
+      business_idbusiness: business.idbusiness
+    };
+
+    const response = await axios.post('http://192.168.100.4:3000/comments/create', commentData);
+
+    
+   
+    const newCommentWithUser = {
+      ...response.data.comment,
+      Explorer: explorer.idexplorer ? {
+        idexplorer: explorer.idexplorer,
+        firstname: explorer.firstname,
+        lastname: explorer.lastname,
+        username: explorer.username,
+        image: explorer.image
+      } : null,
+      Business: business.idbusiness ? {
+        idbusiness: business.idbusiness,
+        businessname: business.businessname,
+        firstname: business.firstname,
+        lastname: business.lastname,
+        username: business.username,
+        image: business.image
+      } : null
+    };
+
+    setComments([newCommentWithUser, ...comments]);
+    setNewComment('');
+  } catch (error) {
+    console.error('Error adding comment:', error);
+    Alert.alert('Error', 'Failed to add comment');
+  }
+};
+
+const handleEditComment = async (commentId, newContent) => {
+  try {
+    await axios.put(`http://192.168.100.4:3000/comments/${commentId}`, { content: newContent });
+
+    setComments(comments.map(comment => 
+      comment.idcomments === commentId ? { ...comment, content: newContent } : comment
+    ));
+    setEditingCommentId(null);
+  } catch (error) {
+    console.error('Error editing comment:', error);
+    Alert.alert('Error', 'Failed to edit comment');
+  }
+};
+
+const handleDeleteComment = async (commentId) => {
+  try {
+    await axios.delete(`http://192.168.100.4:3000/comments/${commentId}`);
+
+    setComments(comments.filter(comment => comment.idcomments !== commentId));
+  } catch (error) {
+    console.error('Error deleting comment:', error);
+    Alert.alert('Error', 'Failed to delete comment');
+  }
+};
+
+const getUserImage = (user) => {
+  if (!user) return require('../assets/user.jpg');
+  return user.image && user.image.startsWith('http') 
+    ? { uri: user.image } 
+    : require('../assets/user.jpg');
+};
+
+const getUserDisplayName = (user) => {
+  if (!user) return 'Unknown User';
+  if (user.firstname && user.lastname) return `${user.firstname} ${user.lastname}`;
+  return user.username || user.businessname || 'Unknown User';
+};
+
+if (!postData) {
   return (
     <ScrollView style={styles.container} ref={scrollViewRef}>
       <View style={styles.imageContainer}>

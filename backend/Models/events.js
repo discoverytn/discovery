@@ -8,7 +8,15 @@ module.exports = (sequelize) => {
       autoIncrement: true,
     },
     eventName: DataTypes.STRING,
-    eventDate: DataTypes.DATE,
+    startDate: DataTypes.STRING,
+    endDate: DataTypes.STRING,
+    eventDescription: DataTypes.TEXT,
+    eventPrice: DataTypes.INTEGER,
+    eventLocation: DataTypes.STRING,
+    image: {
+      type: DataTypes.STRING,
+      allowNull: false 
+    },
     explorer_idexplorer: {
       type: DataTypes.INTEGER,
       references: {

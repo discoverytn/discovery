@@ -55,6 +55,8 @@ const registerBO = async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
+    
+    
     const newBusiness = await db.Business.create({
       email,
       username,
@@ -62,7 +64,8 @@ const registerBO = async (req, res) => {
       businessName,
       BOid,
       credImg,
-      category, 
+      category,
+      approvalStatus: 'pending', 
     });
 
     const token = jwt.sign(
@@ -77,6 +80,7 @@ const registerBO = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
 const login = async (req, res) => {
   const { email, password } = req.body;
   try {
@@ -88,10 +92,15 @@ const login = async (req, res) => {
 
     if (!user) {
       user = await db.Business.findOne({ where: { email } });
+      if (user && user.approvalStatus !== 'accepted') {
+        return res.status(401).json({ error: "Your request has been sent, please wait for admin approval" });
+      }
     }
+
     if (!user) {
       user = await db.Admin.findOne({ where: { email } });
     }
+
     if (!user) {
       return res.status(401).json({ error: "Please re-check your info" });
     }
@@ -129,6 +138,7 @@ const login = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
 
 const resetPassword = async (req, res) => {
   const { email, newPassword } = req.body;

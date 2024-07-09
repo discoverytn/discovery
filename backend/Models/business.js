@@ -103,16 +103,15 @@ module.exports=(sequelize)=>{
       type: DataTypes.STRING,
       allowNull: false,
     },
-    approvalStatus:{
-      type: DataTypes.ENUM('pending','accepted'),
-      allowNull:false,
-      defaultValue:'pending'
+    approvalStatus: {
+      type: DataTypes.ENUM('pending', 'accepted'),
+      allowNull: false,
+      defaultValue: 'pending', 
     },
-    subscribed:{
+    subscribed: {
       type: DataTypes.ENUM('no', 'yes'),
-      allowNull:false,
-      defaultValue:'no'
-   
-    },
-  })
-}
+      allowNull: false,
+      defaultValue: 'no', 
+    }
+  });
+};

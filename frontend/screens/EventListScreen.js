@@ -1,39 +1,78 @@
 import React from 'react';
 import { View, Text, Image, TouchableOpacity, FlatList, StyleSheet } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import LottieView from 'lottie-react-native';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { faPersonWalkingLuggage, faLocationDot, faCalendarDays, faUser } from '@fortawesome/free-solid-svg-icons';
+import CustomModal from './CustomModal';
+import axios from 'axios';
+import join from '../assets/join.gif'
 
-const events = [
-  { id: 1, name: 'Bouselem', location: 'location.jpg', startDate: '16 July', endDate: '28 July', price: 'Free', image: require('../assets/eljem.jpg') },
-  { id: 2, name: 'Matmata', location: 'location.jpg', startDate: '20 Sep', endDate: '29 Sep', price: '20DT', image: require('../assets/camping.jpg') },
-  { id: 3, name: 'Hammamet', location: 'location.jpg', startDate: '14 Nov', endDate: '22 Nov', price: '25DT', image: require('../assets/souq.jpg') },
-  { id: 4, name: 'Sfax', location: 'location.jpg', startDate: '12 Dec', endDate: '18 Dec', price: 'Free', image: require('../assets/sidibousaid.jpg') },
-  { id: 5, name: 'tunis', location: 'location.jpg', startDate: '19 Dec', endDate: '18 Dec', price: 'Free', image: require('../assets/sidibousaid1.jpg') },
-];
 
 const EventListScreen = () => {
   const navigation = useNavigation();
+  const [showModal, setShowModal] = useState(false);
+  const [events, setEvents] = useState([]);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const fetchEvents = async () => {
+    try {
+      const response = await axios.get('http://192.168.100.4:3000/events/getAll');
+
+      setEvents(response.data);
+    } catch (error) {
+      console.error('Error fetching events:', error);
+    }
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchEvents();
+    }, [])
+  );
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    fetchEvents().then(() => setRefreshing(false));
+  }, []);
+
+  const toggleModal = () => setShowModal(!showModal);
 
   const renderItem = ({ item }) => (
-    <View style={styles.eventItem}>
-      <Image source={item.image} style={styles.eventImage} />
+    <TouchableOpacity 
+      style={styles.eventItem}
+      onPress={() => navigation.navigate('OneEvent', { event: item })}
+    >
+      <Image 
+        source={item.image ? { uri: item.image } : require('../assets/event-placeholder.jpg')} 
+        style={styles.eventImage} 
+      />
       <View style={styles.eventDetails}>
-        <View style={styles.eventTitleRow}>
-          <Text style={styles.eventName}>{item.name}</Text>
-          <Image source={require('../assets/location.jpg')} style={styles.locationIcon} />
+        <Text style={styles.eventName}>{item.eventName}</Text>
+        <View style={styles.infoRow}>
+          <FontAwesomeIcon icon={faLocationDot} size={16} color="#32CD32" />
+          <Text style={styles.infoText}>{item.eventLocation}</Text>
         </View>
-        <Text style={styles.eventPrice}>{item.price}</Text>
-        <View style={styles.eventDateRow}>
-          <Image source={require('../assets/date.jpg')} style={styles.dateIcon} />
-          <Text style={styles.eventDates}>{item.startDate} - {item.endDate}</Text>
+        <View style={styles.infoRow}>
+          <FontAwesomeIcon icon={faCalendarDays} size={16} color="#32CD32" />
+          <Text style={styles.infoText}>{item.startDate} - {item.endDate}</Text>
         </View>
-        <View style={styles.eventJoinedRow}>
-          <Image source={require('../assets/user.jpg')} style={styles.userIcon} />
-          <Image source={require('../assets/user.jpg')} style={styles.userIcon} />
-          <Image source={require('../assets/user.jpg')} style={styles.userIcon} />
-          <Text style={styles.joinedText}>9 People Joined</Text>
+        <View style={styles.infoRow}>
+          <FontAwesomeIcon icon={faUser} size={16} color="#32CD32" />
+          <Text style={styles.infoText}>
+            By: {item.Explorer ? item.Explorer.username : item.Business ? item.Business.businessname : 'Unknown'}
+          </Text>
+        </View>
+        <Text style={styles.eventDescription} numberOfLines={2}>{item.eventDescription}</Text>
+        <View style={styles.footer}>
+          <Text style={styles.eventPrice}>{item.eventPrice} DT</Text>
+          <TouchableOpacity style={styles.joinButton} onPress={toggleModal}>
+          <Image source={join} style={styles.gif} />
+
+          </TouchableOpacity>
         </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 
   return (
@@ -42,14 +81,29 @@ const EventListScreen = () => {
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Image source={require('../assets/left-arrow.jpg')} style={styles.icon} />
         </TouchableOpacity>
-        <Text style={styles.headerText}>Event Lists</Text>
+        <Text style={styles.headerText}></Text>
       </View>
-      <Text style={styles.subHeaderText}>All Popular Events</Text>
+      <View style={styles.subHeader}>
+        <Text style={styles.subHeaderText}>Available Events </Text>
+        <LottieView
+          source={require('../assets/sand-clock.json')}
+          autoPlay
+          loop
+          style={styles.sandClockAnimation}
+        />
+      </View>
       <FlatList
         data={events}
         renderItem={renderItem}
         keyExtractor={(item) => item.id.toString()}
         contentContainerStyle={styles.eventsContainer}
+        refreshing={refreshing}
+        onRefresh={onRefresh}
+      />
+      <CustomModal
+        visible={showModal}
+        onClose={toggleModal}
+        message="Event request was sent!"
       />
     </View>
   );
@@ -58,109 +112,106 @@ const EventListScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#F0FFF0',
     paddingTop: 40,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 10,
+    paddingHorizontal: 20,
     marginBottom: 20,
   },
   icon: {
     width: 30,
     height: 30,
-    marginTop: 20, 
   },
   headerText: {
     fontSize: 24,
     fontWeight: 'bold',
-    marginLeft: 100,
-    marginTop: 20, 
+    marginLeft: 1,
+    color: '#000',
+    flex: 1,
+    textAlign: 'center',
+  },
+  subHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 20,
   },
   subHeaderText: {
     fontSize: 20,
     fontWeight: 'bold',
-    paddingHorizontal: 10,
-    marginBottom: 20,
+    color: '#32CD32',
+    textAlign: 'center',
+  },
+  sandClockAnimation: {
+    width: 50,
+    height: 50,
   },
   eventsContainer: {
-    paddingHorizontal: 10,
+    paddingHorizontal: 20,
   },
   eventItem: {
-    flexDirection: 'row',
-    backgroundColor: '#fff',
+    backgroundColor: '#FFFFFF',
     borderRadius: 15,
     overflow: 'hidden',
+    marginBottom: 20,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 5,
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
     elevation: 3,
-    marginBottom: 20,
   },
   eventImage: {
-    width: 130,
-    height: 130,
-    borderTopLeftRadius: 15,
-    borderBottomLeftRadius: 15,
+    width: '100%',
+    height: 200,
+    resizeMode: 'cover',
   },
   eventDetails: {
-    flex: 1,
-    padding: 10,
-  },
-  eventTitleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    padding: 15,
   },
   eventName: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: 'bold',
+    marginBottom: 10,
+    color: '#333',
   },
-  locationIcon: {
-    width: 20,
-    height: 20,
-  },
-  eventPrice: {
-    fontSize: 14,
-    color: '#007BFF',
-    backgroundColor: '#E0F7FA',
-    padding: 5,
-    borderRadius: 5,
-    textAlign: 'center',
-    alignSelf: 'flex-start',
-    marginTop: 5,
-  },
-  eventDateRow: {
+  infoRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 5,
+    marginBottom: 5,
   },
-  dateIcon: {
-    width: 20,
-    height: 20,
-    marginRight: 5,
+  infoText: {
+    marginLeft: 10,
+    fontSize: 14,
+    color: '#666',
   },
-  eventDates: {
-    color: 'grey',
+  eventDescription: {
+    fontSize: 14,
+    color: '#666',
+    marginVertical: 10,
   },
-  eventJoinedRow: {
+  footer: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
     marginTop: 10,
   },
-  userIcon: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    marginRight: -8, // overlap the icons
-    borderColor: '#fff',
-    borderWidth: 2,
+  eventPrice: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#32CD32',
   },
-  joinedText: {
-    color: 'grey',
-    marginLeft: 20, // spacing after overlapped icons
+  joinButton: {
+    backgroundColor: '#32CD32',
+    padding: 2,
+    borderRadius: 20,
+  },
+  gif: {
+    width: 40,
+    height: 40,
+    resizeMode: 'contain',
   },
 });
 

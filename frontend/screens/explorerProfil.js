@@ -16,7 +16,8 @@ const ExplorerProfile = () => {
   useEffect(() => {
     const fetchExplorerData = async () => {
       try {
-        const response = await axios.get(`http://192.168.142.72:3000/explorer/${explorer.id}`);
+        const response = await axios.get(`http://192.168.100.4:3000/explorer/${explorer.id}`);
+
         if (response.status === 200) {
           setExplorer(response.data);
           setNumPosts(response.data.Posts?.length || 0);
@@ -37,7 +38,8 @@ const ExplorerProfile = () => {
   useEffect(() => {
     const fetchExplorerPosts = async () => {
       try {
-        const response = await axios.get(`http://192.168.142.72:3000/explorer/${explorer.id}/posts`);
+        const response = await axios.get(`http://192.168.100.4:3000/explorer/${explorer.id}/posts`);
+
         if (response.status === 200) {
           const transformedPosts = response.data.map(post => ({
             id: post.id,
@@ -76,6 +78,38 @@ const ExplorerProfile = () => {
     logOut();
     navigation.navigate('Login');
   };
+
+  const deleteExplorerPost = async (postId, token) => {
+    try {
+      const response = await fetch(`http://192.168.100.4:3000/posts/explorer/delete/${postId}`, {
+
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      const data = await response.json();
+      if (response.ok) {
+        console.log(data);
+        Alert.alert('Explorer post deleted successfully');
+        const updatedPosts = posts.filter(post => post.id !== postId);
+        setPosts(updatedPosts);
+  
+        // Update numPosts state and explorer object
+        setNumPosts(updatedPosts.length);
+        setExplorer(prev => ({ ...prev, numOfPosts: updatedPosts.length }));
+  
+      } else {
+        console.error('Error:', data);
+        Alert.alert(`Error: ${data.message}`);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      Alert.alert(`Error: ${error.message}`);
+    }
+  };
+  
 
   if (!explorer) {
     return (

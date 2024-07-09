@@ -91,7 +91,8 @@ const BusinessEditProfileScreen = () => {
     }
 
     try {
-      const response = await axios.put(`http://192.168.142.72:3000/business/${businessId}/edit`, payload);
+      const response = await axios.put(`http://192.168.100.4:3000/business/${businessId}/edit`, payload);
+
 
       if (response.status === 200) {
         setBusiness(response.data)

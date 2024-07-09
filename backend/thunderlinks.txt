@@ -1,1 +1,6 @@
 Editprofile : http://localhost:3000/explorer/edit
+Notification get request : http://192.168.100.4:3000/notifications/user/1?userType=explorer
+                           http://192.168.100.4:3000/notifications/user/1?userType=business
+
+
+

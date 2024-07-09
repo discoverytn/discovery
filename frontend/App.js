@@ -25,11 +25,11 @@ import explorerProfil from "./screens/explorerProfil"
 import BusinessEditProfileScreen from "./screens/BusinessEditProfileScreen"
 import BusinessProfileScreen from "./screens/BusinessProfileScreen"
 import NotificationScreen from "./screens/NotificationScreen"
-import Chats from './screens/Chats';
-// import AllChats from './screens/AllChats';
-// import ChatCopie from './screens/ChatCopie';
-import ChatScreen from './screens/ChatScreen'
-import Chat from './screens/Chat'
+import OneEventScreen from "./screens/OneEventScreen"
+
+
+
+
 
 enableScreens();
 
@@ -72,8 +72,8 @@ function MainNavigator() {
       <Tab.Screen name="ScheduleEvent" component={ScheduleEventScreen} options={{ tabBarLabel: () => null }} />
       <Tab.Screen name="EventList" component={EventListScreen} options={{ tabBarLabel: () => null }} />
       <Tab.Screen name="NotificationScreen" component={NotificationScreen} options={{ tabBarLabel: () => null }} />
-
-
+      <Tab.Screen name="OneEvent" component={OneEventScreen} options={{ tabBarLabel: () => null }} />
+     
 
     </Tab.Navigator>
     

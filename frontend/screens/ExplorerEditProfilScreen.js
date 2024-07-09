@@ -44,6 +44,18 @@ const ExplorerEditProfileScreen = () => {
     }
   }, [explorer]);
 
+  const clearFields = () => {
+    setFirstname('');
+    setLastname('');
+    setDescription('');
+    setGovernorate('');
+    setMunicipality('');
+    setMobileNum('');
+    setNewPassword('');
+    setConfirmNewPassword('');
+    setCurrentPassword('');
+  };
+
   const handleSave = async () => {
     if (newPassword && newPassword !== confirmNewPassword) {
       Alert.alert('Error', 'New passwords do not match');
@@ -73,11 +85,13 @@ const ExplorerEditProfileScreen = () => {
     }
 
     try {
-      const response = await axios.put(`http://192.168.142.72:3000/explorer/${explorerId}/edit`, payload);
+      const response = await axios.put(`http://192.168.100.4:3000/explorer/${explorerId}/edit`, payload);
+
 
       if (response.status === 200) {
         setExplorer(response.data);
         Alert.alert('Success', 'Profile updated successfully');
+        clearFields()
                navigation.navigate("explorerProfil");
 
       } else {

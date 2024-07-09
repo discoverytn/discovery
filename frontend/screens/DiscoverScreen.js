@@ -2,47 +2,117 @@ import React, { useState } from 'react';
 import { View, Text, Image, FlatList, StyleSheet, Dimensions, TouchableOpacity } from 'react-native';
 import Rating from './Rating';
 
-const { width } = Dimensions.get('window'); // get the window width to style the page easier
+const { width } = Dimensions.get('window');
 
-const categories = [ 
-  {
-    id: 1,
-    name: 'Nature',
-    posts: [
-      { id: '1', name: 'Niladri Reservoir', location: 'Tekergat, Sunamgnj', image: require('../assets/nature.jpg') },
-      { id: '2', name: 'Casa Las Tortugas', location: 'Av Damero, Mexico', image: require('../assets/nature.jpg') },
-      { id: '10', name: 'Casa Las Tortugas', location: 'Av Damero, Mexico', image: require('../assets/nature.jpg') }
-    ]
-  },
-  {
-    id: 2,
-    name: 'Sites',
-    posts: [
-      { id: '3', name: 'Aonang Villa Resort', location: 'Bastola, Islampur', image: require('../assets/kairouen1.jpg') },
-      { id: '4', name: 'Rangauti Resort', location: 'Sylhet, Airport Road', image: require('../assets/djeem.jpg') }
-    ]
-  },
-  {
-    id: 3,
-    name: 'Coffe shops',
-    posts: [
-      { id: '5', name: 'Aonang Villa Resort', location: 'Bastola, Islampur', image: require('../assets/kairouen1.jpg') },
-      { id: '6', name: 'Rangauti Resort', location: 'Sylhet, Airport Road', image: require('../assets/djeem.jpg') }
-    ]
-  },
-];
+const DiscoverScreen = () => {
+  const { explorer, business } = useAuth();
+  console.log('Business user:', business);
 
-const DiscoverScreen = ({ navigation }) => {
-  const [postRatings, setPostRatings] = useState({});
+  const navigation = useNavigation();
+  const [categories, setCategories] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [refreshing, setRefreshing] = useState(false);
 
-  const handleRating = (postId, rating) => {
-    setPostRatings(prevRatings => ({
-      ...prevRatings,
-      [postId]: rating
+  const fetchPosts = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const response = await fetch('http://192.168.100.4:3000/posts/allposts');
+
+      if (!response.ok) throw new Error('Failed to fetch posts');
+      const posts = await response.json();
+      const categorizedPosts = categorizePosts(posts);
+      setCategories(categorizedPosts);
+    } catch (error) {
+      console.error('Error fetching posts:', error);
+      setError('Failed to load posts. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    fetchPosts().then(() => setRefreshing(false));
+  }, [fetchPosts]);
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchPosts();
+    }, [fetchPosts])
+  );
+
+  const categorizePosts = (posts) => {
+    const categories = {};
+
+    posts.forEach((post) => {
+      if (!categories[post.category]) {
+        categories[post.category] = [];
+      }
+      categories[post.category].push({
+        id: post.idposts,
+        name: post.title,
+        location: post.location,
+        image: { uri: post.image1 },
+        description: post.description,
+        image2: post.image2 ? { uri: post.image2 } : null,
+        image3: post.image3 ? { uri: post.image3 } : null,
+        image4: post.image4 ? { uri: post.image4 } : null,
+        averageRating: post.averageRating,
+      });
+    });
+
+    return Object.keys(categories).map((key, index) => ({
+      id: index + 1,
+      name: key,
+      posts: categories[key],
     }));
   };
 
-  const renderPostItem = ({ item }) => {
+  const handleRating = useCallback(async (postId, rating) => {
+    try {
+      const response = await fetch(`http://192.168.100.4:3000/ratings/rate`, {
+
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          idposts: postId, 
+          explorer_idexplorer: explorer.idexplorer, 
+          rating 
+        })
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to submit rating');
+      }
+      
+      const data = await response.json();
+      
+      // now update the state with the new average rating
+      setCategories(prevCategories => 
+        prevCategories.map(category => ({
+          ...category,
+          posts: category.posts.map(post => 
+            post.id === postId ? { ...post, averageRating: parseFloat(data.averageRating) } : post
+          )
+        }))
+      );
+  
+      // show success message for explorer to know they rated
+      Alert.alert('Success', 'Rating submitted successfully');
+    } catch (error) {
+      console.error('Error submitting rating:', error);
+      Alert.alert('Error', error.message || 'Failed to submit rating');
+    }
+  }, [explorer.idexplorer]);
+
+  const navigateToPost = useCallback((postId, postDetails) => {
+    navigation.navigate('Onepost', { postId, postDetails });
+  }, [navigation]);
+
+  const renderPostItem = useMemo(() => ({ item }) => {
     const postId = item.id.toString();
     const selectedRating = postRatings[postId] || 0;
 
