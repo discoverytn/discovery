@@ -17,7 +17,7 @@ const Rating = ({ postId, onRate }) => {
   const fetchRatings = async () => {
     try {
       // fetch user's rating from server
-      const userRatingResponse = await fetch('http://192.168.100.4:3000/ratings/user-rating', {
+      const userRatingResponse = await fetch('http://192.168.1.21:3000/ratings/user-rating', {
 
         method: 'POST',
         headers: {
@@ -40,7 +40,7 @@ const Rating = ({ postId, onRate }) => {
       }
   
       // fetch average rating for the post
-      const averageRatingResponse = await fetch(`http://192.168.100.4:3000/ratings/average-rating/${postId}`);
+      const averageRatingResponse = await fetch(`http://192.168.1.21:3000/ratings/average-rating/${postId}`);
 
       if (averageRatingResponse.ok) {
         const averageData = await averageRatingResponse.json();
@@ -53,7 +53,7 @@ const Rating = ({ postId, onRate }) => {
 
   const handleRate = async (rating) => {
     try {
-      const response = await fetch('http://192.168.100.4:3000/ratings/rate', {
+      const response = await fetch('http://192.168.1.21:3000/ratings/rate', {
 
         method: 'POST',
         headers: {

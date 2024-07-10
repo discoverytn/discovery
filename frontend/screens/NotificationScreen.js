@@ -20,7 +20,7 @@ const NotificationScreen = () => {
       setIsLoading(true);
       const userId = explorer?.idexplorer || business?.idbusiness;
       const userType = explorer?.idexplorer ? 'explorer' : 'business';
-      const response = await axios.get(`http://192.168.100.4:3000/notifications/user/${userId}?userType=${userType}`);
+      const response = await axios.get(`http://192.168.1.21:3000/notifications/user/${userId}?userType=${userType}`);
 
       setNotifications(response.data);
       // part to count unread notifications popup
@@ -44,7 +44,7 @@ const NotificationScreen = () => {
 
   const markAsRead = async (notificationId) => {
     try {
-      await axios.put(`http://192.168.100.4:3000/notifications/${notificationId}/read`);
+      await axios.put(`http://192.168.1.21:3000/notifications/${notificationId}/read`);
 
       setNotifications(notifications.map(notif => 
         notif.idnotif === notificationId ? { ...notif, is_read: true } : notif
@@ -56,7 +56,7 @@ const NotificationScreen = () => {
 
   const renderNotificationItem = ({ item }) => {
     const renderMessage = (message, type) => {
-      if (type === 'favorite') {
+      if (type === 'favorite' || type === 'event_join') {
         const parts = message.split(' ');
         return (
           <Text style={styles.notificationText}>
@@ -67,6 +67,7 @@ const NotificationScreen = () => {
       }
       return <Text style={styles.notificationText}>{message}</Text>;
     };
+  
   
     return (
       <TouchableOpacity 

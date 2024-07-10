@@ -13,7 +13,7 @@ const Chats = () => {
   const [socket, setSocket] = useState(null);
 
   const getMessage = () => {
-    axios.get(`http://192.168.100.4:3000/api/chat/getmsg/${idexplorer}/${idbusiness}`)
+    axios.get(`http://192.168.1.21:3000/api/chat/getmsg/${idexplorer}/${idbusiness}`)
       .then((res) => {
         setChatMessages(res.data);
       })
@@ -24,7 +24,7 @@ const Chats = () => {
     if (socket) {
       socket.emit("send-message", message);
     }
-    axios.post(`http://192.168.100.4:3000/api/chat/send`, { 
+    axios.post(`http://192.168.1.21:3000/api/chat/send`, { 
       message, 
       idexplorer: idexplorer, 
       idbusiness: idbusiness 
@@ -43,7 +43,7 @@ const Chats = () => {
   };
 
   useEffect(() => {
-    const socketConnection = io("http://192.168.100.4:3000");
+    const socketConnection = io("http://192.168.1.21:3000");
     setSocket(socketConnection);
 
     socketConnection.on("connect", () => {

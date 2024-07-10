@@ -37,17 +37,14 @@ function Dashboard() {
         return (
           <>
             <AnalyticsOverview />
-            <Box sx={{ width: '100%' }}>
-      <AnalyticsOverview />
-      <Box sx={{ display: 'flex', mt: 3, width: '100%' }}>
-        <WebsiteVisitors sx={{ flex: 1, mr: 1 }} />
-        <PostsByUserType sx={{ flex: 1, ml: 1 }} />
-      </Box>
-      <Box sx={{ display: 'flex', mt: 3, width: '100%' }}>
-        <MostFavoritePosts sx={{ flex: 1, mr: 1 }} />
-        <UpcomingEvents sx={{ flex: 1, ml: 1 }} />
-      </Box>
-    </Box>
+            <Box sx={{ display: 'flex', mt: 3 }}>
+              <WebsiteVisitors />
+              <PostsByUserType />
+            </Box>
+            <Box sx={{ display: 'flex', mt: 3 }}>
+              <MostFavoritePosts />
+              <UpcomingEvents />
+            </Box>
           </>
         );
       case 'users':
@@ -65,17 +62,17 @@ function Dashboard() {
 
   return (
     <ThemeProvider theme={darkTheme}>
-    <CssBaseline />
-    <Box sx={{ display: 'flex', height: '100vh', bgcolor: '#0a1929', width: '100%' }}>
-      <Sidebar onChangeView={changeView} onLogout={logout} />
-      <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', width: '100%' }}>
-        <TopBar />
-        <Box component="main" sx={{ flexGrow: 1, p: 3, overflowY: 'auto', width: '100%' }}>
-          {renderView()}
+      <CssBaseline />
+      <Box sx={{ display: 'flex', height: '100vh', bgcolor: '#0a1929' }}>
+        <Sidebar onChangeView={changeView} onLogout={logout} />
+        <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
+          <TopBar />
+          <Box component="main" sx={{ flexGrow: 1, p: 3, overflowY: 'auto' }}>
+            {renderView()}
+          </Box>
         </Box>
       </Box>
-    </Box>
-  </ThemeProvider>
+    </ThemeProvider>
   );
 }
 

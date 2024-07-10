@@ -7,6 +7,7 @@ import { faPersonWalkingLuggage, faLocationDot, faCalendarDays, faUser } from '@
 import CustomModal from './CustomModal';
 import axios from 'axios';
 import join from '../assets/join.gif'
+import { useAuth } from '../context/AuthContext';
 
 
 const EventListScreen = () => {
@@ -14,10 +15,11 @@ const EventListScreen = () => {
   const [showModal, setShowModal] = useState(false);
   const [events, setEvents] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
+  const { explorer, business } = useAuth();
 
   const fetchEvents = async () => {
     try {
-      const response = await axios.get('http://192.168.100.4:3000/events/getAll');
+      const response = await axios.get('http://192.168.1.21:3000/events/getAll');
 
       setEvents(response.data);
     } catch (error) {
@@ -36,7 +38,26 @@ const EventListScreen = () => {
     fetchEvents().then(() => setRefreshing(false));
   }, []);
 
-  const toggleModal = () => setShowModal(!showModal);
+  const toggleModal = async (event) => {
+    setShowModal(!showModal);
+    if (explorer && explorer.idexplorer) {
+      try {
+        await axios.post('http://192.168.1.21:3000/notifications/create', {
+          type: 'event_join',
+          message: `${explorer.firstname} ${explorer.lastname} wants to join your event "${event.eventName}"`,
+          business_idbusiness: event.business_idbusiness,
+          explorer_idexplorer: explorer.idexplorer,
+          senderImage: explorer.image
+        });
+        console.log('Notification sent successfully');
+      } catch (error) {
+        console.error('Error sending notification:', error);
+      }
+    } else {
+      console.log('Explorer information is not available');
+      // You might want to show an alert to the user here
+    }
+  };
 
   const renderItem = ({ item }) => (
     <TouchableOpacity 
@@ -66,10 +87,9 @@ const EventListScreen = () => {
         <Text style={styles.eventDescription} numberOfLines={2}>{item.eventDescription}</Text>
         <View style={styles.footer}>
           <Text style={styles.eventPrice}>{item.eventPrice} DT</Text>
-          <TouchableOpacity style={styles.joinButton} onPress={toggleModal}>
-          <Image source={join} style={styles.gif} />
-
-          </TouchableOpacity>
+        <TouchableOpacity style={styles.joinButton} onPress={() => toggleModal(item)}>
+  <Image source={join} style={styles.gif} />
+</TouchableOpacity>
         </View>
       </View>
     </TouchableOpacity>

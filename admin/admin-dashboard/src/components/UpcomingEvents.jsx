@@ -6,7 +6,7 @@ function UpcomingEvents() {
   const [events, setEvents] = useState([]);
 
   useEffect(() => {
-    fetch("http://192.168.100.4:3000/events/getall")
+    fetch("http://192.168.1.21:3000/events/getall")
       .then((response) => response.json())
       .then((data) => {
         if (Array.isArray(data)) {
