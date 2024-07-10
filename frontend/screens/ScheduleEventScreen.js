@@ -133,7 +133,7 @@ const ScheduleEventScreen = ({ navigation }) => {
     }
 
     try {
-      const response = await axios.post('http://${DB_HOST}:${PORT}/events/create', eventData);
+      const response = await axios.post(`http://${DB_HOST}:${PORT}/events/create`, eventData);
 
       console.log('Event Data:', response.data);
       Alert.alert('Success', 'Your event has been posted successfully!', [

@@ -18,7 +18,7 @@ const Rating = ({ postId, onRate }) => {
   const fetchRatings = async () => {
     try {
       // fetch user's rating from server
-      const userRatingResponse = await fetch('http://${DB_HOST}:${PORT}/ratings/user-rating', {
+      const userRatingResponse = await fetch(`http://${DB_HOST}:${PORT}/ratings/user-rating`, {
 
         method: 'POST',
         headers: {
@@ -54,7 +54,7 @@ const Rating = ({ postId, onRate }) => {
 
   const handleRate = async (rating) => {
     try {
-      const response = await fetch('http://${DB_HOST}:${PORT}/ratings/rate', {
+      const response = await fetch(`http://${DB_HOST}:${PORT}/ratings/rate`, {
 
         method: 'POST',
         headers: {

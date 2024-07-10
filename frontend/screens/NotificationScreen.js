@@ -57,7 +57,7 @@ const NotificationScreen = () => {
 
   const renderNotificationItem = ({ item }) => {
     const renderMessage = (message, type) => {
-      if (type === 'favorite') {
+      if (type === 'favorite' || type === 'event_join') {
         const parts = message.split(' ');
         return (
           <Text style={styles.notificationText}>
@@ -68,6 +68,7 @@ const NotificationScreen = () => {
       }
       return <Text style={styles.notificationText}>{message}</Text>;
     };
+  
   
     return (
       <TouchableOpacity 
