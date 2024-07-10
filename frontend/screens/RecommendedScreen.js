@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, Image, TouchableOpacity, FlatList, StyleSheet, ImageBackground } from 'react-native';
+import { DB_HOST, PORT } from "@env";
 
 const posts = [
   { id: 1, name: 'Djem', location: 'Route Mahdia', image: require('../assets/djeem.jpg') },

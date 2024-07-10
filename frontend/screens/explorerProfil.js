@@ -5,6 +5,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../context/AuthContext';
 import { Picker } from '@react-native-picker/picker';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import { DB_HOST, PORT } from "@env";
 
 const ExplorerProfile = () => {
   const { explorer, setExplorer, logOut } = useAuth();
@@ -19,7 +20,7 @@ const ExplorerProfile = () => {
   useEffect(() => {
     const fetchExplorerData = async () => {
       try {
-        const response = await axios.get(`http://192.168.1.21:3000/explorer/${explorer.id}`);
+        const response = await axios.get(`http://${DB_HOST}:${PORT}/explorer/${explorer.id}`);
         if (response.status === 200) {
           const explorerData = response.data;
           // Set the explorer object and update numOfPosts based on posts length
@@ -44,7 +45,7 @@ const ExplorerProfile = () => {
   useEffect(() => {
     const fetchExplorerPosts = async () => {
       try {
-        const response = await axios.get(`http://192.168.1.21:3000/explorer/${explorer.id}/posts`);
+        const response = await axios.get(`http://${DB_HOST}:${PORT}/explorer/${explorer.id}/posts`);
         if (response.status === 200) {
           const transformedPosts = response.data.map(post => ({
             id: post.idposts,
@@ -90,7 +91,7 @@ const ExplorerProfile = () => {
 
   const deleteExplorerPost = async (postId, token) => {
     try {
-      const response = await fetch(`http://192.168.1.21:3000/posts/explorer/delete/${postId}`, {
+      const response = await fetch(`http://${DB_HOST}:${PORT}/posts/explorer/delete/${postId}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',

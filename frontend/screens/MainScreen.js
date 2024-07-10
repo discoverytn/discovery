@@ -4,6 +4,7 @@ import { Icon } from 'react-native-elements';
 import LeaderScreen from './LeaderScreen'; 
 import LeaderScreen2 from './LeaderScreen2';
 import RecommendedScreen from './RecommendedScreen';
+import { DB_HOST, PORT } from "@env";
 
 const { width } = Dimensions.get('window');
 

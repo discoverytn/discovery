@@ -8,6 +8,7 @@ import CustomModal from './CustomModal';
 import axios from 'axios';
 import join from '../assets/join.gif'
 import { useAuth } from '../context/AuthContext';
+import { DB_HOST, PORT } from "@env";
 
 
 const EventListScreen = () => {
@@ -19,7 +20,7 @@ const EventListScreen = () => {
 
   const fetchEvents = async () => {
     try {
-      const response = await axios.get('http://192.168.1.21:3000/events/getAll');
+      const response = await axios.get(`http://${DB_HOST}:${PORT}/events/getAll`);
 
       setEvents(response.data);
     } catch (error) {
@@ -42,7 +43,7 @@ const EventListScreen = () => {
     setShowModal(!showModal);
     if (explorer && explorer.idexplorer) {
       try {
-        await axios.post('http://192.168.1.21:3000/notifications/create', {
+        await axios.post(`http://${DB_HOST}:${PORT}/notifications/create`, {
           type: 'event_join',
           message: `${explorer.firstname} ${explorer.lastname} wants to join your event "${event.eventName}"`,
           business_idbusiness: event.business_idbusiness,

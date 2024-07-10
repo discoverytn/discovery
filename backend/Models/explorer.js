@@ -77,5 +77,9 @@ module.exports = (sequelize) => {
       type: DataTypes.STRING,
       allowNull: true,
     },
+    categories: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
   });
 };

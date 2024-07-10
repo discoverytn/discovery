@@ -11,16 +11,14 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import axios from "axios";
-
+const API_URL = import.meta.env.VITE_API_URL;
 function MostFavoritePosts() {
   const [data, setData] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get(
-          "http://192.168.1.21:3000/posts/top5"
-        );
+        const response = await axios.get(`${API_URL}/posts/top5`);
         setData(response.data);
       } catch (error) {
         console.error("Error fetching most favorite posts:", error);
