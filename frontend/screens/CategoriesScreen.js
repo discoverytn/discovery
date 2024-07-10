@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { View, Text, Image, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
 import { DB_HOST, PORT } from "@env";
 import { useNavigation } from '@react-navigation/native';
-
 import selectedLogo from '../assets/selectedLogo.gif';
+import axios from 'axios';
+import { useAuth } from '../context/AuthContext';
 
 const categories = [
   { id: 1, name: 'Restaurant', image: require('../assets/restaurant.jpg') },
@@ -13,12 +14,13 @@ const categories = [
   { id: 5, name: 'Camping', image: require('../assets/camping.jpg') },
   { id: 6, name: 'Workout', image: require('../assets/workout.jpg') },
   { id: 7, name: 'Cycling', image: require('../assets/cycling.jpg') },
- 
 ];
 
 const CategoriesScreen = () => {
   const [selectedCategories, setSelectedCategories] = useState([]);
   const navigation = useNavigation();
+  const { explorer} = useAuth();
+
 
   const toggleCategory = (id) => {
     setSelectedCategories((prevSelected) =>
@@ -30,9 +32,16 @@ const CategoriesScreen = () => {
 
   const isCategorySelected = (id) => selectedCategories.includes(id);
 
-  const handleProceed = () => {
+  const handleProceed = async () => {
     if (selectedCategories.length >= 3) {
-      navigation.navigate('Home'); 
+      try {
+        const categoriesString = selectedCategories.join(',');
+        const explorerId = explorer.idexplorer; 
+        await axios.put(`http://${DB_HOST}:${PORT}/explorer/${explorerId}/categories`, { categories: categoriesString });
+        navigation.navigate('ExplorerEditProfilScreen');
+      } catch (error) {
+        console.error('Failed to update categories:', error);
+      }
     } else {
       alert('Please select at least 3 categories.');
     }
