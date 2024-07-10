@@ -241,38 +241,36 @@ const getAllBusinessPosts = async (req, res) => {
     res.status(500).json({ error: "Failed to fetch business posts" });
   }
 };
-const getTopFavoritePosts = async (req, res) => {
+const getTopRatedPosts = async (req, res) => {
   try {
-    const topFavoritePosts = await db.Favorites.findAll({
+    const topRatedPosts = await db.Posts.findAll({
       attributes: [
-        'posts_idposts',
-        [db.Sequelize.fn('COUNT', 'posts_idposts'), 'count']
+        'idposts',
+        'title',
+        'description',
+        'hashtags',
+        'location',
+        'image1',
+        'averageRating'
       ],
-      group: ['posts_idposts'],
-      order: [[db.Sequelize.literal('count'), 'DESC']],
-      limit: 5,
-      include: [
-        {
-          model: Posts,
-          attributes: ['idposts', 'title', 'description', 'hashtags', 'location', 'image1'],
-        },
-      ],
+      order: [[db.Sequelize.literal('averageRating'), 'DESC']],
+      limit: 5
     });
 
-    const formattedTopPosts = topFavoritePosts.map(favorite => ({
-      idposts: favorite.Post.idposts,
-      title: favorite.Post.title,
-      description: favorite.Post.description,
-      hashtags: favorite.Post.hashtags,
-      location: favorite.Post.location,
-      image1: favorite.Post.image1,
-      totalFavorites: favorite.get('count'),
+    const formattedTopPosts = topRatedPosts.map(post => ({
+      idposts: post.idposts,
+      title: post.title,
+      description: post.description,
+      hashtags: post.hashtags,
+      location: post.location,
+      image1: post.image1,
+      averageRating: post.averageRating
     }));
 
     res.status(200).json(formattedTopPosts);
   } catch (error) {
-    console.error("Error fetching top favorite posts:", error);
-    res.status(500).json({ error: "Failed to fetch top favorite posts" });
+    console.error("Error fetching top rated posts:", error);
+    res.status(500).json({ error: "Failed to fetch top rated posts" });
   }
 };
 const deletePost = async (req, res) => {
@@ -305,6 +303,6 @@ module.exports = {
   ratePost,
   getAllExplorerPosts,
   getAllBusinessPosts,
-  getTopFavoritePosts,
+  getTopRatedPosts,
   deletePost
 };

@@ -38,6 +38,7 @@ const CategoriesScreen = () => {
         const categoriesString = selectedCategories.join(',');
         const explorerId = explorer.idexplorer; 
         await axios.put(`http://${DB_HOST}:${PORT}/explorer/${explorerId}/categories`, { categories: categoriesString });
+        setSelectedCategories([]); 
         navigation.navigate('ExplorerEditProfilScreen');
       } catch (error) {
         console.error('Failed to update categories:', error);

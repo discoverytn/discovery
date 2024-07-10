@@ -12,7 +12,7 @@ const {
   getPostById,
   ratePost,
   getAllBusinessPosts,
-  getTopFavoritePosts,
+  getTopRatedPosts,
   deletePost
   
   
@@ -22,7 +22,7 @@ router.get('/explorer/posts', getAllExplorerPosts);
 
 router.get('/business/posts', getAllBusinessPosts);
 
-router.get('/top5', getTopFavoritePosts);
+router.get('/top5', getTopRatedPosts);
 
 
 router.post('/explorer/add', ExplorerCreatePost);
