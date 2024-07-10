@@ -38,7 +38,7 @@ const OnepostScreen = ({ route }) => {
 
   const fetchPostDetails = async (postId) => {
     try {
-      const response = await axios.get(`http://192.168.100.4:3000/posts/onepost/${postId}`);
+      const response = await axios.get(`http://192.168.26.72:3000/posts/onepost/${postId}`);
 
       setAverageRating(parseFloat(response.data.averageRating));
       setPostData(prevData => ({
@@ -97,7 +97,7 @@ const OnepostScreen = ({ route }) => {
   const checkIfPostFavorited = async (postId) => {
     try {
       const idexplorer = explorer.idexplorer;
-      const response = await axios.get(`http://192.168.100.4:3000/explorer/${idexplorer}/favourites/${postId}/check`);
+      const response = await axios.get(`http://192.168.26.72:3000/explorer/${idexplorer}/favourites/${postId}/check`);
 
       setIsFavorited(response.data.favorited);
     } catch (error) {
@@ -108,7 +108,7 @@ const OnepostScreen = ({ route }) => {
   const checkIfPostTraveled = async (postId) => {
     try {
       const idexplorer = explorer.idexplorer;
-      const response = await axios.get(`http://192.168.100.4:3000/explorer/${idexplorer}/traveled/${postId}/check`);
+      const response = await axios.get(`http://192.168.26.72:3000/explorer/${idexplorer}/traveled/${postId}/check`);
 
       setIsTraveled(response.data.traveled);
     } catch (error) {
@@ -120,7 +120,7 @@ const OnepostScreen = ({ route }) => {
 const addToFavorites = async () => {
   try {
     const idexplorer = explorer.idexplorer;
-    const response = await axios.post(`http://192.168.100.4:3000/explorer/${idexplorer}/favourites/${postId}/addOrRemove`, {
+    const response = await axios.post(`http://192.168.26.72:3000/explorer/${idexplorer}/favourites/${postId}/addOrRemove`, {
 
       idposts: postId,
     });
@@ -130,7 +130,7 @@ const addToFavorites = async () => {
       Alert.alert('Success', 'Post added to favorites');
       
       // Create a notification for the post owner
-      await axios.post('http://192.168.100.4:3000/notifications/create', {
+      await axios.post('http://192.168.26.72:3000/notifications/create', {
 
         type: 'favorite',
         message: `${explorer.firstname} ${explorer.lastname} added your post to favorites`,
@@ -153,7 +153,7 @@ const addToFavorites = async () => {
 const addToTraveled = async () => {
   try {
     const idexplorer = explorer.idexplorer;
-    const response = await axios.post(`http://192.168.100.4:3000/explorer/${idexplorer}/traveled/${postId}/addOrRemove`, {
+    const response = await axios.post(`http://192.168.26.72:3000/explorer/${idexplorer}/traveled/${postId}/addOrRemove`, {
 
       idposts: postId,
     });
@@ -198,7 +198,7 @@ const handleSeeMorePress = () => {
 
 const fetchComments = async (postId) => {
   try {
-    const response = await axios.get(`http://192.168.100.4:3000/comments/post/${postId}`);
+    const response = await axios.get(`http://192.168.26.72:3000/comments/post/${postId}`);
 
     setComments(response.data);
   } catch (error) {
@@ -218,7 +218,7 @@ const handleAddComment = async () => {
       business_idbusiness: business.idbusiness
     };
 
-    const response = await axios.post('http://192.168.100.4:3000/comments/create', commentData);
+    const response = await axios.post('http://192.168.26.72:3000/comments/create', commentData);
 
     
    
@@ -251,7 +251,7 @@ const handleAddComment = async () => {
 
 const handleEditComment = async (commentId, newContent) => {
   try {
-    await axios.put(`http://192.168.100.4:3000/comments/${commentId}`, { content: newContent });
+    await axios.put(`http://192.168.26.72:3000/comments/${commentId}`, { content: newContent });
 
     setComments(comments.map(comment => 
       comment.idcomments === commentId ? { ...comment, content: newContent } : comment
@@ -265,7 +265,7 @@ const handleEditComment = async (commentId, newContent) => {
 
 const handleDeleteComment = async (commentId) => {
   try {
-    await axios.delete(`http://192.168.100.4:3000/comments/${commentId}`);
+    await axios.delete(`http://192.168.26.72:3000/comments/${commentId}`);
 
     setComments(comments.filter(comment => comment.idcomments !== commentId));
   } catch (error) {

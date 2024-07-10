@@ -1,166 +1,178 @@
 import React, { useState, useEffect } from 'react';
-import { Text, View, FlatList, TextInput, Pressable, StyleSheet, KeyboardAvoidingView, Platform, SafeAreaView } from 'react-native';
-import { APP_API_URL } from '../env';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Text, View, TextInput, Pressable, StyleSheet, KeyboardAvoidingView, Platform, SafeAreaView, ScrollView } from 'react-native';
 import { io } from 'socket.io-client';
-import AllChats from './AllChats';
 import axios from 'axios';
+import { useAuth } from '../context/AuthContext';
+import {useRoute} from '@react-navigation/native'
 
-const Chats = () => {
-  const [idexplorer, setIdExplorer] = useState(null);
-  const [idbusiness, setIdBusiness] = useState(null);
-  const [message, setMessage] = useState("");
-  const [chatMessages, setChatMessages] = useState([]);
-  const [socket, setSocket] = useState(null);
+const Chats = ({navigation,route}) => {
+  const { idbusiness, idexplorer, eventName } = route.params;
+   console.log("routeeeeeeeeeeeeeeeeeeee",route.params);
+  //  const idbusiness  = route.params
+  //  const idexplorer = route.params
+
+  const [message, setMessage] = useState("")
+  const [chatMessages, setChatMessages] = useState([])
+  const [socket, setSocket] = useState(null)
+  console.log("idexplorer:", idexplorer)
+  console.log("idbusiness:", idbusiness)
+  useEffect(() => {
+    const socket = io('http://192.168.26.72:3000')
+    setSocket(socket)
+    socket.on('message', (data) => {
+      console.log("data:", data)
+      setChatMessages([...chatMessages, data])
+      })
+  
+      
+  }, [idexplorer, idbusiness])
+
+
 
   const getMessage = () => {
-    axios.get(`${APP_API_URL}/chat/getmsg/${idexplorer}/${idbusiness}`)
+    axios.post("http://192.168.26.72:3000/chat/get", { explorer_idexplorer: idexplorer, business_idbusiness: idbusiness })
       .then((res) => {
-        setChatMessages(res.data);
+        setChatMessages(res.data)
       })
       .catch((err) => console.log(err));
   };
 
-  const sendMessage = (message) => {
-    if (socket) {
-      socket.emit("send-message", message);
+  const sendMessage = () => {
+    if (message.length > 0) {
+      socket.emit('message', { explorer_idexplorer: idexplorer, business_idbusiness:
+        idbusiness, message: message })}
+    console.log("Sending message:", message);
+    setMessage("")
+  console.log("ID of Explorer:", idexplorer);
+  console.log("ID of Business:", idbusiness);
+
+    if (!idexplorer || !idbusiness) {
+      console.error("Missing idexplorer or idbusiness"); 
+      return;
     }
-    axios.post(`${APP_API_URL}/chat/send`, { 
-      message, 
-      idexplorer: idexplorer, 
-      idbusiness: idbusiness 
+
+     if (socket) {
+      socket.emit("send-message", { message, explorer_idexplorer: idexplorer, business_idbusiness: idbusiness });
+     }
+
+    console.log("Sending message:", message);
+    axios.post("http://192.168.26.72:3000/chat/send", {
+      message,
+      explorer_idexplorer: idexplorer,
+      business_idbusiness : idbusiness
     })
       .then((res) => {
+        console.log("Message sent:", res.data);
+        setChatMessages([...chatMessages, res.data]);
         setMessage("");
-        getMessage();
       })
-      .catch((err) => console.log(err));
-  };
+      .catch((err) => {
+        console.log("Error sending message:", err)
+        if (err.response) {
+          console.log("Server responded with:", err.response.data)
+        }
 
-  const handleAdd = () => {
-    if (message.trim()) {
-      sendMessage(message);
-    }
+      });
   };
 
   useEffect(() => {
-    const socketConnection = io("http://192.168.100.4:3000");
-    setSocket(socketConnection);
-
-    socketConnection.on("connect", () => {
-      console.log("Socket connected.");
-    });
-
-    socketConnection.on("disconnect", () => {
-      console.log("Socket disconnected !");
-    });
+    const newSocket = io("http://192.168.26.72:3000");
+    setSocket(newSocket);
+    
+    if (newSocket && idexplorer && idbusiness && eventName) {
+      newSocket.emit('join-room', { eventName, idexplorer, idbusiness });
+    }
 
     return () => {
-      if (socketConnection) {
-        socketConnection.disconnect();
-      }
-    };
-  }, []);
+      newSocket.close();
+    }  }, []);
 
   useEffect(() => {
-    const fetchSessionData = async () => {
-      const storedIdExplorer = await AsyncStorage.getItem("idexplorer");
-      const storedIdBusiness = await AsyncStorage.getItem("idbusiness");
-      setIdExplorer(storedIdExplorer);
-      setIdBusiness(storedIdBusiness);
-    };
-
-    fetchSessionData();
-    getMessage();
-  }, []);
+    if (socket) {
+      getMessage();
+  
+      socket.on("receive-message", (newMessage) => {
+        console.log("Received message:", newMessage);
+        setChatMessages((prevMessages) => [...prevMessages, newMessage]);
+      });
+  
+      return () => {
+        socket.disconnect();
+      };
+    }
+  }, [socket]);
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <KeyboardAvoidingView 
+    <SafeAreaView style={styles.container}>
+      <ScrollView>
+        {chatMessages.map((msg, index) => (
+          <Text key={index}>{msg.message}</Text>
+        ))}
+      </ScrollView>
+      <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={styles.container}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 20}
+        style={styles.inputContainer}
       >
-        <View style={styles.messageContainer}>
-          {chatMessages.length > 0 ? (
-            <FlatList
-              data={chatMessages}
-              renderItem={({ item }) => <AllChats item={item} />}
-              keyExtractor={(item) => item.id.toString()}
-              inverted
-            />
-          ) : (
-            <Text style={styles.noMessagesText}>There are no messages.</Text>
-          )}
-        </View>
-
-        <View style={styles.inputContainer}>
-          <TextInput
-            value={message}
-            style={styles.textInput}
-            onChangeText={(value) => setMessage(value)}
-            placeholder="Type your message"
-            placeholderTextColor="#7D848D"
-          />
-          <Pressable
-            style={styles.sendButton}
-            onPress={handleAdd}
-          >
-            <Text style={styles.sendButtonText}>SEND</Text>
-          </Pressable>
-        </View>
+        <TextInput
+          style={styles.input}
+          value={message}
+          onChangeText={setMessage}
+          placeholder="Type your message..."
+        />
+        <Pressable onPress={() => sendMessage(message)} style={styles.sendButton}>
+          <Text style={styles.sendButtonText}>Send</Text>
+        </Pressable>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: "#FFF",
-  },
   container: {
     flex: 1,
-    backgroundColor: "#FFF",
+    backgroundColor: "#F5F5F5",
   },
   messageContainer: {
-    flex: 1,
-    paddingHorizontal: 10,
+    padding: 10,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 5,
+    marginBottom: 10,
+    marginHorizontal: 10,
   },
-  noMessagesText: {
-    textAlign: 'center',
-    marginTop: 100,
-    color: '#7D848D',
+  messageUser: {
+    fontWeight: "bold",
+    marginBottom: 5,
+  },
+  messageText: {
+    fontSize: 16,
   },
   inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: "rgba(247, 247, 249, 1)",
-    paddingVertical: 12,
-    paddingHorizontal: 14,
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 10,
+    backgroundColor: "#FFFFFF",
     borderTopWidth: 1,
-    borderTopColor: '#E5E5E5',
+    borderColor: "#EEEEEE",
   },
-  textInput: {
+  input: {
     flex: 1,
-    fontSize: 16,
-    color: "#1B1E28",
-    fontWeight: "400",
-    letterSpacing: 0.3,
+    padding: 10,
+    borderWidth: 1,
+    borderColor: "#DDDDDD",
+    borderRadius: 5,
     marginRight: 10,
-    paddingVertical: 1,
   },
   sendButton: {
-    backgroundColor: "#1B1E28",
-    borderRadius: 16,
-    paddingVertical: 12,
-    paddingHorizontal: 20,
+    backgroundColor: "#32CD32",
+    padding: 10,
+    borderRadius: 5,
   },
   sendButtonText: {
-    color: "#f2f0f1",
-    fontSize: 16,
-    fontWeight: '600',
+    color: "#FFFFFF",
+    fontWeight: "bold",
   },
 });
 
 export default Chats;
+

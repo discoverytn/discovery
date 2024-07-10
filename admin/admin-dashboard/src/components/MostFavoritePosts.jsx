@@ -19,7 +19,7 @@ function MostFavoritePosts() {
     const fetchData = async () => {
       try {
         const response = await axios.get(
-          "http://192.168.100.3:3000/posts/top5"
+          "http://192.168.26.72:3000/posts/top5"
         );
         setData(response.data);
       } catch (error) {

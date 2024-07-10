@@ -3,27 +3,29 @@ import { View, Text, Image, TouchableOpacity, FlatList, StyleSheet } from 'react
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import LottieView from 'lottie-react-native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faPersonWalkingLuggage, faLocationDot, faCalendarDays, faUser } from '@fortawesome/free-solid-svg-icons';
+import { faLocationDot, faCalendarDays, faUser } from '@fortawesome/free-solid-svg-icons';
 import CustomModal from './CustomModal';
 import axios from 'axios';
-import join from '../assets/join.gif'
-
+import join from '../assets/join.gif';
+import { useAuth } from '../context/AuthContext';
 
 const EventListScreen = () => {
   const navigation = useNavigation();
   const [showModal, setShowModal] = useState(false);
   const [events, setEvents] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
-
+   
   const fetchEvents = async () => {
     try {
-      const response = await axios.get('http://192.168.100.4:3000/events/getAll');
-
+      const response = await axios.get('http://192.168.26.72:3000/events/getAll');
       setEvents(response.data);
     } catch (error) {
       console.error('Error fetching events:', error);
     }
   };
+
+  const auth = useAuth();
+  console.log("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",auth.explorer.idexplorer);
 
   useFocusEffect(
     useCallback(() => {
@@ -36,12 +38,21 @@ const EventListScreen = () => {
     fetchEvents().then(() => setRefreshing(false));
   }, []);
 
-  const toggleModal = () => setShowModal(!showModal);
-
-  const renderItem = ({ item }) => (
-    <TouchableOpacity 
-      style={styles.eventItem}
-      onPress={() => navigation.navigate('OneEvent', { event: item })}
+  const toggleModal = () => {
+    console.log(auth);
+    setShowModal(!showModal);
+  };
+  const renderItem = ({ item }) => 
+    {
+      console.log("itemmmmmmmmmmmmmmmmmmm",item);
+      return<TouchableOpacity 
+    style={styles.eventItem}
+    onPress={() => navigation.navigate('Chats', { 
+        idexplorer: auth.explorer.idexplorer, 
+        idbusiness: item.Business.idbusiness,
+        idevent: item.idevents,
+        eventName: item.eventName 
+      })}
     >
       <Image 
         source={item.image ? { uri: item.image } : require('../assets/event-placeholder.jpg')} 
@@ -66,15 +77,20 @@ const EventListScreen = () => {
         <Text style={styles.eventDescription} numberOfLines={2}>{item.eventDescription}</Text>
         <View style={styles.footer}>
           <Text style={styles.eventPrice}>{item.eventPrice} DT</Text>
-          <TouchableOpacity style={styles.joinButton} onPress={toggleModal}>
-          <Image source={join} style={styles.gif} />
-
+          <TouchableOpacity 
+            style={styles.joinButton} 
+            onPress={() => navigation.navigate('Chats', { 
+              idexplorer: auth.id, 
+              idbusiness: item.Business ? item.Business.id : null 
+            })}
+          >
+            <Image source={join} style={styles.gif} />
           </TouchableOpacity>
         </View>
       </View>
-    </TouchableOpacity>
-  );
-
+    </TouchableOpacity>}
+  
+  
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -216,3 +232,4 @@ const styles = StyleSheet.create({
 });
 
 export default EventListScreen;
+

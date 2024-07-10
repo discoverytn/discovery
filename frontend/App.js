@@ -45,10 +45,10 @@ function MainNavigator() {
         headerShown: false,
         tabBarStyle: { display: 'none' },
       }}
+
       
     >
                   <Tab.Screen name="Chat" component={Chat} options={{ tabBarLabel: () => null }} />
-
             <Tab.Screen name="Chats" component={Chats} options={{ tabBarLabel: () => null }} />
             {/* <Tab.Screen name="AllChats" component={AllChats} options={{ tabBarLabel: () => null }} /> */}
       {/* <Tab.Screen name="ChatCopie" component={ChatCopie} options={{ tabBarLabel: () => null }} /> */}

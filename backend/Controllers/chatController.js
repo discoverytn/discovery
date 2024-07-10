@@ -4,7 +4,6 @@ const sendMessage = async (req, res) => {
   const { explorer_idexplorer, business_idbusiness, message } = req.body;
 
   try {
-    // Check if explorer and business exist
     const explorerExists = await db.Explorer.findByPk(explorer_idexplorer);
     const businessExists = await db.Business.findByPk(business_idbusiness);
 
@@ -28,7 +27,7 @@ const sendMessage = async (req, res) => {
 };
 
 const getMessages = async (req, res) => {
-  const { explorer_idexplorer, business_idbusiness } = req.params;
+  const { explorer_idexplorer, business_idbusiness } = req.body;
 
   try {
     const messages = await db.Chat.findAll({
