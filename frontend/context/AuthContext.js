@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 import axios from "axios";
 import { Alert } from "react-native";
 import * as SecureStore from "expo-secure-store";
-import jwtDecode from "jwt-decode";
+import {jwtDecode} from "jwt-decode";
 import { DB_HOST, PORT } from "@env";
 
 // Log the DB_HOST variable

@@ -131,7 +131,7 @@ const addToFavorites = async () => {
       Alert.alert('Success', 'Post added to favorites');
       
       // Create a notification for the post owner
-      await axios.post('http://${DB_HOST}:${PORT}/notifications/create', {
+      await axios.post(`http://${DB_HOST}:${PORT}/notifications/create`, {
 
         type: 'favorite',
         message: `${explorer.firstname} ${explorer.lastname} added your post to favorites`,
@@ -219,7 +219,7 @@ const handleAddComment = async () => {
       business_idbusiness: business.idbusiness
     };
 
-    const response = await axios.post('http://${DB_HOST}:${PORT}/comments/create', commentData);
+    const response = await axios.post(`http://${DB_HOST}:${PORT}/comments/create`, commentData);
 
     
    
