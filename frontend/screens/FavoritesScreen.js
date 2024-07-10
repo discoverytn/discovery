@@ -4,6 +4,7 @@ import { useNavigation } from '@react-navigation/native';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import { useFocusEffect } from '@react-navigation/native';
+import { DB_HOST, PORT } from "@env";
 
 const FavoritesScreen = () => {
   const { explorer } = useAuth();
@@ -29,7 +30,7 @@ const FavoritesScreen = () => {
   const fetchFavorites = async (explorerId) => {
     setLoading(true);
     try {
-      const url = `http://192.168.100.4:3000/explorer/${explorerId}/favourites`;
+      const url = `http://${DB_HOST}:${PORT}/explorer/${explorerId}/favourites`;
 
       const response = await axios.get(url);
       console.log('Favorites fetched:', response.data);

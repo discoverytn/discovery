@@ -20,6 +20,10 @@ import {
   DialogTitle,
 } from "@mui/material";
 
+import ConfirmationPopup from "./ConfirmationPopup"; // Replace with correct path
+
+const API_URL = import.meta.env.VITE_API_URL;
+
 function EventsView() {
   const [eventSearch, setEventSearch] = useState("");
   const [openModal, setOpenModal] = useState(false);
@@ -30,7 +34,7 @@ function EventsView() {
   const [selectedEventImg, setSelectedEventImg] = useState(null);
 
   useEffect(() => {
-    fetch("http://192.168.100.3:3000/events/getall")
+    fetch(`${API_URL}/events/getall`)
       .then((response) => response.json())
       .then((data) => {
         if (Array.isArray(data)) {
@@ -57,12 +61,9 @@ function EventsView() {
 
   const deleteEvent = async (idevents) => {
     try {
-      const response = await fetch(
-        `http://192.168.100.3:3000/events/${idevents}/del/`,
-        {
-          method: "DELETE",
-        }
-      );
+      const response = await fetch(`${API_URL}/events/${idevents}/del/`, {
+        method: "DELETE",
+      });
 
       if (!response.ok) {
         throw new Error("Failed to delete event");
@@ -123,17 +124,16 @@ function EventsView() {
                   .map((event) => (
                     <TableRow key={event.idevents}>
                       <TableCell>
-                        <Button
-                          variant="contained"
-                          color="error"
-                          onClick={() => deleteEvent(event.idevents)}
-                        >
-                          Delete
-                        </Button>
+                        <ConfirmationPopup
+                          action="Delete"
+                          onConfirm={() => deleteEvent(event.idevents)}
+                        />
                       </TableCell>
                       <TableCell>{event.idevents}</TableCell>
                       <TableCell>{event.eventName}</TableCell>
-                      <TableCell>{event.startDate}/{event.endDate}</TableCell>
+                      <TableCell>
+                        {event.startDate}/{event.endDate}
+                      </TableCell>
                       <TableCell>{event.eventLocation}</TableCell>
                       <TableCell>{event.eventDescription}</TableCell>
                       <TableCell>{event.eventPrice}DT</TableCell>
@@ -196,7 +196,9 @@ function EventsView() {
                   </TableRow>
                   <TableRow>
                     <TableCell>Date</TableCell>
-                    <TableCell>{selectedEvent.startDate}/{selectedEvent.endDate}</TableCell>
+                    <TableCell>
+                      {selectedEvent.startDate}/{selectedEvent.endDate}
+                    </TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell>Location</TableCell>

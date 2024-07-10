@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, Image, StyleSheet } from 'react-native';
 import { FontAwesome5 } from '@expo/vector-icons';
+import { DB_HOST, PORT } from "@env";
 
 const LeaderScreen = () => {
   return (

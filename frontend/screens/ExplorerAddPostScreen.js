@@ -5,6 +5,7 @@ import { Picker } from '@react-native-picker/picker';
 import * as ImagePicker from 'expo-image-picker';
 import { useAuth } from '../context/AuthContext';
 import { useNavigation } from '@react-navigation/native';
+import { DB_HOST, PORT } from "@env";
 
 const CLOUDINARY_UPLOAD_PRESET = 'discovery'; 
 const CLOUDINARY_UPLOAD_URL = 'https://api.cloudinary.com/v1_1/dflixnywo/image/upload';
@@ -51,7 +52,7 @@ const ExplorerAddPostScreen = () => {
     console.log('Payload:', payload);
 
     try {
-      const response = await axios.post('http://192.168.100.3:3000/posts/explorer/add', payload);
+      const response = await axios.post(`http://${DB_HOST}:${PORT}/posts/explorer/add`, payload);
 
       if (response.status === 201) {
         Alert.alert('Success', 'Post created successfully');

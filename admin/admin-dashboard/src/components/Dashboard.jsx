@@ -35,9 +35,9 @@ function Dashboard() {
     switch(currentView) {
       case 'dashboard':
         return (
-          <>
+          <Box sx={{ height: '100%', overflow: 'auto', pt: 3 }}>
             <AnalyticsOverview />
-            <Box sx={{ display: 'flex', mt: 3 }}>
+            <Box sx={{ display: 'flex', mt: 3}}>
               <WebsiteVisitors />
               <PostsByUserType />
             </Box>
@@ -45,15 +45,15 @@ function Dashboard() {
               <MostFavoritePosts />
               <UpcomingEvents />
             </Box>
-          </>
+          </Box>
         );
       case 'users':
         return <UsersView />;
       case 'posts':
         return <PostsView />;
-        case 'requests':
+      case 'requests':
         return <RequestsView />;
-        case 'events':
+      case 'events':
         return <EventsView />;
       default:
         return <div>View not found</div>;
@@ -63,11 +63,20 @@ function Dashboard() {
   return (
     <ThemeProvider theme={darkTheme}>
       <CssBaseline />
-      <Box sx={{ display: 'flex', height: '100vh', bgcolor: '#0a1929' }}>
+      <Box sx={{ display: 'flex', height: '100vh', width: '100vw', overflow: 'hidden', bgcolor: '#0a1929' }}>
         <Sidebar onChangeView={changeView} onLogout={logout} />
-        <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
+        <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
           <TopBar />
-          <Box component="main" sx={{ flexGrow: 1, p: 3, overflowY: 'auto' }}>
+          <Box 
+            component="main" 
+            sx={{ 
+              flexGrow: 1, 
+              display: 'flex', 
+              flexDirection: 'column', 
+              overflow: 'hidden',
+              pt: 3
+            }}
+          >
             {renderView()}
           </Box>
         </Box>
