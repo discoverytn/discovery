@@ -10,11 +10,10 @@ import {
   TableRow,
   TablePagination,
   Paper,
-  Button,
   Typography,
   styled,
 } from "@mui/material";
-import ConfirmationPopup from "./ConfirmationPopup"; // Adjust the path based on your file structure
+import ConfirmationPopup from "./ConfirmationPopup";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -37,6 +36,37 @@ const CustomTableContainer = styled(TableContainer)({
 
 const CustomTable = styled(Table)({
   flexGrow: 1,
+});
+
+const DeleteButton = styled('button')({
+  boxShadow: 'inset 0px 1px 0px 0px #f5978e',
+  background: 'linear-gradient(to bottom, #f24537 5%, #c62d1f 100%)',
+  backgroundColor: '#f24537',
+  borderRadius: '6px',
+  border: '1px solid #d02718',
+  display: 'inline-block',
+  cursor: 'pointer',
+  color: '#ffffff',
+  fontFamily: 'Arial',
+  fontSize: '15px',
+  fontWeight: 'bold',
+  padding: '10px 24px',
+  textDecoration: 'none',
+  textShadow: '0px 1px 0px #810e05',
+  '&:hover': {
+    background: 'linear-gradient(to bottom, #c62d1f 5%, #f24537 100%)',
+    backgroundColor: '#c62d1f',
+  },
+  '&:active': {
+    position: 'relative',
+    top: '1px',
+  },
+});
+
+const NarrowTableCell = styled(TableCell)({
+  width: '1%',
+  whiteSpace: 'nowrap',
+  padding: '6px 8px',
 });
 
 function PostsView() {
@@ -122,7 +152,7 @@ function PostsView() {
         <Table sx={{ minWidth: 650 }}>
           <TableHead>
             <TableRow>
-              <TableCell>Delete</TableCell>
+              <NarrowTableCell>Delete</NarrowTableCell>
               <TableCell>ID</TableCell>
               <TableCell>Title</TableCell>
               <TableCell>Location</TableCell>
@@ -135,12 +165,13 @@ function PostsView() {
               .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
               .map((post) => (
                 <TableRow key={post.idposts}>
-                  <TableCell>
+                  <NarrowTableCell>
                     <ConfirmationPopup
                       action="Delete Post"
                       onConfirm={() => handleDelete(post.idposts, isExplorer)}
+                      CustomButton={DeleteButton}
                     />
-                  </TableCell>
+                  </NarrowTableCell>
                   <TableCell>{post.idposts}</TableCell>
                   <TableCell>{post.title}</TableCell>
                   <TableCell>{post.location}</TableCell>
@@ -182,7 +213,7 @@ function PostsView() {
           explorerPage,
           handleChangeExplorerPage,
           explorerSearch,
-          true // Indicating these are explorer posts
+          true
         )}
       </Box>
 
@@ -201,7 +232,7 @@ function PostsView() {
           businessPage,
           handleChangeBusinessPage,
           businessSearch,
-          false // Indicating these are business posts
+          false
         )}
       </Box>
     </Box>

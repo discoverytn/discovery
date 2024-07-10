@@ -48,10 +48,10 @@ const MainScreen = ({ navigation }) => {
         </View>
         <View style={styles.iconsContainer}>
           <TouchableOpacity style={styles.searchIcon}>
-            <Image source={require('../assets/search.jpg')} style={styles.searchImage} />
+            <Image source={require('../assets/search.gif')} style={styles.searchImage} />
           </TouchableOpacity>
           <TouchableOpacity style={styles.notificationIcon}>
-            <Image source={require('../assets/notification.jpg')} style={styles.notificationImage} />
+            <Image source={require('../assets/notification.gif')} style={styles.notificationImage} />
           </TouchableOpacity>
         </View>
       </View>
@@ -133,7 +133,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 10,
     marginBottom: 20,
-    backgroundColor:'#E4EFF1'
+   
   },
   headerLeft: {
     flexDirection: 'row',
@@ -163,16 +163,18 @@ const styles = StyleSheet.create({
   },
   notificationIcon: {
     marginLeft: 10,
+    backgroundColor: 'transparent', // Remove the white box
   },
   searchIcon: {
     marginRight: 10,
+    backgroundColor: 'transparent', 
   },
   notificationImage: {
-    width: 30,
-    height: 30,
+    width: 61, 
+    height: 50,
   },
   searchImage: {
-    width: 30,
+    width: 35,
     height: 30,
   },
   mainContentImage: {

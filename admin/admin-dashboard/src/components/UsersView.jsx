@@ -13,10 +13,36 @@ import {
   Button,
   Modal,
   Typography,
+  styled,
 } from "@mui/material";
-import ConfirmationPopup from "./ConfirmationPopup"; // Adjust the path based on your file structure
+import ConfirmationPopup from "./ConfirmationPopup";
 
 const API_URL = import.meta.env.VITE_API_URL;
+
+const DeleteButton = styled('button')({
+  boxShadow: 'inset 0px 1px 0px 0px #f5978e',
+  background: 'linear-gradient(to bottom, #f24537 5%, #c62d1f 100%)',
+  backgroundColor: '#f24537',
+  borderRadius: '6px',
+  border: '1px solid #d02718',
+  display: 'inline-block',
+  cursor: 'pointer',
+  color: '#ffffff',
+  fontFamily: 'Arial',
+  fontSize: '15px',
+  fontWeight: 'bold',
+  padding: '6px 24px',
+  textDecoration: 'none',
+  textShadow: '0px 1px 0px #810e05',
+  '&:hover': {
+    background: 'linear-gradient(to bottom, #c62d1f 5%, #f24537 100%)',
+    backgroundColor: '#c62d1f',
+  },
+  '&:active': {
+    position: 'relative',
+    top: '1px',
+  },
+});
 
 function UsersView() {
   const [explorerSearch, setExplorerSearch] = useState("");
@@ -168,6 +194,7 @@ function UsersView() {
                         <ConfirmationPopup
                           action="Delete Explorer"
                           onConfirm={() => deleteExplorer(explorer.idexplorer)}
+                          CustomButton={DeleteButton}
                         />
                       </TableCell>
                       <TableCell>{explorer.idexplorer}</TableCell>
@@ -243,6 +270,7 @@ function UsersView() {
                           onConfirm={() =>
                             deleteBusinessOwner(owner.idbusiness)
                           }
+                          CustomButton={DeleteButton}
                         />
                       </TableCell>
                       <TableCell>{owner.idbusiness}</TableCell>
@@ -336,11 +364,6 @@ function UsersView() {
                     <TableCell>Business Description:</TableCell>
                     <TableCell>{selectedBusiness.businessDesc}</TableCell>
                   </TableRow>
-                  <TableRow>
-                    <TableCell>Business Image:</TableCell>
-                    <TableCell>{selectedBusiness.businessImg}</TableCell>
-                  </TableRow>
-                  {/* Add more fields as needed */}
                 </TableBody>
               </Table>
             </TableContainer>

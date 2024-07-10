@@ -301,8 +301,24 @@ module.exports = {
     } catch (error) {
       return res.status(500).json({ error: "Error checking traveled" });
     }
-  }
+  },
   
-  
+  updateCategories: async function (req, res) {
+    const { idexplorer } = req.params;
+    const { categories } = req.body;
+
+    try {
+      const explorer = await db.Explorer.findByPk(idexplorer);
+      if (!explorer) {
+        return res.status(404).json({ error: "Explorer not found" });
+      }
+
+      await explorer.update({ categories });
+      return res.status(200).json({ message: "Categories updated successfully" });
+    } catch (error) {
+      console.error("Error updating categories:", error);
+      return res.status(500).json({ error: "Failed to update categories" });
+    }
+  },
   
 };

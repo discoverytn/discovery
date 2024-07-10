@@ -25,7 +25,7 @@ import SearchIcon from "@mui/icons-material/Search";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import ConfirmationPopup from "./ConfirmationPopup"; // Adjust path as per your project structure
+import { ApproveButton, DeclineButton } from "./ConfirmationPopup";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -199,14 +199,10 @@ const RequestsView = () => {
                         />
                       </TableCell>
                       <TableCell>
-                        <ConfirmationPopup
-                          action="Approve"
-                          onConfirm={() => handleApprove(account.idbusiness)}
-                        />
-                        <ConfirmationPopup
-                          action="Decline"
-                          onConfirm={() => handleDecline(account.idbusiness)}
-                        />
+                        <div className="flex space-x-2">
+                          <ApproveButton onConfirm={() => handleApprove(account.idbusiness)} />
+                          <DeclineButton onConfirm={() => handleDecline(account.idbusiness)} />
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}
