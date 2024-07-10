@@ -8,7 +8,6 @@ import {useRoute} from '@react-navigation/native'
 const Chats = ({navigation,route}) => {
   const { idbusiness, idexplorer, eventName } = route.params;
    console.log("routeeeeeeeeeeeeeeeeeeee",route.params);
-  //  const idbusiness  = route.params
   //  const idexplorer = route.params
 
   const [message, setMessage] = useState("")
