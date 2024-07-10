@@ -19,7 +19,7 @@ const Chats = ({navigation,route}) => {
     const socket = io('http://192.168.26.72:3000')
     setSocket(socket)
     socket.on('message', (data) => {
-      console.log("data:", data)
+      console.log("data:", data);
       setChatMessages([...chatMessages, data])
       })
   

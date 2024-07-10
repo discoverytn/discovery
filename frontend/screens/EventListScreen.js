@@ -51,7 +51,8 @@ const EventListScreen = () => {
         idexplorer: auth.explorer.idexplorer, 
         idbusiness: item.Business.idbusiness,
         idevent: item.idevents,
-        eventName: item.eventName 
+        eventName: item.eventName
+         
       })}
     >
       <Image 
