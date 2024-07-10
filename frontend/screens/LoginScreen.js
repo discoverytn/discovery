@@ -36,12 +36,12 @@ const LoginScreen = () => {
   
         if (userRole === "explorer") {
           if (decodedToken.categories !== null) {
-            navigation.navigate("MainScreen");
+            navigation.navigate("Main");
           } else {
             navigation.navigate("Categories");
           }
         } else if (userRole === "business") {
-          navigation.navigate("MainScreen");
+          navigation.navigate("Main");
         } else {
           Alert.alert("Login Failed", "Unknown user role");
         }
