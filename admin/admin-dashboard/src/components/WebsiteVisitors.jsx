@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Box, Paper, Typography, CircularProgress } from "@mui/material";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend } from "recharts";
 import axios from "axios";
-
+const API_URL = import.meta.env.VITE_API_URL;
 const COLORS = ["#8B5CF6", "#EC4899"];
 
 const RADIAN = Math.PI / 180;
@@ -39,14 +39,10 @@ function WebsiteVisitors() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const explorersResponse = await axios.get(
-          "http://192.168.58.72:3000/admin/explorer"
-        );
+        const explorersResponse = await axios.get(`${API_URL}/admin/explorer`);
         console.log("Explorers response:", explorersResponse);
 
-        const businessResponse = await axios.get(
-          "http://192.168.58.72:3000/admin/business"
-        );
+        const businessResponse = await axios.get(`${API_URL}/admin/business`);
         console.log("Business response:", businessResponse);
 
         const newData = [

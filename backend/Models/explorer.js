@@ -51,6 +51,11 @@ module.exports = (sequelize) => {
       allowNull: true,
       defaultValue: 0,
     },
+    numOfLikes: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      defaultValue: 0,
+    },
     coins: {
       type: DataTypes.INTEGER,
       allowNull: true,
@@ -60,11 +65,7 @@ module.exports = (sequelize) => {
       type: DataTypes.INTEGER,
       allowNull: true,
     },
-    numOfReviews: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-      defaultValue: 0,
-    },
+    
     governorate: {
       type: DataTypes.STRING,
       allowNull: true,
@@ -74,6 +75,10 @@ module.exports = (sequelize) => {
       allowNull: true,
     },
     resetCode: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    categories: {
       type: DataTypes.STRING,
       allowNull: true,
     },

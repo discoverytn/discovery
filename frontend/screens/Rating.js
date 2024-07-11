@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Image, TouchableOpacity, Text, StyleSheet } from 'react-native';
 import { useAuth } from '../context/AuthContext';
+import { DB_HOST, PORT } from "@env";
 
 const starGrey = require('../assets/star_grey.jpg');
 const starGold = require('../assets/star_gold.jpg');
@@ -17,7 +18,7 @@ const Rating = ({ postId, onRate }) => {
   const fetchRatings = async () => {
     try {
       // fetch user's rating from server
-      const userRatingResponse = await fetch('http://192.168.58.72:3000/ratings/user-rating', {
+      const userRatingResponse = await fetch(`http://${DB_HOST}:${PORT}/ratings/user-rating`, {
 
         method: 'POST',
         headers: {
@@ -40,7 +41,7 @@ const Rating = ({ postId, onRate }) => {
       }
   
       // fetch average rating for the post
-      const averageRatingResponse = await fetch(`http://192.168.58.72:3000/ratings/average-rating/${postId}`);
+      const averageRatingResponse = await fetch(`http://${DB_HOST}:${PORT}/ratings/average-rating/${postId}`);
 
       if (averageRatingResponse.ok) {
         const averageData = await averageRatingResponse.json();
@@ -53,7 +54,7 @@ const Rating = ({ postId, onRate }) => {
 
   const handleRate = async (rating) => {
     try {
-      const response = await fetch('http://192.168.58.72:3000/ratings/rate', {
+      const response = await fetch(`http://${DB_HOST}:${PORT}/ratings/rate`, {
 
         method: 'POST',
         headers: {

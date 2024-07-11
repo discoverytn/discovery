@@ -4,6 +4,7 @@ import axios from 'axios';
 import * as ImagePicker from 'expo-image-picker';
 import { useAuth } from '../context/AuthContext';
 import { Picker } from "@react-native-picker/picker";
+import { DB_HOST, PORT } from "@env";
 
 const CLOUDINARY_UPLOAD_PRESET = 'discovery';
 const CLOUDINARY_UPLOAD_URL = 'https://api.cloudinary.com/v1_1/dflixnywo/image/upload';
@@ -69,7 +70,7 @@ const ExplorerEditProfileScreen = () => {
     }
 
     try {
-      const response = await axios.put(`http://192.168.58.72:3000/explorer/${explorer.id}/edit`, payload);
+      const response = await axios.put(`http://${DB_HOST}:${PORT}/explorer/${explorer.id}/edit`, payload);
 
       if (response.status === 200) {
         setExplorer(response.data);

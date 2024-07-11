@@ -3,6 +3,7 @@ import { View, Text, Image, FlatList, StyleSheet, Dimensions, TouchableOpacity, 
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import Rating from './Rating';
 import { useAuth } from '../context/AuthContext';
+import { DB_HOST, PORT } from "@env";
 
 const { width } = Dimensions.get('window');
 
@@ -20,7 +21,7 @@ const DiscoverScreen = () => {
     try {
       setIsLoading(true);
       setError(null);
-      const response = await fetch('http://192.168.58.72:3000/posts/allposts');
+      const response = await fetch(`http://${DB_HOST}:${PORT}/posts/allposts`);
       if (!response.ok) throw new Error('Failed to fetch posts');
       const posts = await response.json();
       const categorizedPosts = categorizePosts(posts);
@@ -73,7 +74,7 @@ const DiscoverScreen = () => {
 
   const handleRating = useCallback(async (postId, rating) => {
     try {
-      const response = await fetch(`http://192.168.58.72:3000/ratings/rate`, {
+      const response = await fetch(`http://${DB_HOST}:${PORT}/ratings/rate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 

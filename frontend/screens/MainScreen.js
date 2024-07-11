@@ -4,6 +4,7 @@ import { Icon } from 'react-native-elements';
 import LeaderScreen from './LeaderScreen'; 
 import LeaderScreen2 from './LeaderScreen2';
 import RecommendedScreen from './RecommendedScreen';
+import { DB_HOST, PORT } from "@env";
 
 const { width } = Dimensions.get('window');
 
@@ -47,16 +48,21 @@ const MainScreen = ({ navigation }) => {
         </View>
         <View style={styles.iconsContainer}>
           <TouchableOpacity style={styles.searchIcon}>
-            <Image source={require('../assets/search.jpg')} style={styles.searchImage} />
+            <Image source={require('../assets/search.gif')} style={styles.searchImage} />
           </TouchableOpacity>
           <TouchableOpacity style={styles.notificationIcon}>
-            <Image source={require('../assets/notification.jpg')} style={styles.notificationImage} />
+            <Image source={require('../assets/notification.gif')} style={styles.notificationImage} />
           </TouchableOpacity>
         </View>
       </View>
 
       {/* Title */}
-      <Text style={styles.title}>Discovery  🇹🇳</Text>
+      {/* <Text style={styles.title}>Discovery  🇹🇳</Text>
+      <Image source={require('../assets/flag.gif')} style={styles.notificationImage} /> */}
+      <View style={styles.headerContainer}>
+      <Text style={styles.title}>Discovery</Text>
+      <Image source={require('../assets/flag.gif')} style={styles.flagimage} />
+    </View>
       
       {/* Content Section */}
       <ScrollView style={styles.scrollView}>
@@ -132,8 +138,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 10,
     marginBottom: 20,
-    backgroundColor:'#E4EFF1'
+   
   },
+  headerContainer: {
+    marginLeft:130,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+ 
   headerLeft: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -162,16 +174,18 @@ const styles = StyleSheet.create({
   },
   notificationIcon: {
     marginLeft: 10,
+    backgroundColor: 'transparent', // Remove the white box
   },
   searchIcon: {
     marginRight: 10,
+    backgroundColor: 'transparent', 
   },
   notificationImage: {
-    width: 30,
-    height: 30,
+    width: 61, 
+    height: 50,
   },
   searchImage: {
-    width: 30,
+    width: 35,
     height: 30,
   },
   mainContentImage: {
@@ -226,6 +240,12 @@ const styles = StyleSheet.create({
   navText: {
     color: '#fff',
     fontSize: 12,
+  },
+  flagimage: {
+    width: 30,
+    height: 40,
+    marginLeft:12
+    
   },
 });
 

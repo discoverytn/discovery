@@ -25,6 +25,9 @@ import SearchIcon from "@mui/icons-material/Search";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { ApproveButton, DeclineButton } from "./ConfirmationPopup";
+
+const API_URL = import.meta.env.VITE_API_URL;
 
 const RequestsView = () => {
   const [pendingAccounts, setPendingAccounts] = useState([]);
@@ -38,9 +41,7 @@ const RequestsView = () => {
   useEffect(() => {
     const fetchPendingAccounts = async () => {
       try {
-        const response = await axios.get(
-          "http://192.168.58.72:3000/business/pending"
-        );
+        const response = await axios.get(`${API_URL}/business/pending`);
         setPendingAccounts(response.data);
         setLoading(false);
       } catch (error) {
@@ -62,7 +63,7 @@ const RequestsView = () => {
 
   const handleApprove = async (idbusiness) => {
     try {
-      await axios.put(`http://192.168.58.72:3000/admin/approve/${idbusiness}`);
+      await axios.put(`${API_URL}/admin/approve/${idbusiness}`);
       setPendingAccounts(
         pendingAccounts.filter((account) => account.idbusiness !== idbusiness)
       );
@@ -75,9 +76,7 @@ const RequestsView = () => {
 
   const handleDecline = async (idbusiness) => {
     try {
-      await axios.delete(
-        `http://192.168.58.72:3000/admin/decline/${idbusiness}`
-      );
+      await axios.delete(`${API_URL}/admin/decline/${idbusiness}`);
       setPendingAccounts(
         pendingAccounts.filter((account) => account.idbusiness !== idbusiness)
       );
@@ -200,22 +199,10 @@ const RequestsView = () => {
                         />
                       </TableCell>
                       <TableCell>
-                        <Button
-                          variant="contained"
-                          color="success"
-                          onClick={() => handleApprove(account.idbusiness)}
-                          sx={{ ml: 1 }}
-                        >
-                          Approve
-                        </Button>
-                        <Button
-                          variant="contained"
-                          color="error"
-                          onClick={() => handleDecline(account.idbusiness)}
-                          sx={{ ml: 1 }}
-                        >
-                          Decline
-                        </Button>
+                        <div className="flex space-x-2">
+                          <ApproveButton onConfirm={() => handleApprove(account.idbusiness)} />
+                          <DeclineButton onConfirm={() => handleDecline(account.idbusiness)} />
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}

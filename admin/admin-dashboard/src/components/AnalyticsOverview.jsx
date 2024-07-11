@@ -4,7 +4,7 @@ import ExploreIcon from "@mui/icons-material/Explore";
 import BusinessIcon from "@mui/icons-material/Business";
 import PostAddIcon from "@mui/icons-material/PostAdd";
 import EventIcon from "@mui/icons-material/Event";
-
+const API_URL = import.meta.env.VITE_API_URL;
 const overviewItems = [
   { title: "Explorers", value: "", icon: ExploreIcon, color: "#8B5CF6" },
   { title: "Business Owners", value: "", icon: BusinessIcon, color: "#EC4899" },
@@ -21,27 +21,19 @@ function AnalyticsOverview() {
   useEffect(() => {
     async function fetchData() {
       try {
-        const explorerResponse = await fetch(
-          "http://192.168.58.72:3000/admin/explorer"
-        );
+        const explorerResponse = await fetch(`${API_URL}/admin/explorer`);
         const explorersData = await explorerResponse.json();
         setExplorersCount(explorersData.length);
 
-        const businessResponse = await fetch(
-          "http://192.168.58.72:3000/admin/business"
-        );
+        const businessResponse = await fetch(`${API_URL}/admin/business`);
         const businessData = await businessResponse.json();
         setBusinessOwnersCount(businessData.length);
 
-        const postsResponse = await fetch(
-          "http://192.168.58.72:3000/posts/allposts"
-        );
+        const postsResponse = await fetch(`${API_URL}/posts/allposts`);
         const postsData = await postsResponse.json();
         setPostsCount(postsData.length);
 
-        const eventsResponse = await fetch(
-          "http://192.168.58.72:3000/events/getAll"
-        );
+        const eventsResponse = await fetch(`${API_URL}/events/getAll`);
         const eventsData = await eventsResponse.json();
         setEventsCount(eventsData.length);
       } catch (error) {

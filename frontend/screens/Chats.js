@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Text, View, TextInput, Pressable, StyleSheet, KeyboardAvoidingView, Platform, SafeAreaView, ScrollView } from 'react-native';
+import { Text, View, FlatList, TextInput, Pressable, StyleSheet, KeyboardAvoidingView, Platform, SafeAreaView } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { io } from 'socket.io-client';
 import axios from 'axios';
 import { useRoute } from '@react-navigation/native';
@@ -41,66 +42,65 @@ const Chats = ({ navigation, route }) => {
   }, [idexplorer, idbusiness]);
 
   const getMessage = () => {
-    axios.post("http://192.168.58.72:3000/chat/get", { explorer_idexplorer: idexplorer, business_idbusiness: idbusiness })
-      .then(res => {
+    axios.get(`http://192.168.1.21:3000/api/chat/getmsg/${idexplorer}/${idbusiness}`)
+      .then((res) => {
         setChatMessages(res.data);
       })
       .catch(err => console.log(err));
   };
 
-  const sendMessage = () => {
-    if (!idexplorer || !idbusiness) {
-      console.error("Missing idexplorer or idbusiness");
-      return;
+  const sendMessage = (message) => {
+    if (socket) {
+      socket.emit("send-message", message);
     }
-
-    if (message.length > 0) {
-      if (socket) {
-        socket.emit('send-message', { message, explorer_idexplorer: idexplorer, business_idbusiness: idbusiness });
-      }
-
-      axios.post("http://192.168.58.72:3000/chat/send", {
-        message,
-        explorer_idexplorer: idexplorer,
-        business_idbusiness: idbusiness
+    axios.post(`http://192.168.1.21:3000/api/chat/send`, { 
+      message, 
+      idexplorer: idexplorer, 
+      idbusiness: idbusiness 
+    })
+      .then((res) => {
+        setMessage("");
+        getMessage();
       })
-        .then(res => {
-          setChatMessages(prevMessages => [...prevMessages, res.data]);
-          setMessage("");
-        })
-        .catch(err => {
-          if (err.response) {
-            console.log("Server responded with:", err.response.data);
-          }
-        });
+      .catch((err) => console.log(err));
+  };
+
+  const handleAdd = () => {
+    if (message.trim()) {
+      sendMessage(message);
     }
   };
 
-  const startRecording = async () => {
-    try {
-      const audioFile = await AudioRecord.start();
-      setIsRecording(true);
-      setRecordedAudioPath(audioFile);
-    } catch (error) {
-      console.error("Failed to start recording:", error);
-    }
-  };
+  useEffect(() => {
+    const socketConnection = io("http://192.168.1.21:3000");
+    setSocket(socketConnection);
 
-  const stopRecording = async () => {
-    try {
-      const audioFile = await AudioRecord.stop();
-      setIsRecording(false);
-      setRecordedAudioPath(audioFile);
-      // send the recorded audio file
-      sendRecordedAudio(audioFile);
-    } catch (error) {
-      console.error("Failed to stop recording:", error);
-    }
-  };
+    socketConnection.on("connect", () => {
+      console.log("Socket connected.");
+    });
 
-  const sendRecordedAudio = (audioFilePath) => {
-    // Logic to send recorded audio file
-  };
+    socketConnection.on("disconnect", () => {
+      console.log("Socket disconnected !");
+    });
+
+    return () => {
+      if (socketConnection) {
+        socketConnection.disconnect();
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    const fetchSessionData = async () => {
+      const storedIdExplorer = await AsyncStorage.getItem("idexplorer");
+      const storedIdBusiness = await AsyncStorage.getItem("idbusiness");
+      setIdExplorer(storedIdExplorer);
+      setIdBusiness(storedIdBusiness);
+    };
+
+    fetchSessionData();
+    getMessage();
+  }, []);
 
   return (
     <SafeAreaView style={styles.container}>

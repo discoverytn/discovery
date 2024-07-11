@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Box,
@@ -12,7 +12,7 @@ import {
 import { EmailOutlined, LockOutlined } from "@mui/icons-material";
 import axios from "axios";
 import { useAuth } from "../AuthContext";
-import backgroundImage from '../assets/sidibou.jpg';
+import backgroundImage from "../assets/sidibou.jpg";
 
 const AdminLogin = () => {
   const [email, setEmail] = useState("");
@@ -23,13 +23,19 @@ const AdminLogin = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
 
+  useEffect(() => {
+    console.log('API URL:', import.meta.env.VITE_API_URL);
+  }, []);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
+    const API_URL = import.meta.env.VITE_API_URL ;
+
     try {
       const response = await axios.post(
-        "http://192.168.58.72:3000/auth/login",
+        `${API_URL}/auth/login`,
         {
           email,
           password,
@@ -69,27 +75,27 @@ const AdminLogin = () => {
 
   return (
     <Box
-  sx={{
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    minHeight: '100vh',
-    width: '100vw',
-    backgroundImage: `url(${backgroundImage})`, 
-    backgroundSize: 'cover',
-    backgroundPosition: 'center',
-  }}
->
+      sx={{
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        minHeight: "100vh",
+        width: "100vw",
+        backgroundImage: `url(${backgroundImage})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+      }}
+    >
       <Paper
         elevation={6}
         sx={{
           p: 4,
-          width: '100%',
-          maxWidth: '600px',
+          width: "100%",
+          maxWidth: "600px",
           m: 2,
-          bgcolor: 'rgba(255, 255, 255, 0.9)',
-          borderRadius: '16px',
-          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2)',
+          bgcolor: "rgba(255, 255, 255, 0.9)",
+          borderRadius: "16px",
+          boxShadow: "0 8px 32px rgba(0, 0, 0, 0.2)",
         }}
       >
         <Typography
@@ -157,7 +163,9 @@ const AdminLogin = () => {
               },
             }}
             InputProps={{
-              startAdornment: <LockOutlined sx={{ color: "#000000", mr: 1 }} />,
+              startAdornment: (
+                <LockOutlined sx={{ color: "#000000", mr: 1 }} />
+              ),
             }}
           />
           <Button

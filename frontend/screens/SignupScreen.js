@@ -14,6 +14,7 @@ import { useAuth } from "../context/AuthContext";
 import * as ImagePicker from "expo-image-picker";
 import axios from "axios";
 import { useNavigation } from '@react-navigation/native';
+import { DB_HOST, PORT } from "@env";
 
 const CLOUDINARY_UPLOAD_PRESET = "discovery";
 const CLOUDINARY_UPLOAD_URL =

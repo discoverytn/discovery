@@ -111,23 +111,28 @@ const login = async (req, res) => {
     }
 
     let role;
-    let id; 
+    let id;
+    let categories = null; // Initialize categories variable
 
     if (user instanceof db.Admin) {
       role = "admin";
       id = user.idadmin;
     } else if (user instanceof db.Explorer) {
       role = "explorer";
-      id = user.idexplorer; 
+      id = user.idexplorer;
+      categories = user.categories; // Assign categories from user object
     } else if (user instanceof db.Business) {
       role = "business";
-      id = user.idbusiness; 
+      id = user.idbusiness;
+      subscribed = user.subscribed
     } else {
       return res.status(500).json({ error: "Unknown user type" });
     }
 
+    const tokenPayload = { id, email: user.email, role, categories,subscribed };
+
     const token = jwt.sign(
-      { id, email: user.email, role },
+      tokenPayload,
       process.env.JWT_SECRET,
       { expiresIn: "1h" }
     );
@@ -138,6 +143,8 @@ const login = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+
 
 
 const resetPassword = async (req, res) => {

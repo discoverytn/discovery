@@ -28,7 +28,9 @@ import NotificationScreen from "./screens/NotificationScreen"
 import OneEventScreen from "./screens/OneEventScreen"
 import Chat from "./screens/Chat";
 import Chats from './screens/Chats';
-// import ChatScreen from "./screens/ChatScreen"
+import ChatScreen from "./screens/ChatScreen"
+import PaymentScreen from './screens/PaymentScreen';
+import { StripeProvider } from '@stripe/stripe-react-native'; 
 
 
 
@@ -48,6 +50,7 @@ function MainNavigator() {
 
       
     >
+      <Tab.Screen name="PaymentScreen" component={PaymentScreen} options={{ tabBarLabel: () => null }} />
                   <Tab.Screen name="Chat" component={Chat} options={{ tabBarLabel: () => null }} />
             <Tab.Screen name="Chats" component={Chats} options={{ tabBarLabel: () => null }} />
             {/* <Tab.Screen name="AllChats" component={AllChats} options={{ tabBarLabel: () => null }} /> */}
@@ -61,8 +64,8 @@ function MainNavigator() {
       <Tab.Screen name="Signup" component={SignupScreen} options={{ tabBarLabel: () => null }} />
       <Tab.Screen name="Login" component={LoginScreen} options={{ tabBarLabel: () => null }} />
       <Tab.Screen name="Main" component={MainScreen} options={{ tabBarLabel: () => null }} />
-      <Tab.Screen name="BusinessProfileScreen" component={BusinessProfileScreen} options={{ tabBarLabel: () => null }} />
       <Tab.Screen name="Discover" component={DiscoverScreen} options={{ tabBarLabel: () => null }} />
+      <Tab.Screen name="BusinessProfileScreen" component={BusinessProfileScreen} options={{ tabBarLabel: () => null }} />
      <Tab.Screen name="BusinessEditProfileScreen" component={BusinessEditProfileScreen} options={{ tabBarLabel: () => null }} />
       <Tab.Screen name="explorerProfil" component={explorerProfil} options={{ tabBarLabel: () => null }} />
       <Tab.Screen name="ExplorerEditProfilScreen" component={ExplorerEditProfileScreen} options={{ tabBarLabel: () => null }} />
@@ -84,11 +87,13 @@ function MainNavigator() {
 
 export default function App() {
   return (
+    <StripeProvider publishableKey="pk_test_51PaKMsRq04W7hPlS4uFB3GuEOnDwEfu97rBTdVw5PmuXh2PVGpTGu1W0E6VPAEGziD59DnVhHNJ7UkKkDQLh5rj600hdyekUS3">
     <NavigationContainer>
       <AuthProvider>
         <MainNavigator />
         <StatusBar style="auto" />
       </AuthProvider>
     </NavigationContainer>
+  </StripeProvider>
   );
 }

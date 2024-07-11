@@ -4,8 +4,10 @@ const Explorer = db.Explorer;
 const Business = db.Business;
 
 // create a new notification
+// In notificationController.js
+
 const createNotification = async (req, res) => {
-  const { type, message, explorer_idexplorer, business_idbusiness,senderImage } = req.body;
+  const { type, message, explorer_idexplorer, business_idbusiness, senderImage } = req.body;
 
   try {
     const notification = await Notif.create({

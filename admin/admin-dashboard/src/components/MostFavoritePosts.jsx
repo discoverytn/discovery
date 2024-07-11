@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Box, Paper, Typography } from "@mui/material";
 import {
-  LineChart,
-  Line,
+  BarChart,
+  Bar,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -12,16 +12,20 @@ import {
 } from "recharts";
 import axios from "axios";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 function MostFavoritePosts() {
   const [data, setData] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get(
-          "http://192.168.58.72:3000/posts/top5"
-        );
-        setData(response.data);
+        const response = await axios.get(`${API_URL}/posts/top5`);
+        const formattedData = response.data.map(post => ({
+          name: post.title,
+          favorites: post.averageRating
+        }));
+        setData(formattedData);
       } catch (error) {
         console.error("Error fetching most favorite posts:", error);
       }
@@ -31,25 +35,18 @@ function MostFavoritePosts() {
   }, []);
 
   return (
-    <Box sx={{ mt: 3, width: "100%" }}>
+    <Box sx={{ flexBasis: "50%", pl: 2 }}>
       <Paper sx={{ p: 2, height: 400 }}>
-        <Typography variant="h6" sx={{ mb: 2 }}>
-          Most Favorite Posts
-        </Typography>
+        <Typography variant="h6">Most Rated Posts</Typography>
         <ResponsiveContainer width="100%" height={300}>
-          <LineChart data={data}>
+          <BarChart data={data}>
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="title" />
+            <XAxis dataKey="name" />
             <YAxis />
             <Tooltip />
             <Legend />
-            <Line
-              type="monotone"
-              dataKey="numOfFavorites"
-              stroke="#8884d8"
-              activeDot={{ r: 8 }}
-            />
-          </LineChart>
+            <Bar dataKey="favorites" fill="#00ccaa" />
+          </BarChart>
         </ResponsiveContainer>
       </Paper>
     </Box>

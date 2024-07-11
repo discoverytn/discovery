@@ -11,6 +11,7 @@ import { useNavigation } from "@react-navigation/native";
 import { useAuth } from "../context/AuthContext";
 import axios from "axios";
 import {jwtDecode} from "jwt-decode"; 
+import { DB_HOST, PORT } from "@env";
 
 const LoginScreen = () => {
   const navigation = useNavigation();
@@ -34,9 +35,17 @@ const LoginScreen = () => {
         const userRole = decodedToken.role;
   
         if (userRole === "explorer") {
-          navigation.navigate("explorerProfil");
+          if (decodedToken.categories !== null) {
+            navigation.navigate("Main");
+          } else {
+            navigation.navigate("Categories");
+          }
         } else if (userRole === "business") {
-          navigation.navigate("BusinessProfileScreen");
+          if (decodedToken.subscribed === 'no') {
+            navigation.navigate("PaymentScreen"); 
+          } else {
+            navigation.navigate("Main"); 
+          }
         } else {
           Alert.alert("Login Failed", "Unknown user role");
         }
@@ -46,17 +55,18 @@ const LoginScreen = () => {
     } catch (error) {
       console.error("Login error:", error);
       if (error.response && error.response.status === 401) {
-        Alert.alert(
-          "Your request has been sent, please wait for admin approval"
-        );
-      } 
+        Alert.alert("Your request has been sent, please wait for admin approval");
+      } else {
+        Alert.alert("Login Failed", "An error occurred during login");
+      }
     }
   };
+  
   
 
   const sendResetCode = async () => {
     try {
-      const endpoint = `http://192.168.58.72:3000/auth/send-reset-code`;
+      const endpoint = `http://${DB_HOST}:${PORT}/auth/send-reset-code`;
       const payload = { email: resetEmail };
 
       const response = await axios.post(endpoint, payload);
@@ -81,7 +91,7 @@ const LoginScreen = () => {
 
   const verifyResetCode = async () => {
     try {
-      const endpoint = `http://192.168.58.72:3000/auth/verify-code`;
+      const endpoint = `http://${DB_HOST}:${PORT}/auth/verify-code`;
       const payload = { email: resetEmail, code: resetCode };
 
       const response = await axios.post(endpoint, payload);
@@ -111,7 +121,7 @@ const LoginScreen = () => {
     }
 
     try {
-      const endpoint = `http://192.168.58.72:3000/auth/reset-password`;
+      const endpoint = `http://${DB_HOST}:${PORT}/auth/reset-password`;
       const payload = { email: resetEmail, newPassword };
 
       const response = await axios.post(endpoint, payload);

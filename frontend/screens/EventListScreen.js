@@ -8,16 +8,19 @@ import CustomModal from './CustomModal';
 import axios from 'axios';
 import join from '../assets/join.gif';
 import { useAuth } from '../context/AuthContext';
+import { DB_HOST, PORT } from "@env";
 
 const EventListScreen = () => {
   const navigation = useNavigation();
   const [showModal, setShowModal] = useState(false);
   const [events, setEvents] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
+  const [currentEvent, setCurrentEvent] = useState(null); 
+  const { explorer } = useAuth();
 
   const fetchEvents = async () => {
     try {
-      const response = await axios.get('http://192.168.58.72:3000/events/getAll');
+      const response = await axios.get(`http://${DB_HOST}:${PORT}/events/getAll`);
       setEvents(response.data);
     } catch (error) {
       console.error('Error fetching events:', error);
@@ -38,69 +41,65 @@ const EventListScreen = () => {
     fetchEvents().then(() => setRefreshing(false));
   }, []);
 
-  const toggleModal = () => {
-    console.log(auth);
+  const toggleModal = async (event) => {
     setShowModal(!showModal);
+    if (!showModal && event !== currentEvent) {
+     
+      setCurrentEvent(event);
+      if (explorer && explorer.idexplorer) {
+        try {
+          await axios.post(`http://${DB_HOST}:${PORT}/notifications/create`, {
+            type: 'event_join',
+            message: `${explorer.firstname} ${explorer.lastname} wants to join your event "${event.eventName}"`,
+            business_idbusiness: event.business_idbusiness,
+            explorer_idexplorer: explorer.idexplorer,
+            senderImage: explorer.image
+          });
+          console.log('Notification sent successfully');
+        } catch (error) {
+          console.error('Error sending notification:', error);
+        }
+      } else {
+        console.log('Explorer information is not available');
+      }
+    }
   };
 
-  const renderItem = ({ item }) => {
-    console.log("Event item:", item);
-
-    if (!auth.explorer || !auth.explorer.idexplorer) {
-      console.error("auth.explorer or auth.explorer.idexplorer is undefined");
-      return null;
-    }
-
-    return (
-      <TouchableOpacity 
-        style={styles.eventItem}
-        onPress={() => navigation.navigate('Chats', { 
-          idexplorer: auth.explorer.idexplorer, 
-          idbusiness: item.Business.idbusiness,
-          idevent: item.idevents,
-          eventName: item.eventName
-        })}
-      >
-        <Image 
-          source={item.image ? { uri: item.image } : require('../assets/event-placeholder.jpg')} 
-          style={styles.eventImage} 
-        />
-        <View style={styles.eventDetails}>
-          <Text style={styles.eventName}>{item.eventName}</Text>
-          <View style={styles.infoRow}>
-            <FontAwesomeIcon icon={faLocationDot} size={16} color="#32CD32" />
-            <Text style={styles.infoText}>{item.eventLocation}</Text>
-          </View>
-          <View style={styles.infoRow}>
-            <FontAwesomeIcon icon={faCalendarDays} size={16} color="#32CD32" />
-            <Text style={styles.infoText}>{item.startDate} - {item.endDate}</Text>
-          </View>
-          <View style={styles.infoRow}>
-            <FontAwesomeIcon icon={faUser} size={16} color="#32CD32" />
-            <Text style={styles.infoText}>
-              By: {item.Explorer ? item.Explorer.username : item.Business ? item.Business.businessname : 'Unknown'}
-            </Text>
-          </View>
-          <Text style={styles.eventDescription} numberOfLines={2}>{item.eventDescription}</Text>
-          <View style={styles.footer}>
-            <Text style={styles.eventPrice}>{item.eventPrice} DT</Text>
-            <TouchableOpacity 
-              style={styles.joinButton} 
-              onPress={() => navigation.navigate('Chats', { 
-                idexplorer: auth.explorer.idexplorer,
-                explorerName:auth.explorer.username, 
-                idbusiness: item.Business.idbusiness,
-                idevent: item.idevents,
-                eventName: item.eventName
-              })}
-            >
-              <Image source={join} style={styles.gif} />
-            </TouchableOpacity>
-          </View>
+  const renderItem = ({ item }) => (
+    <TouchableOpacity
+      style={styles.eventItem}
+      onPress={() => navigation.navigate('OneEvent', { event: item })}
+    >
+      <Image
+        source={item.image ? { uri: item.image } : require('../assets/event-placeholder.jpg')}
+        style={styles.eventImage}
+      />
+      <View style={styles.eventDetails}>
+        <Text style={styles.eventName}>{item.eventName}</Text>
+        <View style={styles.infoRow}>
+          <FontAwesomeIcon icon={faLocationDot} size={16} color="#32CD32" />
+          <Text style={styles.infoText}>{item.eventLocation}</Text>
         </View>
-      </TouchableOpacity>
-    );
-  }
+        <View style={styles.infoRow}>
+          <FontAwesomeIcon icon={faCalendarDays} size={16} color="#32CD32" />
+          <Text style={styles.infoText}>{item.startDate} - {item.endDate}</Text>
+        </View>
+        <View style={styles.infoRow}>
+          <FontAwesomeIcon icon={faUser} size={16} color="#32CD32" />
+          <Text style={styles.infoText}>
+            By: {item.Explorer ? item.Explorer.username : item.Business ? item.Business.businessname : 'Unknown'}
+          </Text>
+        </View>
+        <Text style={styles.eventDescription} numberOfLines={2}>{item.eventDescription}</Text>
+        <View style={styles.footer}>
+          <Text style={styles.eventPrice}>{item.eventPrice} DT</Text>
+          <TouchableOpacity style={styles.joinButton} onPress={() => toggleModal(item)}>
+            <Image source={join} style={styles.gif} />
+          </TouchableOpacity>
+        </View>
+      </View>
+    </TouchableOpacity>
+  );
 
   return (
     <View style={styles.container}>
@@ -111,7 +110,7 @@ const EventListScreen = () => {
         <Text style={styles.headerText}></Text>
       </View>
       <View style={styles.subHeader}>
-        <Text style={styles.subHeaderText}>Available Events </Text>
+        <Text style={styles.subHeaderText}>Available Events</Text>
         <LottieView
           source={require('../assets/sand-clock.json')}
           autoPlay
@@ -129,7 +128,7 @@ const EventListScreen = () => {
       />
       <CustomModal
         visible={showModal}
-        onClose={toggleModal}
+        onClose={() => setShowModal(false)}
         message="Event request was sent!"
       />
     </View>
@@ -242,4 +241,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default EventListScreen; 
+export default EventListScreen;

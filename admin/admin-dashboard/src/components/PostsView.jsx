@@ -10,31 +10,63 @@ import {
   TableRow,
   TablePagination,
   Paper,
-  Button,
   Typography,
   styled,
 } from "@mui/material";
+import ConfirmationPopup from "./ConfirmationPopup";
 
-const FullWidthBox = styled(Box)({
-  flex: 1,
-  height: '100vh',
-  padding: '20px',
-  boxSizing: 'border-box',
-  overflowY: 'auto',
-  display: 'flex',
-  flexDirection: 'column',
-  width: '100%',
-});
+const API_URL = import.meta.env.VITE_API_URL;
 
 const FullWidthPaper = styled(Paper)({
-  width: '100%',
-  marginBottom: '20px',
-  overflowX: 'auto',
+  width: "100%",
+  marginBottom: "20px",
+  overflowX: "auto",
 });
 
 const FullWidthTextField = styled(TextField)({
-  width: '100%',
-  marginBottom: '20px',
+  width: "100%",
+  marginBottom: "20px",
+});
+
+const CustomTableContainer = styled(TableContainer)({
+  flexGrow: 1,
+  display: "flex",
+  flexDirection: "column",
+});
+
+const CustomTable = styled(Table)({
+  flexGrow: 1,
+});
+
+const DeleteButton = styled('button')({
+  boxShadow: 'inset 0px 1px 0px 0px #f5978e',
+  background: 'linear-gradient(to bottom, #f24537 5%, #c62d1f 100%)',
+  backgroundColor: '#f24537',
+  borderRadius: '6px',
+  border: '1px solid #d02718',
+  display: 'inline-block',
+  cursor: 'pointer',
+  color: '#ffffff',
+  fontFamily: 'Arial',
+  fontSize: '15px',
+  fontWeight: 'bold',
+  padding: '10px 24px',
+  textDecoration: 'none',
+  textShadow: '0px 1px 0px #810e05',
+  '&:hover': {
+    background: 'linear-gradient(to bottom, #c62d1f 5%, #f24537 100%)',
+    backgroundColor: '#c62d1f',
+  },
+  '&:active': {
+    position: 'relative',
+    top: '1px',
+  },
+});
+
+const NarrowTableCell = styled(TableCell)({
+  width: '1%',
+  whiteSpace: 'nowrap',
+  padding: '6px 8px',
 });
 
 function PostsView() {
@@ -47,7 +79,7 @@ function PostsView() {
   const [businessPosts, setBusinessPosts] = useState([]);
 
   useEffect(() => {
-    fetch("http://192.168.58.72:3000/posts/explorer/posts")
+    fetch(`${API_URL}/posts/explorer/posts`)
       .then((response) => response.json())
       .then((data) => {
         if (Array.isArray(data)) {
@@ -58,7 +90,7 @@ function PostsView() {
       })
       .catch((error) => console.error("Error fetching explorer posts:", error));
 
-    fetch("http://192.168.58.72:3000/posts/business/posts")
+    fetch(`${API_URL}/posts/business/posts`)
       .then((response) => response.json())
       .then((data) => {
         if (Array.isArray(data)) {
@@ -92,12 +124,9 @@ function PostsView() {
 
   const handleDelete = async (idposts, isExplorer) => {
     try {
-      const response = await fetch(
-        `http://192.168.58.72:3000/posts/delete/${idposts}`,
-        {
-          method: "DELETE",
-        }
-      );
+      const response = await fetch(`${API_URL}/posts/delete/${idposts}`, {
+        method: "DELETE",
+      });
 
       if (!response.ok) {
         throw new Error("Failed to delete post");
@@ -117,13 +146,13 @@ function PostsView() {
     }
   };
 
-  const renderTable = (posts, page, handleChangePage, search) => (
+  const renderTable = (posts, page, handleChangePage, search, isExplorer) => (
     <FullWidthPaper elevation={3}>
-      <TableContainer sx={{ width: '100%', overflowX: 'auto', flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
-        <Table sx={{ flexGrow: 1 }}>
+      <TableContainer sx={{ flexGrow: 1 }}>
+        <Table sx={{ minWidth: 650 }}>
           <TableHead>
             <TableRow>
-              <TableCell>Delete</TableCell>
+              <NarrowTableCell>Delete</NarrowTableCell>
               <TableCell>ID</TableCell>
               <TableCell>Title</TableCell>
               <TableCell>Location</TableCell>
@@ -136,20 +165,13 @@ function PostsView() {
               .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
               .map((post) => (
                 <TableRow key={post.idposts}>
-                  <TableCell>
-                    <Button
-                      variant="contained"
-                      color="secondary"
-                      onClick={() =>
-                        handleDelete(
-                          post.idposts,
-                          post.explorer_idexplorer !== null
-                        )
-                      }
-                    >
-                      Delete
-                    </Button>
-                  </TableCell>
+                  <NarrowTableCell>
+                    <ConfirmationPopup
+                      action="Delete Post"
+                      onConfirm={() => handleDelete(post.idposts, isExplorer)}
+                      CustomButton={DeleteButton}
+                    />
+                  </NarrowTableCell>
                   <TableCell>{post.idposts}</TableCell>
                   <TableCell>{post.title}</TableCell>
                   <TableCell>{post.location}</TableCell>
@@ -173,52 +195,47 @@ function PostsView() {
       />
     </FullWidthPaper>
   );
-
+  
   return (
-    <FullWidthBox>
-      <Box sx={{ 
-        display: 'flex', 
-        flexDirection: 'column', 
-        height: '100%', 
-        overflow: 'hidden'
-      }}>
-        <Typography variant="h4" gutterBottom align="center">
-          Explorer Posts
-        </Typography>
-        <FullWidthTextField
-          label="Search Explorer Posts"
-          variant="outlined"
-          value={explorerSearch}
-          onChange={(e) => setExplorerSearch(e.target.value)}
-        />
-        <Box sx={{ flexGrow: 1, overflow: 'auto', mb: 4 }}>
-          {renderTable(
-            explorerPosts,
-            explorerPage,
-            handleChangeExplorerPage,
-            explorerSearch
-          )}
-        </Box>
-
-        <Typography variant="h4" gutterBottom align="center">
-          Business Posts
-        </Typography>
-        <FullWidthTextField
-          label="Search Business Posts"
-          variant="outlined"
-          value={businessSearch}
-          onChange={(e) => setBusinessSearch(e.target.value)}
-        />
-        <Box sx={{ flexGrow: 1, overflow: 'auto' }}>
-          {renderTable(
-            businessPosts,
-            businessPage,
-            handleChangeBusinessPage,
-            businessSearch
-          )}
-        </Box>
+    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+      <Typography variant="h4" gutterBottom>
+        Explorer Posts
+      </Typography>
+      <FullWidthTextField
+        label="Search Explorer Posts"
+        variant="outlined"
+        value={explorerSearch}
+        onChange={(e) => setExplorerSearch(e.target.value)}
+      />
+      <Box sx={{ flexGrow: 1, overflow: 'auto', mb: 4 }}>
+        {renderTable(
+          explorerPosts,
+          explorerPage,
+          handleChangeExplorerPage,
+          explorerSearch,
+          true
+        )}
       </Box>
-    </FullWidthBox>
+
+      <Typography variant="h4" gutterBottom>
+        Business Posts
+      </Typography>
+      <FullWidthTextField
+        label="Search Business Posts"
+        variant="outlined"
+        value={businessSearch}
+        onChange={(e) => setBusinessSearch(e.target.value)}
+      />
+      <Box sx={{ flexGrow: 1, overflow: 'auto' }}>
+        {renderTable(
+          businessPosts,
+          businessPage,
+          handleChangeBusinessPage,
+          businessSearch,
+          false
+        )}
+      </Box>
+    </Box>
   );
 }
 
