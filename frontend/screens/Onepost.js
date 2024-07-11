@@ -317,7 +317,7 @@ return (
         <TouchableOpacity onPress={handleSendPost} style={styles.iconContainer}>
           <FontAwesomeIcon
             icon={faPaperPlane}
-            style={[styles.icon1, isTraveled ? styles.traveledIconActive : styles.traveledIconInactive]}
+            style={[styles.icon1, isTraveled ? styles.traveledIconInactive : styles.traveledIconActive]}
             size={26}
           />
         </TouchableOpacity>

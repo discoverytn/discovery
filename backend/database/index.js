@@ -27,7 +27,7 @@ db.Chat = require('../Models/chat')(sequelize, DataTypes);
 db.Events = require('../Models/events')(sequelize, DataTypes);
 db.Favorites = require('../Models/favorites')(sequelize, DataTypes);
 db.Traveled = require ("../Models/traveled.js")(sequelize, DataTypes);
-
+db.Payment = require ("../Models/payment.js")(sequelize, DataTypes);
 db.Rating = require("../Models/rating.js")(sequelize, DataTypes);
 
 
@@ -76,6 +76,11 @@ db.Rating.belongsTo(db.Posts, { foreignKey: 'posts_idposts' });
 
 db.Explorer.hasMany(db.Rating, { foreignKey: 'explorer_idexplorer' });
 db.Rating.belongsTo(db.Explorer, { foreignKey: 'explorer_idexplorer' });
+
+db.Payment.belongsTo(db.Business, { foreignKey: 'business_idbusiness' });
+db.Business.hasMany(db.Payment, { foreignKey: 'business_idbusiness' });
+
+
 
 
 sequelize
