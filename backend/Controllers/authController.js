@@ -124,11 +124,12 @@ const login = async (req, res) => {
     } else if (user instanceof db.Business) {
       role = "business";
       id = user.idbusiness;
+      subscribed = user.subscribed
     } else {
       return res.status(500).json({ error: "Unknown user type" });
     }
 
-    const tokenPayload = { id, email: user.email, role, categories };
+    const tokenPayload = { id, email: user.email, role, categories,subscribed };
 
     const token = jwt.sign(
       tokenPayload,
