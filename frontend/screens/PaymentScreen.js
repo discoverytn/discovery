@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, SafeAreaView, Alert, ScrollView } from 'react-native';
+import { StyleSheet, View, SafeAreaView, Alert } from 'react-native';
 import { TextInput, Button, Text } from 'react-native-paper';
-import { useStripe } from '@stripe/stripe-react-native'; 
+import { CardField, useStripe } from '@stripe/stripe-react-native'; 
 import axios from "axios";
 import { DB_HOST, PORT } from "@env";
 import { useAuth } from '../context/AuthContext';
@@ -9,17 +9,13 @@ import { useAuth } from '../context/AuthContext';
 const PaymentScreen = () => {
   const { createPaymentMethod, confirmPayment } = useStripe();
   const [cardholderName, setCardholderName] = useState('');
-  const [cardNumber, setCardNumber] = useState('');
-  const [expMonth, setExpMonth] = useState('');
-  const [expYear, setExpYear] = useState('');
-  const [cvc, setCvc] = useState('');
   const [amount, setAmount] = useState('');
   const [loading, setLoading] = useState(false);
   const { business } = useAuth();
 
   const handleContinue = async () => {
     // Check if all required fields are filled
-    if (!cardholderName || !cardNumber || !expMonth || !expYear || !cvc || !amount) {
+    if (!cardholderName || !amount) {
       Alert.alert('Invalid Input', 'Please complete all the fields.');
       return;
     }
@@ -29,12 +25,7 @@ const PaymentScreen = () => {
     try {
       const { paymentMethod, error: paymentMethodError } = await createPaymentMethod({
         type: 'Card',
-        card: {
-          number: cardNumber,
-          expMonth: parseInt(expMonth),
-          expYear: parseInt(expYear),
-          cvc,
-        },
+        card: {}, // Add card details here
         billingDetails: { name: cardholderName },
       });
 
@@ -73,90 +64,57 @@ const PaymentScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        <View style={styles.header}>
-          <Text style={styles.headerText}>Add Payment Method</Text>
+      <View style={styles.header}>
+        <Text style={styles.headerText}>Add Payment Method</Text>
+      </View>
+
+      <View style={styles.form}>
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Cardholder Name</Text>
+          <TextInput
+            value={cardholderName}
+            onChangeText={setCardholderName}
+            style={styles.input}
+            theme={{ colors: { primary: '#FF0000', text: '#333333' } }}
+          />
         </View>
 
-        <View style={styles.form}>
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Cardholder Name</Text>
-            <TextInput
-              value={cardholderName}
-              onChangeText={setCardholderName}
-              style={styles.input}
-              theme={{ colors: { primary: '#FF0000', text: '#333333' } }}
-            />
-          </View>
-
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Card Number</Text>
-            <TextInput
-              value={cardNumber}
-              onChangeText={setCardNumber}
-              style={styles.input}
-              keyboardType="numeric"
-              theme={{ colors: { primary: '#FF0000', text: '#333333' } }}
-            />
-          </View>
-
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Expiration Month</Text>
-            <TextInput
-              value={expMonth}
-              onChangeText={setExpMonth}
-              style={styles.input}
-              keyboardType="numeric"
-              theme={{ colors: { primary: '#FF0000', text: '#333333' } }}
-            />
-          </View>
-
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Expiration Year</Text>
-            <TextInput
-              value={expYear}
-              onChangeText={setExpYear}
-              style={styles.input}
-              keyboardType="numeric"
-              theme={{ colors: { primary: '#FF0000', text: '#333333' } }}
-            />
-          </View>
-
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>CVC</Text>
-            <TextInput
-              value={cvc}
-              onChangeText={setCvc}
-              style={styles.input}
-              keyboardType="numeric"
-              theme={{ colors: { primary: '#FF0000', text: '#333333' } }}
-            />
-          </View>
-
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Amount</Text>
-            <TextInput
-              value={amount}
-              onChangeText={setAmount}
-              style={styles.input}
-              keyboardType="numeric"
-              theme={{ colors: { primary: '#FF0000', text: '#333333' } }}
-            />
-          </View>
-
-          <Button
-            mode="contained"
-            onPress={handleContinue}
-            style={styles.continueButton}
-            contentStyle={styles.continueButtonContent}
-            labelStyle={styles.continueButtonLabel}
-            color="#000000"
-            disabled={loading} 
-          >
-            {loading ? 'Processing...' : 'Continue'}
-          </Button>
+        {/* Use CardField for Card Details */}
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Card Details</Text>
+          {/* <CardField
+            postalCodeEnabled={false}
+            placeholder={{
+              number: '4242 4242 4242 4242',
+            }}
+            cardStyle={styles.card}
+            style={styles.cardContainer}
+          /> */}
         </View>
-      </ScrollView>
+
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Amount</Text>
+          <TextInput
+            value={amount}
+            onChangeText={setAmount}
+            style={styles.input}
+            keyboardType="numeric"
+            theme={{ colors: { primary: '#FF0000', text: '#333333' } }}
+          />
+        </View>
+
+        <Button
+          mode="contained"
+          onPress={handleContinue}
+          style={styles.continueButton}
+          contentStyle={styles.continueButtonContent}
+          labelStyle={styles.continueButtonLabel}
+          color="#000000"
+          disabled={loading} 
+        >
+          {loading ? 'Processing...' : 'Continue'}
+        </Button>
+      </View>
     </SafeAreaView>
   );
 };
@@ -166,14 +124,10 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#FFFFFF',
   },
-  scrollContent: {
-    flexGrow: 1,
-    paddingBottom: 20,
-  },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FF0000',
+    backgroundColor: '#D2042D',
     paddingVertical: 20,
     paddingHorizontal: 16,
     elevation: 4,
@@ -202,6 +156,15 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     fontSize: 18,
     color: '#333333',
+  },
+  cardContainer: {
+    height: 50,
+    marginVertical: 30,
+  },
+  card: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 8,
+    fontSize: 18,
   },
   continueButton: {
     margin: 24,
