@@ -28,7 +28,7 @@ app.use('/comments', commentRoutes);
 app.use('/events', eventRoutes);
 app.use('/notifications', notificationRoutes);
 app.use('/chat',chatRoutes)
-app.use(express.json());
+app.use(express.json())
 const http = require("http").Server(app)
 const socketIO = require('socket.io')(http, {
   cors: {

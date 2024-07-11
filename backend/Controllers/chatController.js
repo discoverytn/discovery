@@ -72,7 +72,8 @@ const deleteMessage = async (req, res) => {
   try {
     const deleted = await db.Chat.destroy({
       where: { idchat }
-    });
+    })
+    
     if (deleted) {
       return res.status(204).json({ message: 'Message deleted' });
     }
