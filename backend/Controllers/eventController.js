@@ -20,6 +20,13 @@ const createEvent = async (req, res) => {
       business_idbusiness
     });
 
+    // Increase numOfEvents in Business model
+    const business = await db.Business.findByPk(business_idbusiness);
+    if (business) {
+      business.numOfEvents += 1;
+      await business.save();
+    }
+
     res.status(201).json({
       message: 'Event created successfully',
       event
@@ -29,6 +36,7 @@ const createEvent = async (req, res) => {
     res.status(500).json({ error: 'Failed to create event' });
   }
 };
+
 
 // Get all events
 const getAllEvents = async (req, res) => {
@@ -114,11 +122,23 @@ const deleteEvent = async (req, res) => {
   const { idevents } = req.params;
 
   try {
+    const event = await Events.findByPk(idevents);
+    if (!event) {
+      return res.status(404).json({ error: 'Event not found' });
+    }
+
     const deleted = await Events.destroy({
       where: { idevents: idevents }
     });
 
     if (deleted) {
+      // Decrease numOfEvents in Business model
+      const business = await db.Business.findByPk(event.business_idbusiness);
+      if (business && business.numOfEvents > 0) {
+        business.numOfEvents -= 1;
+        await business.save();
+      }
+      
       res.status(204).json({ message: 'Event deleted successfully' });
     } else {
       res.status(404).json({ error: 'Event not found' });
@@ -128,6 +148,7 @@ const deleteEvent = async (req, res) => {
     res.status(500).json({ error: 'Failed to delete event' });
   }
 };
+
 
 module.exports = {
   createEvent,
