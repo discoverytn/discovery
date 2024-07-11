@@ -56,7 +56,6 @@ const ExplorerProfile = () => {
           setPosts(transformedPosts);
           setNumPosts(transformedPosts.length || 0);
   
-          // Update explorer object with the correct number of posts
           setExplorer(prev => ({ ...prev, numOfPosts: transformedPosts.length || 0 }));
         } else {
           console.error('Failed to fetch explorer posts');

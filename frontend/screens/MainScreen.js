@@ -57,7 +57,12 @@ const MainScreen = ({ navigation }) => {
       </View>
 
       {/* Title */}
-      <Text style={styles.title}>Discovery  🇹🇳</Text>
+      {/* <Text style={styles.title}>Discovery  🇹🇳</Text>
+      <Image source={require('../assets/flag.gif')} style={styles.notificationImage} /> */}
+      <View style={styles.headerContainer}>
+      <Text style={styles.title}>Discovery</Text>
+      <Image source={require('../assets/flag.gif')} style={styles.flagimage} />
+    </View>
       
       {/* Content Section */}
       <ScrollView style={styles.scrollView}>
@@ -135,6 +140,12 @@ const styles = StyleSheet.create({
     marginBottom: 20,
    
   },
+  headerContainer: {
+    marginLeft:130,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+ 
   headerLeft: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -229,6 +240,12 @@ const styles = StyleSheet.create({
   navText: {
     color: '#fff',
     fontSize: 12,
+  },
+  flagimage: {
+    width: 30,
+    height: 40,
+    marginLeft:12
+    
   },
 });
 
