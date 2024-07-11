@@ -321,6 +321,24 @@ module.exports = {
       return res.status(500).json({ error: "Failed to update categories" });
     }
   },
-  
+  getTopExplorersByPosts: async function (req, res) {
+    try {
+      const topExplorers = await db.Explorer.findAll({
+        attributes: ['idexplorer', 'firstname', 'image'],
+        include: [{
+          model: db.Posts,
+          attributes: [],
+        }],
+        group: ['Explorer.idexplorer'],
+        order: [[db.sequelize.fn('COUNT', db.sequelize.col('Posts.idposts')), 'DESC']],
+        limit: 3
+      });
+
+      return res.status(200).json(topExplorers);
+    } catch (error) {
+      console.error("Error fetching top explorers by posts:", error);
+      return res.status(500).json({ error: "Failed to fetch top explorers" });
+    }
+  },
   
 };
