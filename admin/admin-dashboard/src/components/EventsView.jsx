@@ -21,7 +21,7 @@ import {
   styled,
 } from "@mui/material";
 
-import ConfirmationPopup from "./ConfirmationPopup"; // Replace with correct path
+import ConfirmationPopup from "./ConfirmationPopup"; // Make sure this path is correct
 
 const API_URL = import.meta.env.VITE_API_URL;
 

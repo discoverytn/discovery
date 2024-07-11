@@ -49,13 +49,13 @@ function MainNavigator() {
       }}
       
     >
+      <Tab.Screen name="PaymentScreen" component={PaymentScreen} options={{ tabBarLabel: () => null }} />
                   <Tab.Screen name="Chat" component={Chat} options={{ tabBarLabel: () => null }} />
 
             <Tab.Screen name="Chats" component={Chats} options={{ tabBarLabel: () => null }} />
             {/* <Tab.Screen name="AllChats" component={AllChats} options={{ tabBarLabel: () => null }} /> */}
       {/* <Tab.Screen name="ChatCopie" component={ChatCopie} options={{ tabBarLabel: () => null }} /> */}
       <Tab.Screen name="ChatScreen" component={ChatScreen} options={{ tabBarLabel: () => null }} />
-      <Tab.Screen name="PaymentScreen" component={PaymentScreen} options={{ tabBarLabel: () => null }} />
 
        <Tab.Screen name="Home" component={HomeScreen} options={{ tabBarLabel: () => null }} />
        <Tab.Screen name="Intro1" component={Intro1} options={{ tabBarLabel: () => null }} />

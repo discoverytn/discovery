@@ -15,6 +15,10 @@ module.exports = (sequelize) => {
       type: DataTypes.FLOAT,
       allowNull: false,
     },
+    subMonths: { 
+      type: DataTypes.INTEGER,
+      allowNull: true, 
+    },
     business_idbusiness: {
       type: DataTypes.INTEGER,
       references: {
