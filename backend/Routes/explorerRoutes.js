@@ -2,6 +2,8 @@ const express = require("express");
 const { getExplorerById, editExplorer, getExplorerPosts,getExplorerNumberPosts, removeFromFavourites, addOrRemoveFromFavorites, isPostFavoritedByExplorer, getExplorerFavorites,addOrRemoveFromTraveled,removeFromTraveled,isPostTraveledByExplorer,updateCategories,getTopExplorersByPosts } = require("../Controllers/ExplorerController");
 const router = express.Router();
 
+
+router.get('/top-explorers', getTopExplorersByPosts);
 // Route to get a specific explorer profile by their ID
 router.get("/:idexplorer", getExplorerById);
 // Route to update a specific explorer profile by their ID
@@ -37,6 +39,6 @@ router.get("/:idexplorer/traveled/:idposts/check", isPostTraveledByExplorer);
 
 router.put('/:idexplorer/categories', updateCategories);
 
-router.get('/top3', getTopExplorersByPosts);
+
 
 module.exports = router;

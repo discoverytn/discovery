@@ -323,21 +323,44 @@ module.exports = {
   },
   getTopExplorersByPosts: async function (req, res) {
     try {
+      console.log("Attempting to fetch top explorers");
       const topExplorers = await db.Explorer.findAll({
-        attributes: ['idexplorer', 'firstname', 'image'],
+        attributes: [
+          'idexplorer', 
+          'firstname', 
+          'image',
+          [db.sequelize.fn('COUNT', db.sequelize.col('Posts.idposts')), 'postCount']
+        ],
         include: [{
           model: db.Posts,
           attributes: [],
         }],
-        group: ['Explorer.idexplorer'],
-        order: [[db.sequelize.fn('COUNT', db.sequelize.col('Posts.idposts')), 'DESC']],
+        group: ['Explorer.idexplorer', 'Explorer.firstname', 'Explorer.image'],
+        order: [[db.sequelize.literal('postCount'), 'DESC']],
         limit: 3
       });
-
-      return res.status(200).json(topExplorers);
+  
+      console.log("Query executed successfully");
+      console.log("Top explorers:", JSON.stringify(topExplorers, null, 2));
+  
+      if (topExplorers.length === 0) {
+        console.log("No explorers found");
+        return res.status(404).json({ error: "No explorers found" });
+      }
+  
+      // Format the result to include postCount
+      const formattedTopExplorers = topExplorers.map(explorer => ({
+        idexplorer: explorer.idexplorer,
+        firstname: explorer.firstname,
+        image: explorer.image,
+        postCount: parseInt(explorer.get('postCount'))
+      }));
+  
+      return res.status(200).json(formattedTopExplorers);
     } catch (error) {
       console.error("Error fetching top explorers by posts:", error);
-      return res.status(500).json({ error: "Failed to fetch top explorers" });
+      console.error("Error stack:", error.stack);
+      return res.status(500).json({ error: "Failed to fetch top explorers", details: error.message });
     }
   },
   
