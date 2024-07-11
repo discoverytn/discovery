@@ -4,55 +4,56 @@ import { io } from 'socket.io-client';
 import axios from 'axios';
 import { useRoute } from '@react-navigation/native';
 import AudioRecord from 'react-native-audio-record';
+import { useAuth } from '../context/AuthContext';
 
 const Chats = ({ navigation, route }) => {
   const params = route.params || {};
   const { idbusiness, idexplorer, eventName } = params;
-
+const auth = useAuth()
   const [message, setMessage] = useState("");
-  const [chatMessages, setChatMessages] = useState([]);
-  const [socket, setSocket] = useState(null);
-  const [isRecording, setIsRecording] = useState(false);
-  const [recordedAudioPath, setRecordedAudioPath] = useState(null);
+  const [chatMessages, setChatMessages] = useState([])
+  const [socket, setSocket] = useState(null)
+  const [isRecording, setIsRecording] = useState(false)
+  const [recordedAudioPath, setRecordedAudioPath] = useState(null)
 
   useEffect(() => {
-    const socket = io('http://192.168.58.72:3000');
-    setSocket(socket);
+    const socket = io('http://192.168.58.72:3000')
+    setSocket(socket)
 
     socket.on('receive-message', (newMessage) => {
-      setChatMessages((prevMessages) => [...prevMessages, newMessage]);
-    });
+      setChatMessages((prevMessages) => [...prevMessages, newMessage])
+    })
 
     if (idexplorer && idbusiness && eventName) {
-      socket.emit('join-room', { eventName, idexplorer, idbusiness });
+      socket.emit('join-room', { eventName, idexplorer, idbusiness })
     }
 
     return () => {
-      socket.disconnect();
-    };
-  }, [idexplorer, idbusiness, eventName]);
+      socket.disconnect()
+    }
+  }, [idexplorer, idbusiness, eventName])
 
   useEffect(() => {
-    getMessage();
-  }, [idexplorer, idbusiness]);
+    getMessage()
+  }, [idexplorer, idbusiness])
 
   const getMessage = () => {
     axios.post("http://192.168.58.72:3000/chat/get", { explorer_idexplorer: idexplorer, business_idbusiness: idbusiness })
       .then((res) => {
-        setChatMessages(res.data);
+        setChatMessages(res.data)
       })
-      .catch((err) => console.log(err));
-  };
+      .catch((err) => console.log(err))
+  }
 
   const sendMessage = () => {
     if (!idexplorer || !idbusiness) {
-      console.error("Missing idexplorer or idbusiness");
-      return;
+      console.error("Missing idexplorer or idbusiness")
+      return
     }
 
     if (message.length > 0) {
       if (socket) {
-        socket.emit('send-message', { message, explorer_idexplorer: idexplorer, business_idbusiness: idbusiness });
+        socket.emit('send-message', { message, explorer_idexplorer: idexplorer, business_idbusiness: idbusiness })
       }
 
       axios.post("http://192.168.58.72:3000/chat/send", {
@@ -61,64 +62,64 @@ const Chats = ({ navigation, route }) => {
         business_idbusiness: idbusiness
       })
         .then((res) => {
-          setChatMessages((prevMessages) => [...prevMessages, res.data]);
-          setMessage("");
+          setChatMessages((prevMessages) => [...prevMessages, res.data])
+          setMessage("")
         })
         .catch((err) => {
           if (err.response) {
-            console.log("Server responded with:", err.response.data);
+            console.log("Server responded with:", err.response.data)
           }
-        });
+        })
     }
-  };
+  }
 
   const startRecording = async () => {
     try {
-      const audioFile = await AudioRecord.start();
-      setIsRecording(true);
-      setRecordedAudioPath(audioFile);
+      const audioFile = await AudioRecord.start()
+      setIsRecording(true)
+      setRecordedAudioPath(audioFile)
     } catch (error) {
-      console.error("Failed to start recording:", error);
+      console.error("Failed to start recording:", error)
     }
-  };
+  }
 
   const stopRecording = async () => {
     try {
-      const audioFile = await AudioRecord.stop();
-      setIsRecording(false);
-      setRecordedAudioPath(audioFile);
+      const audioFile = await AudioRecord.stop()
+      setIsRecording(false)
+      setRecordedAudioPath(audioFile)
       // send the recorded audio file
-      sendRecordedAudio(audioFile);
+      sendRecordedAudio(audioFile)
     } catch (error) {
-      console.error("Failed to stop recording:", error);
+      console.error("Failed to stop recording:", error)
     }
-  };
+  }
 
   const sendRecordedAudio = (audioFilePath) => {
     //still the  logic to send recorded audio file
-  };
+  }
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.messagesContainer}>
-        {chatMessages.map((msg, index) => (
-          <View
-            key={index}
-            style={[
-              styles.messageContainer,
-              msg.explorer_idexplorer === idexplorer ? styles.sentMessage : styles.receivedMessage
-            ]}
-          >
-            <Text style={styles.senderText}>
-              {msg.explorer_idexplorer === idexplorer ? 'Explorer' : msg.Explorer?.username || msg.Business?.username}
-            </Text>
-            <Text style={styles.messageText}>{msg.message}</Text>
-            <Text style={styles.receiverText}>
-              {msg.business_idbusiness === idbusiness ? msg.Business?.username || msg.Explorer?.username : 'Business'}
-            </Text>
-          </View>
-        ))}
-      </ScrollView>
+     <ScrollView contentContainerStyle={styles.messagesContainer}>
+    {chatMessages.map((msg, index) => (
+      <View
+        key={index}
+        style={[
+          styles.messageContainer,
+          msg.explorer_idexplorer === idexplorer ? styles.sentMessage : styles.receivedMessage
+        ]}
+      >
+        <Text style={styles.senderText}>
+          {msg.explorer_idexplorer === idexplorer ? auth.explorer.username : msg.Business?.businessname}
+        </Text>
+        <Text style={styles.messageText}>{msg.message}</Text>
+        <Text style={styles.receiverText}>
+          {msg.business_idbusiness === idbusiness ? msg.Business?.businessname : auth.explorer.username}
+        </Text>
+      </View>
+    ))}
+  </ScrollView>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 20}
