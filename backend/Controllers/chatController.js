@@ -1,8 +1,8 @@
-const db = require('../database/index')
-const { io } = require('../ChatServer/index') 
+const db = require('../database/index');
+const { io } = require('../ChatServer/index');
 
 const sendMessage = async (req, res) => {
-  const { explorer_idexplorer, business_idbusiness, message, eventName } = req.body
+  const { explorer_idexplorer, business_idbusiness, message, eventName } = req.body;
 
   try {
     const explorer = await db.Explorer.findByPk(explorer_idexplorer);
@@ -18,7 +18,8 @@ const sendMessage = async (req, res) => {
     const newMessage = await db.Chat.create({
       explorer_idexplorer,
       business_idbusiness,
-      message
+      message,
+      eventName,
     });
 
     const roomName = `${eventName}-${explorer_idexplorer}-${business_idbusiness}`;
@@ -49,8 +50,8 @@ const getMessages = async (req, res) => {
       order: [['createdAt', 'ASC']],
       include: [
         { model: db.Explorer, attributes: ['name'], as: 'explorer' },
-        { model: db.Business, attributes: ['name'], as: 'business' }
-      ]
+        { model: db.Business, attributes: ['name'], as: 'business' },
+      ],
     });
 
     const formattedMessages = messages.map((msg) => ({
@@ -66,14 +67,42 @@ const getMessages = async (req, res) => {
   }
 };
 
+// const getChatHistory = async (req, res) => {
+//   const { explorer_idexplorer } = req.params;
+
+//   try {
+//     const history = await db.Chat.findAll({
+//       where: {
+//         explorer_idexplorer,
+//       },
+//       order: [['createdAt', 'ASC']],
+//       include: [
+//         { model: db.Explorer, as: 'explorer' }, 
+//         { model: db.Business, as: 'business' }, 
+//       ],
+//     });
+
+//     const formattedHistory = history.map((msg) => ({
+//       ...msg.toJSON(),
+//       explorerName: msg.explorer ? msg.explorer.name : null,
+//       businessName: msg.business ? msg.business.name : null,
+//     }));
+
+//     return res.status(200).json(formattedHistory);
+//   } catch (error) {
+//     console.error('Error fetching chat history:', error);
+//     return res.status(500).json({ error: 'Failed to fetch chat history' });
+//   }
+// };
+
 const deleteMessage = async (req, res) => {
   const { idchat } = req.params;
 
   try {
     const deleted = await db.Chat.destroy({
-      where: { idchat }
-    })
-    
+      where: { idchat },
+    });
+
     if (deleted) {
       return res.status(204).json({ message: 'Message deleted' });
     }
@@ -84,4 +113,4 @@ const deleteMessage = async (req, res) => {
   }
 };
 
-module.exports = { sendMessage, getMessages, deleteMessage }
+module.exports = { sendMessage, getMessages, deleteMessage };
