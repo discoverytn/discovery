@@ -3,25 +3,24 @@ import { View, Text, Image, TouchableOpacity, FlatList, StyleSheet } from 'react
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import LottieView from 'lottie-react-native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faPersonWalkingLuggage, faLocationDot, faCalendarDays, faUser } from '@fortawesome/free-solid-svg-icons';
+import { faLocationDot, faCalendarDays, faUser } from '@fortawesome/free-solid-svg-icons';
 import CustomModal from './CustomModal';
 import axios from 'axios';
-import join from '../assets/join.gif'
+import join from '../assets/join.gif';
 import { useAuth } from '../context/AuthContext';
 import { DB_HOST, PORT } from "@env";
-
 
 const EventListScreen = () => {
   const navigation = useNavigation();
   const [showModal, setShowModal] = useState(false);
   const [events, setEvents] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
-  const { explorer, business } = useAuth();
+  const [currentEvent, setCurrentEvent] = useState(null); 
+  const { explorer } = useAuth();
 
   const fetchEvents = async () => {
     try {
       const response = await axios.get(`http://${DB_HOST}:${PORT}/events/getAll`);
-
       setEvents(response.data);
     } catch (error) {
       console.error('Error fetching events:', error);
@@ -41,33 +40,36 @@ const EventListScreen = () => {
 
   const toggleModal = async (event) => {
     setShowModal(!showModal);
-    if (explorer && explorer.idexplorer) {
-      try {
-        await axios.post(`http://${DB_HOST}:${PORT}/notifications/create`, {
-          type: 'event_join',
-          message: `${explorer.firstname} ${explorer.lastname} wants to join your event "${event.eventName}"`,
-          business_idbusiness: event.business_idbusiness,
-          explorer_idexplorer: explorer.idexplorer,
-          senderImage: explorer.image
-        });
-        console.log('Notification sent successfully');
-      } catch (error) {
-        console.error('Error sending notification:', error);
+    if (!showModal && event !== currentEvent) {
+     
+      setCurrentEvent(event);
+      if (explorer && explorer.idexplorer) {
+        try {
+          await axios.post(`http://${DB_HOST}:${PORT}/notifications/create`, {
+            type: 'event_join',
+            message: `${explorer.firstname} ${explorer.lastname} wants to join your event "${event.eventName}"`,
+            business_idbusiness: event.business_idbusiness,
+            explorer_idexplorer: explorer.idexplorer,
+            senderImage: explorer.image
+          });
+          console.log('Notification sent successfully');
+        } catch (error) {
+          console.error('Error sending notification:', error);
+        }
+      } else {
+        console.log('Explorer information is not available');
       }
-    } else {
-      console.log('Explorer information is not available');
-      // You might want to show an alert to the user here
     }
   };
 
   const renderItem = ({ item }) => (
-    <TouchableOpacity 
+    <TouchableOpacity
       style={styles.eventItem}
       onPress={() => navigation.navigate('OneEvent', { event: item })}
     >
-      <Image 
-        source={item.image ? { uri: item.image } : require('../assets/event-placeholder.jpg')} 
-        style={styles.eventImage} 
+      <Image
+        source={item.image ? { uri: item.image } : require('../assets/event-placeholder.jpg')}
+        style={styles.eventImage}
       />
       <View style={styles.eventDetails}>
         <Text style={styles.eventName}>{item.eventName}</Text>
@@ -88,9 +90,9 @@ const EventListScreen = () => {
         <Text style={styles.eventDescription} numberOfLines={2}>{item.eventDescription}</Text>
         <View style={styles.footer}>
           <Text style={styles.eventPrice}>{item.eventPrice} DT</Text>
-        <TouchableOpacity style={styles.joinButton} onPress={() => toggleModal(item)}>
-  <Image source={join} style={styles.gif} />
-</TouchableOpacity>
+          <TouchableOpacity style={styles.joinButton} onPress={() => toggleModal(item)}>
+            <Image source={join} style={styles.gif} />
+          </TouchableOpacity>
         </View>
       </View>
     </TouchableOpacity>
@@ -105,7 +107,7 @@ const EventListScreen = () => {
         <Text style={styles.headerText}></Text>
       </View>
       <View style={styles.subHeader}>
-        <Text style={styles.subHeaderText}>Available Events </Text>
+        <Text style={styles.subHeaderText}>Available Events</Text>
         <LottieView
           source={require('../assets/sand-clock.json')}
           autoPlay
@@ -123,7 +125,7 @@ const EventListScreen = () => {
       />
       <CustomModal
         visible={showModal}
-        onClose={toggleModal}
+        onClose={() => setShowModal(false)}
         message="Event request was sent!"
       />
     </View>

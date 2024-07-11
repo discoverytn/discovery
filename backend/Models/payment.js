@@ -7,6 +7,10 @@ module.exports = (sequelize) => {
       autoIncrement: true,
       primaryKey: true,
     },
+    cardholderName: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
     amount: {
       type: DataTypes.FLOAT,
       allowNull: false,

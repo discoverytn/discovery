@@ -4,34 +4,31 @@ const Business = db.Business;
 const Payment = db.Payment;
 
 const createPayment = async (req, res) => {
-  const { amount, business_idbusiness } = req.body;
+  const {cardholderName, amount,business_idbusiness } = req.body;
 
   try {
-    // Check if business exists
     const business = await Business.findByPk(business_idbusiness);
     if (!business) {
       return res.status(404).json({ error: 'Business not found' });
     }
 
-    // Create a record of the payment in your database
     const payment = await Payment.create({
+      cardholderName,
       amount,
       business_idbusiness: business_idbusiness,
     });
 
-    // Create a PaymentIntent with Stripe
     const paymentIntent = await stripe.paymentIntents.create({
-      amount: amount * 100, // amount in cents
+      cardholderName,
+      amount: amount * 100, 
       currency: 'usd',
       description: `Payment for ${business.businessName}`,
-      paymentMethodType: 'Card', // specify card payment
       metadata: {
         integration_check: 'accept_a_payment',
         business_id: business_idbusiness,
       },
     });
 
-    // Send client_secret back to the frontend
     res.status(200).json({ client_secret: paymentIntent.client_secret });
   } catch (error) {
     console.error('Error creating payment:', error);
