@@ -41,7 +41,11 @@ const LoginScreen = () => {
             navigation.navigate("Categories");
           }
         } else if (userRole === "business") {
-          navigation.navigate("Main");
+          if (decodedToken.subscribed === 'no') {
+            navigation.navigate("PaymentScreen"); 
+          } else {
+            navigation.navigate("Main"); 
+          }
         } else {
           Alert.alert("Login Failed", "Unknown user role");
         }
