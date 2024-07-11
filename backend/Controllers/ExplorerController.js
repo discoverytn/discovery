@@ -136,53 +136,71 @@ module.exports = {
 
   addOrRemoveFromFavorites: async function (req, res) {
     const { idexplorer, idposts } = req.params;
-
-  try {
-    const favorite = await db.Favorites.findOne({
-      where: {
-        explorer_idexplorer: idexplorer,
-        posts_idposts: idposts,
-      },
-    });
-
-    if (favorite) {
-      await favorite.destroy();
-      return res.status(200).json({ message: "Post removed from favorites" });
-    } else {
-      const post = await db.Posts.findByPk(idposts);
-      if (!post) {
-        return res.status(404).json({ error: "Post not found" });
+  
+    try {
+      const favorite = await db.Favorites.findOne({
+        where: {
+          explorer_idexplorer: idexplorer,
+          posts_idposts: idposts,
+        },
+      });
+  
+      if (favorite) {
+        // Post is already in favorites, remove it
+        await favorite.destroy();
+  
+        // Decrease numOfLikes in Explorer model
+        const explorer = await db.Explorer.findByPk(idexplorer);
+        if (explorer) {
+          explorer.numOfLikes = Math.max(explorer.numOfLikes - 1, 0);
+          await explorer.save();
+        }
+  
+        return res.status(200).json({ message: "Post removed from favorites" });
+      } else {
+        // Post is not in favorites, add it
+        const post = await db.Posts.findByPk(idposts);
+        if (!post) {
+          return res.status(404).json({ error: "Post not found" });
+        }
+  
+        await db.Favorites.create({
+          explorer_idexplorer: idexplorer,
+          posts_idposts: idposts,
+          post_title: post.title,         
+          post_image1: post.image1,
+          post_location: post.location,
+        });
+  
+        // Increase numOfLikes in Explorer model
+        const explorer = await db.Explorer.findByPk(idexplorer);
+        if (explorer) {
+          explorer.numOfLikes += 1;
+          await explorer.save();
+        }
+  
+        // Create a notification for the post owner
+        const postOwner = post.explorer_idexplorer ? await db.Explorer.findByPk(post.explorer_idexplorer) : await db.Business.findByPk(post.business_idbusiness);
+        if (postOwner) {
+          await db.Notif.create({
+            type: 'favorite',
+            message: `${explorer.firstname} ${explorer.lastname} added your post to favorites`,
+            explorer_idexplorer: postOwner.idexplorer,
+            business_idbusiness: postOwner.idbusiness,
+            created_at: new Date(),
+            is_read: false,
+            senderImage: explorer.image
+          });
+        }
+  
+        return res.status(200).json({ message: "Post added to favorites" });
       }
-
-      await db.Favorites.create({
-        explorer_idexplorer: idexplorer,
-        posts_idposts: idposts,
-        post_title: post.title,         
-        post_image1: post.image1,
-        post_location: post.location,
-      });
-
-      // Create a notification for the post owner
-      const explorer = await db.Explorer.findByPk(idexplorer);
-      await db.Notif.create({
-        type: 'favorite',
-        message: `${explorer.firstname} ${explorer.lastname} added your post to favorites`,
-        explorer_idexplorer: post.explorer_idexplorer,
-        business_idbusiness: post.business_idbusiness,
-        created_at: new Date(),
-        is_read: false,
-        senderImage: explorer.image
-      });
-
-      return res.status(200).json({ message: "Post added to favorites" });
+    } catch (error) {
+      console.error("Error adding/removing post to/from favorites:", error);
+      return res.status(500).json({ error: "Failed to add/remove post to/from favorites" });
     }
-  } catch (error) {
-    console.error("Error adding/removing post to/from favorites:", error);
-    return res
-      .status(500)
-      .json({ error: "Failed to add/remove post to/from favorites" });
-  }
   },
+  
   
   
   isPostFavoritedByExplorer: async function (req, res) {
@@ -235,9 +253,19 @@ module.exports = {
       });
   
       if (traveled) {
+        // Post is already in traveled, remove it
         await traveled.destroy();
+  
+        // Decrease numOfVisits in Explorer model
+        const explorer = await db.Explorer.findByPk(idexplorer);
+        if (explorer) {
+          explorer.numOfVisits = Math.max(explorer.numOfVisits - 1, 0); // Ensure numOfVisits doesn't go below zero
+          await explorer.save();
+        }
+  
         return res.status(200).json({ message: "Post removed from traveled" });
       } else {
+        // Post is not in traveled, add it
         const post = await db.Posts.findByPk(idposts);
         if (!post) {
           return res.status(404).json({ error: "Post not found" });
@@ -246,20 +274,26 @@ module.exports = {
         await db.Traveled.create({
           explorer_idexplorer: idexplorer,
           posts_idposts: idposts,
-          post_title: post.title,         
+          post_title: post.title,
           post_image1: post.image1,
           post_location: post.location,
         });
+  
+        // Increase numOfVisits in Explorer model
+        const explorer = await db.Explorer.findByPk(idexplorer);
+        if (explorer) {
+          explorer.numOfVisits += 1;
+          await explorer.save();
+        }
   
         return res.status(200).json({ message: "Post added to traveled" });
       }
     } catch (error) {
       console.error("Error adding/removing post to/from traveled:", error);
-      return res
-        .status(500)
-        .json({ error: "Failed to add/remove post to/from traveled" });
+      return res.status(500).json({ error: "Failed to add/remove post to/from traveled" });
     }
   },
+  
   removeFromTraveled: async function (req, res) {
     const { idexplorer, idposts } = req.params;
 

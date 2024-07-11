@@ -53,15 +53,16 @@ module.exports = (sequelize) => {
       type: DataTypes.INTEGER,
       allowNull: true,
     },
-    mobileNum: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-    },
-    numOfReviews: {
+    numOfEvents: {
       type: DataTypes.INTEGER,
       allowNull: true,
       defaultValue: 0,
     },
+    mobileNum: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
+   
     businessName: {
       type: DataTypes.STRING,
       allowNull: false,
