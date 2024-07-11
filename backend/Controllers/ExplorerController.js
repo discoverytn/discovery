@@ -306,13 +306,14 @@ module.exports = {
   updateCategories: async function (req, res) {
     const { idexplorer } = req.params;
     const { categories } = req.body;
-
+  
     try {
       const explorer = await db.Explorer.findByPk(idexplorer);
       if (!explorer) {
         return res.status(404).json({ error: "Explorer not found" });
       }
-
+  
+      // Updating the categories field with the category names
       await explorer.update({ categories });
       return res.status(200).json({ message: "Categories updated successfully" });
     } catch (error) {
@@ -320,5 +321,6 @@ module.exports = {
       return res.status(500).json({ error: "Failed to update categories" });
     }
   },
+  
   
 };
