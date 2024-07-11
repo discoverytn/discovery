@@ -85,7 +85,7 @@ const ExplorerEditProfileScreen = () => {
     }
 
     try {
-      const response = await axios.put(`http://192.168.26.72:3000/explorer/${explorerId}/edit`, payload);
+      const response = await axios.put(`http://192.168.58.72:3000/explorer/${explorerId}/edit`, payload);
 
       if (response.status === 200) {
         setExplorer(response.data);

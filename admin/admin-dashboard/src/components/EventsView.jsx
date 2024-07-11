@@ -30,7 +30,7 @@ function EventsView() {
   const [selectedEventImg, setSelectedEventImg] = useState(null);
 
   useEffect(() => {
-    fetch("http://192.168.26.72:3000/events/getall")
+    fetch("http://192.168.58.72:3000/events/getall")
       .then((response) => response.json())
       .then((data) => {
         if (Array.isArray(data)) {
@@ -58,7 +58,7 @@ function EventsView() {
   const deleteEvent = async (idevents) => {
     try {
       const response = await fetch(
-        `http://192.168.26.72:3000/events/${idevents}/del/`,
+        `http://192.168.58.72:3000/events/${idevents}/del/`,
         {
           method: "DELETE",
         }

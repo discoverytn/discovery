@@ -132,7 +132,7 @@ const ScheduleEventScreen = ({ navigation }) => {
     }
 
     try {
-      const response = await axios.post('http://192.168.26.72:3000/events/create', eventData);
+      const response = await axios.post('http://192.168.58.72:3000/events/create', eventData);
 
       console.log('Event Data:', response.data);
       Alert.alert('Success', 'Your event has been posted successfully!', [

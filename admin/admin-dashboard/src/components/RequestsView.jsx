@@ -39,7 +39,7 @@ const RequestsView = () => {
     const fetchPendingAccounts = async () => {
       try {
         const response = await axios.get(
-          "http://192.168.26.72:3000/business/pending"
+          "http://192.168.58.72:3000/business/pending"
         );
         setPendingAccounts(response.data);
         setLoading(false);
@@ -62,7 +62,7 @@ const RequestsView = () => {
 
   const handleApprove = async (idbusiness) => {
     try {
-      await axios.put(`http://192.168.26.72:3000/admin/approve/${idbusiness}`);
+      await axios.put(`http://192.168.58.72:3000/admin/approve/${idbusiness}`);
       setPendingAccounts(
         pendingAccounts.filter((account) => account.idbusiness !== idbusiness)
       );
@@ -76,7 +76,7 @@ const RequestsView = () => {
   const handleDecline = async (idbusiness) => {
     try {
       await axios.delete(
-        `http://192.168.26.72:3000/admin/decline/${idbusiness}`
+        `http://192.168.58.72:3000/admin/decline/${idbusiness}`
       );
       setPendingAccounts(
         pendingAccounts.filter((account) => account.idbusiness !== idbusiness)

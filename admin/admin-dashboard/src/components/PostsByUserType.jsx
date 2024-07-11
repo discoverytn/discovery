@@ -19,10 +19,10 @@ function PostsByUserType() {
     const fetchData = async () => {
       try {
         const businessPostsResponse = await axios.get(
-          "http://192.168.26.72:3000/posts/business/posts"
+          "http://192.168.58.72:3000/posts/business/posts"
         );
         const explorerPostsResponse = await axios.get(
-          "http://192.168.26.72:3000/posts/explorer/posts"
+          "http://192.168.58.72:3000/posts/explorer/posts"
         );
 
         const businessPosts = businessPostsResponse.data.length;

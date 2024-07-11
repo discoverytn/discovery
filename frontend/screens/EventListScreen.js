@@ -14,10 +14,10 @@ const EventListScreen = () => {
   const [showModal, setShowModal] = useState(false);
   const [events, setEvents] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
-   
+
   const fetchEvents = async () => {
     try {
-      const response = await axios.get('http://192.168.26.72:3000/events/getAll');
+      const response = await axios.get('http://192.168.58.72:3000/events/getAll');
       setEvents(response.data);
     } catch (error) {
       console.error('Error fetching events:', error);
@@ -25,7 +25,7 @@ const EventListScreen = () => {
   };
 
   const auth = useAuth();
-  console.log("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",auth.explorer.idexplorer);
+  console.log("Authentication context:", auth);
 
   useFocusEffect(
     useCallback(() => {
@@ -42,56 +42,66 @@ const EventListScreen = () => {
     console.log(auth);
     setShowModal(!showModal);
   };
-  const renderItem = ({ item }) => 
-    {
-      console.log("itemmmmmmmmmmmmmmmmmmm",item);
-      return<TouchableOpacity 
-    style={styles.eventItem}
-    onPress={() => navigation.navigate('Chats', { 
-        idexplorer: auth.explorer.idexplorer, 
-        idbusiness: item.Business.idbusiness,
-        idevent: item.idevents,
-        eventName: item.eventName
-         
-      })}
-    >
-      <Image 
-        source={item.image ? { uri: item.image } : require('../assets/event-placeholder.jpg')} 
-        style={styles.eventImage} 
-      />
-      <View style={styles.eventDetails}>
-        <Text style={styles.eventName}>{item.eventName}</Text>
-        <View style={styles.infoRow}>
-          <FontAwesomeIcon icon={faLocationDot} size={16} color="#32CD32" />
-          <Text style={styles.infoText}>{item.eventLocation}</Text>
+
+  const renderItem = ({ item }) => {
+    console.log("Event item:", item);
+
+    if (!auth.explorer || !auth.explorer.idexplorer) {
+      console.error("auth.explorer or auth.explorer.idexplorer is undefined");
+      return null;
+    }
+
+    return (
+      <TouchableOpacity 
+        style={styles.eventItem}
+        onPress={() => navigation.navigate('Chats', { 
+          idexplorer: auth.explorer.idexplorer, 
+          idbusiness: item.Business.idbusiness,
+          idevent: item.idevents,
+          eventName: item.eventName
+        })}
+      >
+        <Image 
+          source={item.image ? { uri: item.image } : require('../assets/event-placeholder.jpg')} 
+          style={styles.eventImage} 
+        />
+        <View style={styles.eventDetails}>
+          <Text style={styles.eventName}>{item.eventName}</Text>
+          <View style={styles.infoRow}>
+            <FontAwesomeIcon icon={faLocationDot} size={16} color="#32CD32" />
+            <Text style={styles.infoText}>{item.eventLocation}</Text>
+          </View>
+          <View style={styles.infoRow}>
+            <FontAwesomeIcon icon={faCalendarDays} size={16} color="#32CD32" />
+            <Text style={styles.infoText}>{item.startDate} - {item.endDate}</Text>
+          </View>
+          <View style={styles.infoRow}>
+            <FontAwesomeIcon icon={faUser} size={16} color="#32CD32" />
+            <Text style={styles.infoText}>
+              By: {item.Explorer ? item.Explorer.username : item.Business ? item.Business.businessname : 'Unknown'}
+            </Text>
+          </View>
+          <Text style={styles.eventDescription} numberOfLines={2}>{item.eventDescription}</Text>
+          <View style={styles.footer}>
+            <Text style={styles.eventPrice}>{item.eventPrice} DT</Text>
+            <TouchableOpacity 
+              style={styles.joinButton} 
+              onPress={() => navigation.navigate('Chats', { 
+                idexplorer: auth.explorer.idexplorer,
+                explorerName:auth.explorer.username, 
+                idbusiness: item.Business.idbusiness,
+                idevent: item.idevents,
+                eventName: item.eventName
+              })}
+            >
+              <Image source={join} style={styles.gif} />
+            </TouchableOpacity>
+          </View>
         </View>
-        <View style={styles.infoRow}>
-          <FontAwesomeIcon icon={faCalendarDays} size={16} color="#32CD32" />
-          <Text style={styles.infoText}>{item.startDate} - {item.endDate}</Text>
-        </View>
-        <View style={styles.infoRow}>
-          <FontAwesomeIcon icon={faUser} size={16} color="#32CD32" />
-          <Text style={styles.infoText}>
-            By: {item.Explorer ? item.Explorer.username : item.Business ? item.Business.businessname : 'Unknown'}
-          </Text>
-        </View>
-        <Text style={styles.eventDescription} numberOfLines={2}>{item.eventDescription}</Text>
-        <View style={styles.footer}>
-          <Text style={styles.eventPrice}>{item.eventPrice} DT</Text>
-          <TouchableOpacity 
-            style={styles.joinButton} 
-            onPress={() => navigation.navigate('Chats', { 
-              idexplorer: auth.id, 
-              idbusiness: item.Business ? item.Business.id : null 
-            })}
-          >
-            <Image source={join} style={styles.gif} />
-          </TouchableOpacity>
-        </View>
-      </View>
-    </TouchableOpacity>}
-  
-  
+      </TouchableOpacity>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -232,5 +242,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default EventListScreen;
-
+export default EventListScreen; 

@@ -1,16 +1,17 @@
-const db = require('../database/index');
+const db = require('../database/index')
+const { io } = require('../ChatServer/index') 
 
 const sendMessage = async (req, res) => {
-  const { explorer_idexplorer, business_idbusiness, message } = req.body;
+  const { explorer_idexplorer, business_idbusiness, message, eventName } = req.body
 
   try {
-    const explorerExists = await db.Explorer.findByPk(explorer_idexplorer);
-    const businessExists = await db.Business.findByPk(business_idbusiness);
+    const explorer = await db.Explorer.findByPk(explorer_idexplorer);
+    const business = await db.Business.findByPk(business_idbusiness);
 
-    if (!explorerExists) {
+    if (!explorer) {
       return res.status(404).json({ error: 'Explorer not found' });
     }
-    if (!businessExists) {
+    if (!business) {
       return res.status(404).json({ error: 'Business not found' });
     }
 
@@ -19,7 +20,17 @@ const sendMessage = async (req, res) => {
       business_idbusiness,
       message
     });
-    return res.status(201).json(newMessage);
+
+    const roomName = `${eventName}-${explorer_idexplorer}-${business_idbusiness}`;
+    const newMessageData = {
+      ...newMessage.toJSON(),
+      explorerName: explorer.name,
+      businessName: business.name,
+    };
+
+    io.to(roomName).emit('receive-message', newMessageData);
+
+    return res.status(201).json(newMessageData);
   } catch (error) {
     console.error('Error sending message:', error);
     return res.status(500).json({ error: 'Failed to send message' });
@@ -36,8 +47,19 @@ const getMessages = async (req, res) => {
         business_idbusiness,
       },
       order: [['createdAt', 'ASC']],
+      include: [
+        { model: db.Explorer, attributes: ['name'], as: 'explorer' },
+        { model: db.Business, attributes: ['name'], as: 'business' }
+      ]
     });
-    return res.status(200).json(messages);
+
+    const formattedMessages = messages.map((msg) => ({
+      ...msg.toJSON(),
+      explorerName: msg.explorer ? msg.explorer.name : null,
+      businessName: msg.business ? msg.business.name : null,
+    }));
+
+    return res.status(200).json(formattedMessages);
   } catch (error) {
     console.error('Error fetching messages:', error);
     return res.status(500).json({ error: 'Failed to fetch messages' });
@@ -61,4 +83,4 @@ const deleteMessage = async (req, res) => {
   }
 };
 
-module.exports = { sendMessage, getMessages, deleteMessage };
+module.exports = { sendMessage, getMessages, deleteMessage }
