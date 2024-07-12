@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View, Image, TouchableOpacity, FlatList, Alert } from 'react-native';
 import axios from 'axios';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation ,useFocusEffect} from '@react-navigation/native';
 import { useAuth } from '../context/AuthContext';
 import { Picker } from '@react-native-picker/picker';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { DB_HOST, PORT } from "@env";
 
-const ExplorerProfile = () => {
+const ExplorerProfile = ({route}) => {
   const { explorer, setExplorer, logOut } = useAuth();
   const navigation = useNavigation();
   const [activeTab, setActiveTab] = useState('Posts');
@@ -17,17 +17,41 @@ const ExplorerProfile = () => {
   const [numTraveled, setNumTraveled] = useState(0);
   const [selectedValue, setSelectedValue] = useState("");
   
+  const fetchNumPosts = async () => {
+    try {
+      const response = await axios.get(`http://${DB_HOST}:${PORT}/explorer/${explorer.id}/numposts`);
+      if (response.status === 200) {
+        setNumPosts(response.data);
+      } else if (response.status === 404) {
+        // If no posts are found, set numPosts to 0
+        setNumPosts(0);
+      }
+    } catch (error) {
+      console.error('Error fetching number of posts:', error);
+      // If there's an error (like 404), set numPosts to 0
+      setNumPosts(0);
+    }
+  };
+  useFocusEffect(
+    React.useCallback(() => {
+      if (route.params?.updatedNumPosts) {
+        setNumPosts(route.params.updatedNumPosts);
+        // Clear the parameter after using it
+        navigation.setParams({ updatedNumPosts: undefined });
+      }
+    }, [route.params?.updatedNumPosts])
+  );
+
   useEffect(() => {
     const fetchExplorerData = async () => {
       try {
         const response = await axios.get(`http://${DB_HOST}:${PORT}/explorer/${explorer.id}`);
         if (response.status === 200) {
           const explorerData = response.data;
-          // Set the explorer object and update numOfPosts based on posts length
           setExplorer({ ...explorerData, numOfPosts: explorerData.Posts?.length || 0 });
-          setNumPosts(explorerData.Posts?.length || 0);
           setNumLikes(explorerData.Likes || 0);
           setNumTraveled(explorerData.Traveled || 0);
+          fetchNumPosts();
         } else {
           console.error('Failed to fetch explorer data');
         }
@@ -41,7 +65,6 @@ const ExplorerProfile = () => {
     }
   }, [explorer?.id, setExplorer]);
   
-
   useEffect(() => {
     const fetchExplorerPosts = async () => {
       try {
@@ -54,27 +77,34 @@ const ExplorerProfile = () => {
             image1: post.image1
           }));
           setPosts(transformedPosts);
-          setNumPosts(transformedPosts.length || 0);
-  
-          setExplorer(prev => ({ ...prev, numOfPosts: transformedPosts.length || 0 }));
+          fetchNumPosts();
         } else {
           console.error('Failed to fetch explorer posts');
           setPosts([]);
-          setNumPosts(0);
         }
       } catch (error) {
         console.error('Error fetching explorer posts:', error.message);
         setPosts([]);
-        setNumPosts(0);
       }
     };
   
     if (activeTab === 'Posts' && explorer?.id) {
       fetchExplorerPosts();
     }
-  }, [explorer?.id, activeTab, posts.length]);
+  }, [explorer?.id, activeTab, route.params?.updatedPosts]);
+  useEffect(() => {
+    if (route.params?.updatedPosts) {
+      setPosts(route.params.updatedPosts.map(post => ({
+        id: post.idposts,
+        title: post.title,
+        description: post.description,
+        image1: post.image1
+      })));
+      // Clear the parameter after using it
+      navigation.setParams({ updatedPosts: undefined });
+    }
+  }, [route.params?.updatedPosts]);
   
-
   const handleTabChange = (tabName) => {
     setActiveTab(tabName);
   };
@@ -103,11 +133,12 @@ const ExplorerProfile = () => {
         Alert.alert('Explorer post deleted successfully');
         const updatedPosts = posts.filter(post => post.id !== postId);
         setPosts(updatedPosts);
-  
-        // Update numPosts state and explorer object
-        setNumPosts(updatedPosts.length);
-        setExplorer(prev => ({ ...prev, numOfPosts: updatedPosts.length }));
-  
+        setNumPosts(prevNumPosts => prevNumPosts - 1);
+        // Update the explorer context
+        setExplorer(prevExplorer => ({
+          ...prevExplorer,
+          numOfPosts: prevExplorer.numOfPosts - 1
+        }));
       } else {
         console.error('Error:', data);
         Alert.alert(`Error: ${data.message}`);
@@ -117,7 +148,6 @@ const ExplorerProfile = () => {
       Alert.alert(`Error: ${error.message}`);
     }
   };
-  
 
   if (!explorer) {
     return (
