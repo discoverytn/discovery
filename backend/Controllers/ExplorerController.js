@@ -399,5 +399,37 @@ module.exports = {
       return res.status(500).json({ error: "Failed to fetch top explorers", details: error.message });
     }
   },
+  getTopExplorersByPostCount: async function (req, res) {
+    try {
+      console.log("Attempting to fetch top explorers by post count");
+      
+      const topExplorers = await db.Explorer.findAll({
+        attributes: ['idexplorer', 'firstname', 'image', 'numOfPosts'],
+        order: [['numOfPosts', 'DESC']],
+        limit: 3
+      });
   
+      console.log("Query executed successfully");
+      console.log("Top explorers:", JSON.stringify(topExplorers, null, 2));
+  
+      if (topExplorers.length === 0) {
+        console.log("No explorers found");
+        return res.status(404).json({ error: "No explorers found" });
+      }
+  
+      // Format the result
+      const formattedTopExplorers = topExplorers.map(explorer => ({
+        idexplorer: explorer.idexplorer,
+        firstname: explorer.firstname,
+        image: explorer.image,
+        postCount: explorer.numOfPosts
+      }));
+  
+      return res.status(200).json(formattedTopExplorers);
+    } catch (error) {
+      console.error("Error fetching top explorers by posts:", error);
+      console.error("Error stack:", error.stack);
+      return res.status(500).json({ error: "Failed to fetch top explorers", details: error.message });
+    }
+  },
 };

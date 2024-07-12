@@ -1,63 +1,59 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, Image, StyleSheet } from 'react-native';
 import { FontAwesome5 } from '@expo/vector-icons';
+import axios from 'axios';
 import { DB_HOST, PORT } from "@env";
 
 const LeaderScreen2 = () => {
+  const [topExplorers, setTopExplorers] = useState([]);
+
+  useEffect(() => {
+    fetchTopExplorers();
+  }, []);
+
+  const fetchTopExplorers = async () => {
+    try {
+      const response = await axios.get(`http://${DB_HOST}:${PORT}/explorer/topthree`);
+      setTopExplorers(response.data);
+    } catch (error) {
+      console.error('Error fetching top explorers:', error);
+    }
+  };
+
+  const renderExplorerCard = (explorer, index) => {
+    const placeStyles = [styles.firstPlace, styles.secondPlace, styles.thirdPlace];
+    const caretIcon = index === 0 ? "caret-up" : "caret-down";
+    const caretColor = index === 0 ? "green" : "red";
+
+    return (
+      <View key={explorer.idexplorer} style={[styles.profileContainer, placeStyles[index]]}>
+        <FontAwesome5 name={caretIcon} size={24} color={caretColor} style={styles.caretIcon} />
+        <Text style={styles.rank}>{index + 1}</Text>
+        <View style={styles.profileImageContainer}>
+          <Image
+            source={{ uri: explorer.image || 'https://cdn.vectorstock.com/i/1000v/30/97/flat-business-man-user-profile-avatar-icon-vector-4333097.jpg' }}
+            style={styles.profileImage}
+          />
+        </View>
+        <Text style={styles.username}>{explorer.firstname}</Text>
+        <Text style={styles.score}>{explorer.postCount} posts</Text>
+      </View>
+    );
+  };
+
   return (
     <View style={styles.container}>
-      {/* Title Container */}
       <View style={styles.titleContainer}>
         <Text style={styles.title}>Explorers Leaderboard</Text>
       </View>
       
-      {/* Leaderboard Container */}
       <View style={styles.leaderboardContainer}>
-        {/* Profile Card 1 */}
-        <View style={[styles.profileContainer, styles.firstPlace]}>
-          <FontAwesome5 name="caret-up" size={24} color="green" style={styles.caretIcon} />
-          <Text style={styles.rank}>1</Text>
-          <View style={styles.profileImageContainer}>
-             <Image
-              source={{ uri: 'https://cdn.vectorstock.com/i/1000v/30/97/flat-business-man-user-profile-avatar-icon-vector-4333097.jpg' }}
-              style={styles.profileImage}
-            />
-          </View>
-          <Text style={styles.username}>Lamjed</Text>
-          <Text style={styles.score}>20 posts</Text>
-        </View>
-
-        {/* Profile Card 2 */}
-        <View style={[styles.profileContainer, styles.secondPlace]}>
-          <FontAwesome5 name="caret-down" size={24} color="red" style={styles.caretIcon} />
-          <Text style={styles.rank}>2</Text>
-          <View style={styles.profileImageContainer}>
-            <Image
-              source={{ uri: 'https://cdn.vectorstock.com/i/1000v/30/97/flat-business-man-user-profile-avatar-icon-vector-4333097.jpg' }}
-              style={styles.profileImage}
-            />
-          </View>
-          <Text style={styles.username}>Maher</Text>
-          <Text style={styles.score}>19 posts</Text>
-        </View>
-
-        {/* Profile Card 3 */}
-        <View style={[styles.profileContainer, styles.thirdPlace]}>
-          <FontAwesome5 name="caret-down" size={24} color="red" style={styles.caretIcon} />
-          <Text style={styles.rank}>3</Text>
-          <View style={styles.profileImageContainer}>
-            <Image
-              source={{ uri: 'https://cdn.vectorstock.com/i/1000v/30/97/flat-business-man-user-profile-avatar-icon-vector-4333097.jpg' }}
-              style={styles.profileImage}
-            />
-          </View>
-          <Text style={styles.username}>Sami</Text>
-          <Text style={styles.score}>6 posts</Text>
-        </View>
+        {topExplorers.map((explorer, index) => renderExplorerCard(explorer, index))}
       </View>
     </View>
   );
 };
+
 
 const styles = StyleSheet.create({
   container: {
