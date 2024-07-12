@@ -89,19 +89,21 @@ module.exports = {
   },
   getExplorerNumberPosts: async function (req, res) {
     const { idexplorer } = req.params;
-
+  
     try {
       const explorer = await db.Explorer.findByPk(idexplorer);
       if (!explorer) {
         return res.status(404).json({ error: "Explorer not found" });
       }
-
+  
       const posts = await db.Posts.findAll({
         where: { explorer_idexplorer: idexplorer },
         order: [["createdAt", "DESC"]],
       });
-      const numOfPosts=posts.length
-      await explorer.update({numOfPosts:numOfPosts})
+      const numOfPosts = posts.length;
+      await explorer.update({ numOfPosts: numOfPosts });
+      
+      // Always return a 200 status, even if there are no posts
       return res.status(200).json(numOfPosts);
     } catch (error) {
       console.error("Error fetching number explorer posts:", error);
