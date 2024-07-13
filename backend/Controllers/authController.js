@@ -113,7 +113,7 @@ const login = async (req, res) => {
     let role;
     let id;
     let categories = null; // Initialize categories variable
-
+    let subscribed;
     if (user instanceof db.Admin) {
       role = "admin";
       id = user.idadmin;

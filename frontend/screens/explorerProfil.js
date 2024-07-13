@@ -23,7 +23,6 @@ const ExplorerProfile = () => {
         const response = await axios.get(`http://${DB_HOST}:${PORT}/explorer/${explorer.id}`);
         if (response.status === 200) {
           const explorerData = response.data;
-          // Set the explorer object and update numOfPosts based on posts length
           setExplorer({ ...explorerData, numOfPosts: explorerData.Posts?.length || 0 });
           setNumPosts(explorerData.Posts?.length || 0);
           setNumLikes(explorerData.Likes || 0);
