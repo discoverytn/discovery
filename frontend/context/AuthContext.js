@@ -5,8 +5,8 @@ import * as SecureStore from "expo-secure-store";
 import {jwtDecode} from "jwt-decode";
 import { DB_HOST, PORT } from "@env";
 
-// Log the DB_HOST variable
-console.log("DB_HOSTTTTTTTTTTTTTTTT:", DB_HOST);
+
+console.log("DB_HOSTTT:", DB_HOST);
 
 const AuthContext = createContext({
   token: "",
