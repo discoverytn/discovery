@@ -74,23 +74,36 @@ const BusinessAddPostScreen = () => {
   
     console.log('Payload:', payload);
   
-    try {
-      const response = await axios.post(`http://${DB_HOST}:${PORT}/posts/business/add`, payload);
-  
-      if (response.status === 201) {
-        setBusiness(response.data)
+    
+  try {
+    const response = await axios.post(`http://${DB_HOST}:${PORT}/posts/business/add`, payload);
+
+    if (response.status === 201) {
+      // Fetch updated business data
+      const businessDataResponse = await axios.get(`http://${DB_HOST}:${PORT}/business/${businessId}`);
+      if (businessDataResponse.status === 200) {
+        setBusiness(businessDataResponse.data);
+      }
+
+      // Fetch updated posts
+      const postsResponse = await axios.get(`http://${DB_HOST}:${PORT}/business/${businessId}/posts`);
+      if (postsResponse.status === 200) {
+        const updatedPosts = postsResponse.data;
 
         Alert.alert('Success', 'Post created successfully');
         clearFields();
-        navigation.navigate("Login");
-
-      } else {
-        Alert.alert('Error', 'Failed to create post');
+        navigation.navigate("BusinessProfileScreen", { 
+          updatedBusinessData: businessDataResponse.data,
+          updatedPosts: updatedPosts
+        });
       }
-    } catch (error) {
-      console.error('Post creation error:', error);
-      Alert.alert('Error', 'An error occurred while creating the post');
+    } else {
+      Alert.alert('Error', 'Failed to create post');
     }
+  } catch (error) {
+    console.error('Post creation error:', error);
+    Alert.alert('Error', 'An error occurred while creating the post');
+  }
   };
 
   const clearFields = () => {
