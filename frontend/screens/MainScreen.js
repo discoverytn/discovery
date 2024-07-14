@@ -1,38 +1,86 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, Dimensions, FlatList, ScrollView } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, Image, TouchableOpacity, Dimensions, ScrollView, Animated } from 'react-native';
 import { Icon } from 'react-native-elements';
 import LeaderScreen from './LeaderScreen'; 
 import LeaderScreen2 from './LeaderScreen2';
 import RecommendedScreen from './RecommendedScreen';
 import { DB_HOST, PORT } from "@env";
 import { LinearGradient } from 'expo-linear-gradient';
-
+import axios from 'axios';
 
 const { width } = Dimensions.get('window');
 
 const MainScreen = ({ navigation }) => {
   const [activeIndex, setActiveIndex] = useState(0);
-  const carouselItems = [
-    {
-      id: '1',
-      imageUrl: 'https://www.croatiaweek.com/wp-content/uploads/2021/06/ftf201-2.jpg?x69906',
-    },
-    {
-      id: '2',
-      imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTzDJxKQ1WRmK6zuBlQ8YaItFabx0jAez0AcQ&s',
-    },
-    {
-      id: '3',
-      imageUrl: 'https://onmilwaukee.com/images/articles/co/coffee-shops-with-patios-outdoor-seating/coffee-shops-with-patios-outdoor-seating_fullsize_story1.jpg',
-    },
-  ];
+  const [events, setEvents] = useState([]);
+  const flatListRef = useRef(null);
+  const scrollX = useRef(new Animated.Value(0)).current;
 
-  const renderItem = ({ item }) => {
+  useEffect(() => {
+    fetchEvents();
+  }, []);
+
+  useEffect(() => {
+    if (events.length > 0) {
+      const autoSwipe = setInterval(() => {
+        if (flatListRef.current) {
+          const nextIndex = (activeIndex + 1) % events.length;
+          const offset = nextIndex * width;
+          flatListRef.current.scrollToOffset({
+            offset,
+            animated: true,
+          });
+          setActiveIndex(nextIndex);
+        }
+      }, 4000); // Change slide every 5 seconds
+
+      return () => clearInterval(autoSwipe);
+    }
+  }, [events, activeIndex]);
+
+  const fetchEvents = async () => {
+    try {
+      const response = await axios.get(`http://${DB_HOST}:${PORT}/events/getAll`);
+      const fetchedEvents = response.data.map(event => ({
+        id: event.idevents.toString(),
+        eventName: event.eventName,
+        imageUrl: event.image
+      }));
+      setEvents(shuffleArray(fetchedEvents));
+    } catch (error) {
+      console.error('Error fetching events:', error);
+    }
+  };
+
+  const shuffleArray = (array) => {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+  };
+
+  const renderItem = ({ item, index }) => {
+    const inputRange = [(index - 1) * width, index * width, (index + 1) * width];
+    const scale = scrollX.interpolate({
+      inputRange,
+      outputRange: [0.8, 1, 0.8],
+      extrapolate: 'clamp',
+    });
+
     return (
-      <View style={styles.carouselItem}>
+      <Animated.View style={[styles.carouselItem, { transform: [{ scale }] }]}>
         <Image source={{ uri: item.imageUrl }} style={styles.carouselImage} />
-      </View>
+        <Text style={styles.carouselItemText}>{item.eventName}</Text>
+      </Animated.View>
     );
+  };
+
+  const onScrollEnd = (e) => {
+    const contentOffset = e.nativeEvent.contentOffset;
+    const viewSize = e.nativeEvent.layoutMeasurement;
+    const pageNum = Math.floor(contentOffset.x / viewSize.width);
+    setActiveIndex(pageNum);
   };
 
   return (
@@ -59,12 +107,10 @@ const MainScreen = ({ navigation }) => {
       </View>
 
       {/* Title */}
-      {/* <Text style={styles.title}>Discovery  🇹🇳</Text>
-      <Image source={require('../assets/flag.gif')} style={styles.notificationImage} /> */}
       <View style={styles.headerContainer}>
-      <Text style={styles.title}>Discovery</Text>
-      <Image source={require('../assets/flag.gif')} style={styles.flagimage} />
-    </View>
+        <Text style={styles.title}>Discovery</Text>
+        <Image source={require('../assets/flag.gif')} style={styles.flagimage} />
+      </View>
       
       {/* Content Section */}
       <ScrollView style={styles.scrollView}>
@@ -76,17 +122,28 @@ const MainScreen = ({ navigation }) => {
 
         <View style={styles.content}>
           <Text style={styles.sectionTitle}>Businesses on the Rise ➹</Text>
-          <FlatList
-            data={carouselItems}
+          <Animated.FlatList
+            ref={flatListRef}
+            data={events}
             renderItem={renderItem}
             keyExtractor={(item) => item.id}
             horizontal
             showsHorizontalScrollIndicator={false}
-            pagingEnabled={false} 
-            onScroll={(event) => {
-              const index = Math.floor(event.nativeEvent.contentOffset.x / width);
-              setActiveIndex(index);
-            }}
+            pagingEnabled={true}
+            onMomentumScrollEnd={onScrollEnd}
+            onScrollToIndexFailed={() => {}}
+            getItemLayout={(data, index) => ({
+              length: width,
+              offset: width * index,
+              index,
+            })}
+            snapToInterval={width}
+            decelerationRate="fast"
+            scrollEventThrottle={16}
+            onScroll={Animated.event(
+              [{ nativeEvent: { contentOffset: { x: scrollX } } }],
+              { useNativeDriver: true }
+            )}
           />
         </View>
 
@@ -103,27 +160,27 @@ const MainScreen = ({ navigation }) => {
 
       {/* Bottom Navigation */}
       <LinearGradient colors={['#667eea', '#764ba2']} style={styles.bottomNav}>
-  <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Home')}>
-    <Icon name="home" type="font-awesome" color="#fff" size={24} />
-    <Text style={styles.navText}>Home</Text>
-  </TouchableOpacity>
-  <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Categories')}>
-    <Icon name="globe" type="font-awesome" color="#fff" size={24} />
-    <Text style={styles.navText}>Explore</Text>
-  </TouchableOpacity>
-  <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Discover')}>
-    <Icon name="plus-square" type="font-awesome" color="#fff" size={24} />
-    <Text style={styles.navText}>Add</Text>
-  </TouchableOpacity>
-  <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Favorites')}>
-    <Icon name="heart" type="font-awesome" color="#fff" size={24} />
-    <Text style={styles.navText}>Favorites</Text>
-  </TouchableOpacity>
-  <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('ScheduleEvent')}>
-    <Icon name="calendar" type="font-awesome" color="#fff" size={24} />
-    <Text style={styles.navText}>Event</Text>
-  </TouchableOpacity>
-</LinearGradient>
+        <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Home')}>
+          <Icon name="home" type="font-awesome" color="#fff" size={24} />
+          <Text style={styles.navText}>Home</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Categories')}>
+          <Icon name="globe" type="font-awesome" color="#fff" size={24} />
+          <Text style={styles.navText}>Explore</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Discover')}>
+          <Icon name="plus-square" type="font-awesome" color="#fff" size={24} />
+          <Text style={styles.navText}>Add</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Favorites')}>
+          <Icon name="heart" type="font-awesome" color="#fff" size={24} />
+          <Text style={styles.navText}>Favorites</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('ScheduleEvent')}>
+          <Icon name="calendar" type="font-awesome" color="#fff" size={24} />
+          <Text style={styles.navText}>Event</Text>
+        </TouchableOpacity>
+      </LinearGradient>
     </View>
   );
 };
@@ -140,14 +197,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 10,
     marginBottom: 20,
-   
   },
   headerContainer: {
-    marginLeft:130,
+    marginLeft: 130,
     flexDirection: 'row',
     alignItems: 'center',
   },
- 
   headerLeft: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -176,14 +231,14 @@ const styles = StyleSheet.create({
   },
   notificationIcon: {
     marginLeft: 10,
-    backgroundColor: 'transparent', // Remove the white box
+    backgroundColor: 'transparent',
   },
   searchIcon: {
     marginRight: 10,
-    backgroundColor: 'transparent', 
+    backgroundColor: 'transparent',
   },
   notificationImage: {
-    width: 61, 
+    width: 61,
     height: 50,
   },
   searchImage: {
@@ -215,15 +270,26 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   carouselItem: {
-    borderRadius: 10,
-    overflow: 'hidden',
-    marginHorizontal: 10,
-    position: 'relative',
+    width: width,
+    height: 200,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   carouselImage: {
-    width: width * 0.95,
-    height: 200,
+    width: width * 0.9,
+    height: 180,
     borderRadius: 10,
+  },
+  carouselItemText: {
+    position: 'absolute',
+    bottom: 20,
+    left: width * 0.05,
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+    backgroundColor: 'transparent',
+    padding: 5,
+    borderRadius: 5,
   },
   bottomNav: {
     flexDirection: 'row',
@@ -246,8 +312,7 @@ const styles = StyleSheet.create({
   flagimage: {
     width: 30,
     height: 40,
-    marginLeft:12
-    
+    marginLeft: 12,
   },
 });
 
