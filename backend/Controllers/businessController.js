@@ -18,6 +18,39 @@ module.exports = {
       return res.status(500).send("Failed to fetch business");
     }
   },
+  getTopBusinessesByPostCount: async function (req, res) {
+    try {
+      console.log("Attempting to fetch top businesess by post count");
+      
+      const topBusinesess = await db.Business.findAll({
+        attributes: ['idbusiness', 'firstname', 'image', 'numOfPosts'],
+        order: [['numOfPosts', 'DESC']],
+        limit: 3
+      });
+  
+      console.log("Query executed successfully");
+      console.log("Top businesses:", JSON.stringify(topBusinesess, null, 2));
+  
+      if (topBusinesess.length === 0) {
+        console.log("No businesess found");
+        return res.status(404).json({ error: "No businesess found" });
+      }
+  
+      // Format the result
+      const formattedtopBusinesess = topBusinesess.map(business => ({
+        idbusiness: business.idbusiness,
+        firstname: business.firstname,
+        image: business.image,
+        postCount: business.numOfPosts
+      }));
+  
+      return res.status(200).json(formattedtopBusinesess);
+    } catch (error) {
+      console.error("Error fetching top businesess by posts:", error);
+      console.error("Error stack:", error.stack);
+      return res.status(500).json({ error: "Failed to fetch top businesess", details: error.message });
+    }
+  },
 
   editBusiness: async function(req, res) {
     try {
