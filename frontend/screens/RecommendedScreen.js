@@ -1,50 +1,103 @@
-import React, { useState } from 'react';
-import { View, Text, Image, TouchableOpacity, FlatList, StyleSheet, ImageBackground } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TouchableOpacity, FlatList, StyleSheet, ImageBackground, Alert } from 'react-native';
 import { DB_HOST, PORT } from "@env";
-
-const posts = [
-  { id: 1, name: 'Djem', location: 'Route Mahdia', image: require('../assets/djeem.jpg') },
-  { id: 2, name: 'Kairo mosque', location: 'Kairouen', image: require('../assets/kairouen1.jpg') },
-  { id: 3, name: 'souq tunis', location: 'Tunis ville', image: require('../assets/souq.jpg') },
-  { id: 4, name: 'Kartaj', location: 'Carthage', image: require('../assets/sidibousaid.jpg') },
-  { id: 5, name: 'djerba', location: 'Djerba', image: require('../assets/djeem.jpg') },
-];
+import axios from 'axios';
+import { useAuth } from '../context/AuthContext';
+import Icon from 'react-native-vector-icons/FontAwesome';
 
 const RecommendedScreen = ({ navigation }) => {
-  const [likedPosts, setLikedPosts] = useState([]);
+  const [posts, setPosts] = useState([]);
+  const [likedPosts, setLikedPosts] = useState({});
+  const { explorer } = useAuth();
 
-  const toggleLike = (postId) => {
-    setLikedPosts((prevLikedPosts) =>
-      prevLikedPosts.includes(postId)
-        ? prevLikedPosts.filter((id) => id !== postId)
-        : [...prevLikedPosts, postId]
-    );
+  useEffect(() => {
+    fetchRecommendedPosts();
+  }, []);
+
+  const fetchRecommendedPosts = async () => {
+    try {
+      const response = await axios.get(`http://${DB_HOST}:${PORT}/posts/recommended/${explorer.idexplorer}`);
+      const allPosts = response.data;
+      const categorizedPosts = {};
+      
+      allPosts.forEach(post => {
+        if (!categorizedPosts[post.category]) {
+          categorizedPosts[post.category] = [];
+        }
+        if (categorizedPosts[post.category].length < 2) {
+          categorizedPosts[post.category].push(post);
+        }
+      });
+
+      const limitedPosts = Object.values(categorizedPosts).flat();
+      setPosts(limitedPosts);
+      checkFavouritePosts(limitedPosts);
+    } catch (error) {
+      console.error('Error fetching recommended posts:', error);
+    }
+  };
+
+  const checkFavouritePosts = async (fetchedPosts) => {
+    try {
+      const favouriteChecks = await Promise.all(
+        fetchedPosts.map(post => 
+          axios.get(`http://${DB_HOST}:${PORT}/explorer/${explorer.idexplorer}/favourites/${post.idposts}/check`)
+        )
+      );
+      const newLikedPosts = {};
+      favouriteChecks.forEach((response, index) => {
+        newLikedPosts[fetchedPosts[index].idposts] = response.data.isFavourite;
+      });
+      setLikedPosts(newLikedPosts);
+    } catch (error) {
+      console.error('Error checking favourite posts:', error);
+    }
+  };
+
+  const toggleLike = async (postId) => {
+    try {
+      await axios.post(`http://${DB_HOST}:${PORT}/explorer/${explorer.idexplorer}/favourites/${postId}/addOrRemove`);
+      setLikedPosts(prev => {
+        const newState = {...prev, [postId]: !prev[postId]};
+        if (newState[postId]) {
+          Alert.alert("Success", "Post added to favourites");
+        } else {
+          Alert.alert("Success", "Post removed from favourites");
+        }
+        return newState;
+      });
+    } catch (error) {
+      console.error('Error toggling like:', error);
+    }
   };
 
   const renderPost = ({ item }) => {
-    const isLiked = likedPosts.includes(item.id);
+    const isLiked = likedPosts[item.idposts];
 
     return (
-      <TouchableOpacity
-        style={styles.postContainer}
-        onPress={() => navigation.navigate('OnePost', { postId: item.id })}
-      >
-        <ImageBackground source={item.image} style={styles.postImage}>
-          <TouchableOpacity
-            style={styles.likeButton}
-            onPress={() => toggleLike(item.id)}
-          >
-            <Text style={[styles.likeButtonText, isLiked && styles.liked]}>
-              {isLiked ? '❤️' : '💟'}
-            </Text>
-          </TouchableOpacity>
-          <View style={styles.overlay} />
-          <View style={styles.textContainer}>
-            <Text style={styles.postTitle}>{item.name}</Text>
-            <Text style={styles.postLocation}>{item.location}</Text>
-          </View>
-        </ImageBackground>
-      </TouchableOpacity>
+      <View style={styles.postContainer}>
+        <TouchableOpacity
+          onPress={() => navigation.navigate('OnePost', { postId: item.idposts })}
+        >
+          <ImageBackground source={{ uri: item.image1 }} style={styles.postImage}>
+            <View style={styles.overlay} />
+            <View style={styles.textContainer}>
+              <Text style={styles.postTitle}>{item.title}</Text>
+              <Text style={styles.postLocation}>{item.location}</Text>
+            </View>
+          </ImageBackground>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.likeButton}
+          onPress={() => toggleLike(item.idposts)}
+        >
+          <Icon 
+            name={isLiked ? "heart" : "heart-o"} 
+            size={24} 
+            color={isLiked ? "red" : "white"} 
+          />
+        </TouchableOpacity>
+      </View>
     );
   };
 
@@ -52,10 +105,9 @@ const RecommendedScreen = ({ navigation }) => {
     <View style={styles.container}>
       <Text style={styles.title}>Recommended Places</Text>
       <FlatList
-        scrollEnabled={false}
         data={posts}
         renderItem={renderPost}
-        keyExtractor={(item) => item.id.toString()}
+        keyExtractor={(item) => item.idposts.toString()}
         contentContainerStyle={styles.postsContainer}
       />
     </View>
@@ -81,6 +133,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     borderRadius: 8,
     overflow: 'hidden',
+    position: 'relative',
   },
   postImage: {
     width: '100%',
@@ -108,13 +161,6 @@ const styles = StyleSheet.create({
     top: 8,
     right: 8,
     zIndex: 1,
-  },
-  likeButtonText: {
-    fontSize: 24,
-    color: '#fff',
-  },
-  liked: {
-    color: 'red',
   },
 });
 
