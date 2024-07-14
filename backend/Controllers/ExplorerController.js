@@ -432,4 +432,24 @@ module.exports = {
       return res.status(500).json({ error: "Failed to fetch top explorers", details: error.message });
     }
   },
+  getExplorerTraveled: async function (req, res) {
+    const { idexplorer } = req.params;
+  
+    try {
+      const TraveledPosts = await db.Traveled.findAll({
+        where: { explorer_idexplorer: idexplorer },
+        include: [
+          {
+            model: db.Posts,
+            attributes: ['idposts', 'title', 'image1', 'location'],
+          },
+        ],
+        order: [["createdAt", "DESC"]],
+      });
+      return res.status(200).json(TraveledPosts);
+    } catch (error) {
+      console.error("Error fetching explorer traveled:", error);
+      return res.status(500).json({ error: "Failed to fetch explorer traveled" });
+    }
+  },
 };
