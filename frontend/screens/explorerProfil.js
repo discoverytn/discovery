@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View, Image, TouchableOpacity, FlatList, Alert } from 'react-native';
+import { Picker } from "@react-native-picker/picker";
 import axios from 'axios';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { useAuth } from '../context/AuthContext';
@@ -11,10 +12,14 @@ const ExplorerProfile = ({route}) => {
   const navigation = useNavigation();
   const [activeTab, setActiveTab] = useState('Posts');
   const [posts, setPosts] = useState([]);
+  const [favourites, setFavourites] = useState([]);
+  const [visited, setVisited] = useState([]);
   const [numPosts, setNumPosts] = useState(0);
   const [numLikes, setNumLikes] = useState(0);
   const [numTraveled, setNumTraveled] = useState(0);
-  const [isMenuVisible, setIsMenuVisible] = useState(false);
+  const [numFavourites, setNumFavourites] = useState(0);
+  const [numVisited, setNumVisited] = useState(0);
+  const [selectedOption, setSelectedOption] = useState('');
   const [showUserInfo, setShowUserInfo] = useState(false);
   
   const fetchNumPosts = async () => {
@@ -92,6 +97,64 @@ const ExplorerProfile = ({route}) => {
   }, [explorer?.id, activeTab, route.params?.updatedPosts]);
 
   useEffect(() => {
+    const fetchExplorerFavourites = async () => {
+      try {
+        const response = await axios.get(`http://${DB_HOST}:${PORT}/explorer/${explorer.id}/favourites`);
+        if (response.status === 200) {
+          const transformedFavourites = response.data.map(fav => ({
+            id: fav.posts_idposts,
+            title: fav.post_title,
+            image1: fav.post_image1
+          }));
+          setFavourites(transformedFavourites);
+          setNumFavourites(transformedFavourites.length);
+        } else {
+          console.error('Failed to fetch explorer favourites');
+          setFavourites([]);
+          setNumFavourites(0);
+        }
+      } catch (error) {
+        console.error('Error fetching explorer favourites:', error.message);
+        setFavourites([]);
+        setNumFavourites(0);
+      }
+    };
+  
+    if (activeTab === 'Favourites' && explorer?.id) {
+      fetchExplorerFavourites();
+    }
+  }, [explorer?.id, activeTab]);
+
+  useEffect(() => {
+    const fetchExplorerVisited = async () => {
+      try {
+        const response = await axios.get(`http://${DB_HOST}:${PORT}/explorer/${explorer.id}/traveled`);
+        if (response.status === 200) {
+          const transformedVisited = response.data.map(visit => ({
+            id: visit.posts_idposts,
+            title: visit.post_title,
+            image1: visit.post_image1
+          }));
+          setVisited(transformedVisited);
+          setNumVisited(transformedVisited.length);
+        } else {
+          console.error('Failed to fetch explorer visited posts');
+          setVisited([]);
+          setNumVisited(0);
+        }
+      } catch (error) {
+        console.error('Error fetching explorer visited posts:', error.message);
+        setVisited([]);
+        setNumVisited(0);
+      }
+    };
+  
+    if (activeTab === 'Visited' && explorer?.id) {
+      fetchExplorerVisited();
+    }
+  }, [explorer?.id, activeTab]);
+
+  useEffect(() => {
     if (route.params?.updatedPosts) {
       setPosts(route.params.updatedPosts.map(post => ({
         id: post.idposts,
@@ -146,6 +209,66 @@ const ExplorerProfile = ({route}) => {
     }
   };
 
+  const deleteExplorerFavourite = async (postId) => {
+    if (!explorer || !explorer.idexplorer) {
+      console.error('Explorer ID is undefined');
+      Alert.alert('Error: Explorer ID is undefined');
+      return;
+    }
+  
+    try {
+      const response = await fetch(`http://${DB_HOST}:${PORT}/explorer/${explorer.idexplorer}/favourites/${postId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      const data = await response.json();
+      if (response.ok) {
+        Alert.alert('Favourite post removed successfully');
+        const updatedFavourites = favourites.filter(fav => fav.id !== postId);
+        setFavourites(updatedFavourites);
+        setNumFavourites(updatedFavourites.length);
+      } else {
+        console.error('Error:', data);
+        Alert.alert(`Error: ${data.error || 'Failed to remove favourite'}`);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      Alert.alert(`Error: ${error.message}`);
+    }
+  };
+  
+  const deleteExplorerVisited = async (postId) => {
+    if (!explorer || !explorer.idexplorer) {
+      console.error('Explorer ID is undefined');
+      Alert.alert('Error: Explorer ID is undefined');
+      return;
+    }
+  
+    try {
+      const response = await fetch(`http://${DB_HOST}:${PORT}/explorer/${explorer.idexplorer}/traveled/${postId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      const data = await response.json();
+      if (response.ok) {
+        Alert.alert('Visited post removed successfully');
+        const updatedVisited = visited.filter(visit => visit.id !== postId);
+        setVisited(updatedVisited);
+        setNumVisited(updatedVisited.length);
+      } else {
+        console.error('Error:', data);
+        Alert.alert(`Error: ${data.error || 'Failed to remove visited post'}`);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      Alert.alert(`Error: ${error.message}`);
+    }
+  };
+
   const generateUsername = (explorer) => {
     if (!explorer) return '';
     return explorer.username ? explorer.username.toLowerCase() : 'user';
@@ -154,23 +277,40 @@ const ExplorerProfile = ({route}) => {
   const renderPostItem = ({ item }) => (
     <View style={styles.postItem}>
       <Image source={{ uri: item.image1 }} style={styles.postImage} />
-      <TouchableOpacity style={styles.deleteButton} onPress={() => { deleteExplorerPost(item.id), console.log("item", item) }}>
+      <Text style={styles.postTitle}>{item.title}</Text>
+      <TouchableOpacity style={styles.deleteButton} onPress={() => { deleteExplorerPost(item.id) }}>
         <Text style={styles.deleteButtonText}>Delete</Text>
       </TouchableOpacity>
     </View>
   );
 
-  const toggleMenu = () => {
-    setIsMenuVisible(!isMenuVisible);
-  };
+  const renderFavouriteItem = ({ item }) => (
+    <View style={styles.postItem}>
+      <Image source={{ uri: item.image1 }} style={styles.postImage} />
+      <Text style={styles.postTitle}>{item.title}</Text>
+      <TouchableOpacity style={styles.heartIcon} onPress={() => deleteExplorerFavourite(item.id)}>
+        <Icon name="heart" size={24} color="red" />
+      </TouchableOpacity>
+    </View>
+  );
 
-  const handleMenuOptionPress = (option) => {
+  const renderVisitedItem = ({ item }) => (
+    <View style={styles.postItem}>
+      <Image source={{ uri: item.image1 }} style={styles.postImage} />
+      <Text style={styles.postTitle}>{item.title}</Text>
+      <TouchableOpacity style={styles.planeIcon} onPress={() => deleteExplorerVisited(item.id)}>
+        <Icon name="plane" size={24} color="green" />
+      </TouchableOpacity>
+    </View>
+  );
+
+  const handleOptionChange = (option) => {
+    setSelectedOption(option);
     if (option === 'Home') {
       navigation.navigate('Main');
     } else if (option === 'AddPost') {
       navigation.navigate('ExplorerAddPostScreen');
     }
-    setIsMenuVisible(false);
   };
 
   const toggleUserInfo = () => {
@@ -190,20 +330,16 @@ const ExplorerProfile = ({route}) => {
       <View style={styles.header}>
         <View style={styles.headerContent}>
           <Text style={styles.fullNameText}>{`${explorer.firstname} ${explorer.lastname}`}</Text>
-          <TouchableOpacity onPress={toggleMenu} style={styles.menuIcon}>
-            <Icon name="bars" size={24} color="#333" />
-          </TouchableOpacity>
+          <Picker
+            selectedValue={selectedOption}
+            style={styles.picker}
+            onValueChange={(itemValue) => handleOptionChange(itemValue)}
+          >
+            <Picker.Item label="Menu" value="" />
+            <Picker.Item label="Home" value="Home" />
+            <Picker.Item label="Add Post" value="AddPost" />
+          </Picker>
         </View>
-        {isMenuVisible && (
-          <View style={styles.menuContainer}>
-            <TouchableOpacity onPress={() => handleMenuOptionPress('Home')} style={styles.menuOption}>
-              <Text style={styles.menuOptionText}>Home</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => handleMenuOptionPress('AddPost')} style={styles.menuOption}>
-              <Text style={styles.menuOptionText}>Add Post</Text>
-            </TouchableOpacity>
-          </View>
-        )}
       </View>
       <View style={styles.profileContainer}>
         <Image source={{ uri: explorer.image }} style={styles.profileImage} />
@@ -214,12 +350,12 @@ const ExplorerProfile = ({route}) => {
             <Text style={styles.statLabel}>Posts</Text>
           </View>
           <View style={styles.statItem}>
-            <Text style={styles.statValue}>{numLikes}</Text>
-            <Text style={styles.statLabel}>Likes</Text>
+            <Text style={styles.statValue}>{numFavourites}</Text>
+            <Text style={styles.statLabel}>Favourites</Text>
           </View>
           <View style={styles.statItem}>
-            <Text style={styles.statValue}>{numTraveled}</Text>
-            <Text style={styles.statLabel}>Traveled</Text>
+            <Text style={styles.statValue}>{numVisited}</Text>
+            <Text style={styles.statLabel}>Visited</Text>
           </View>
         </View>
         <Text style={styles.descriptionText}>{explorer.description}</Text>
@@ -230,7 +366,7 @@ const ExplorerProfile = ({route}) => {
           <View style={styles.userInfoContainer}>
             <Text style={styles.infoText}>Email: {explorer.email}</Text>
             <Text style={styles.infoText}>Location: {explorer.governorate}, {explorer.municipality}</Text>
-            <Text style={styles.infoText}>Phone: {explorer.mobileNum}</Text>
+            <Text style={styles.infoText}>Phone: {explorer.phone}</Text>
           </View>
         )}
         <TouchableOpacity style={styles.editButton} onPress={navigateToEditProfile}>
@@ -246,7 +382,7 @@ const ExplorerProfile = ({route}) => {
           onPress={() => handleTabChange('Posts')}
         >
           <Text style={styles.navBarText}>Posts</Text>
-        </TouchableOpacity>
+          </TouchableOpacity>
         <TouchableOpacity
           style={[styles.navBarItem, activeTab === 'Favourites' && styles.activeTab]}
           onPress={() => handleTabChange('Favourites')}
@@ -266,6 +402,26 @@ const ExplorerProfile = ({route}) => {
           data={posts}
           keyExtractor={(item, index) => item.id ? item.id.toString() : index.toString()}
           renderItem={renderPostItem}
+          numColumns={3}
+          contentContainerStyle={styles.postsContainer}
+        />
+      )}
+      {activeTab === 'Favourites' && (
+        <FlatList
+          key="threeColumnsFavourites"
+          data={favourites}
+          keyExtractor={(item, index) => item.id ? item.id.toString() : index.toString()}
+          renderItem={renderFavouriteItem}
+          numColumns={3}
+          contentContainerStyle={styles.postsContainer}
+        />
+      )}
+      {activeTab === 'Visited' && (
+        <FlatList
+          key="threeColumnsVisited"
+          data={visited}
+          keyExtractor={(item, index) => item.id ? item.id.toString() : index.toString()}
+          renderItem={renderVisitedItem}
           numColumns={3}
           contentContainerStyle={styles.postsContainer}
         />
@@ -294,30 +450,11 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     flex: 1,
   },
-  menuIcon: {
+  picker: {
+    width: 120,
+    height: 50,
     position: 'absolute',
     right: 10,
-    padding: 10,
-  },
-  menuContainer: {
-    position: 'absolute',
-    top: 60,
-    right: 10,
-    backgroundColor: '#fff',
-    borderRadius: 5,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-    padding: 10,
-  },
-  menuOption: {
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-  },
-  menuOptionText: {
-    fontSize: 16,
   },
   profileContainer: {
     alignItems: 'center',
@@ -440,7 +577,12 @@ const styles = StyleSheet.create({
   },
   postImage: {
     width: '100%',
-    height: '100%',
+    height: '80%',
+  },
+  postTitle: {
+    fontSize: 12,
+    textAlign: 'center',
+    marginTop: 2,
   },
   deleteButton: {
     position: 'absolute',
@@ -453,6 +595,16 @@ const styles = StyleSheet.create({
   deleteButtonText: {
     color: '#fff',
     fontSize: 10,
+  },
+  heartIcon: {
+    position: 'absolute',
+    top: 5,
+    right: 5,
+  },
+  planeIcon: {
+    position: 'absolute',
+    top: 5,
+    right: 5,
   },
   errorText: {
     fontSize: 18,
