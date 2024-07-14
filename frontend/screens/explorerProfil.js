@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, View, Image, TouchableOpacity, FlatList, Alert } from 'react-native';
-import { Picker } from "@react-native-picker/picker";
+import { StyleSheet, Text, View, Image, TouchableOpacity, FlatList, Alert, Modal } from 'react-native';
 import axios from 'axios';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { useAuth } from '../context/AuthContext';
@@ -19,7 +18,7 @@ const ExplorerProfile = ({route}) => {
   const [numTraveled, setNumTraveled] = useState(0);
   const [numFavourites, setNumFavourites] = useState(0);
   const [numVisited, setNumVisited] = useState(0);
-  const [selectedOption, setSelectedOption] = useState('');
+  const [showMenu, setShowMenu] = useState(false);
   const [showUserInfo, setShowUserInfo] = useState(false);
   
   const fetchNumPosts = async () => {
@@ -63,12 +62,6 @@ const ExplorerProfile = ({route}) => {
       }
     };
   
-    if (explorer?.id) {
-      fetchExplorerData();
-    }
-  }, [explorer?.id, setExplorer]);
-  
-  useEffect(() => {
     const fetchExplorerPosts = async () => {
       try {
         const response = await axios.get(`http://${DB_HOST}:${PORT}/explorer/${explorer.id}/posts`);
@@ -90,13 +83,7 @@ const ExplorerProfile = ({route}) => {
         setPosts([]);
       }
     };
-  
-    if (activeTab === 'Posts' && explorer?.id) {
-      fetchExplorerPosts();
-    }
-  }, [explorer?.id, activeTab, route.params?.updatedPosts]);
 
-  useEffect(() => {
     const fetchExplorerFavourites = async () => {
       try {
         const response = await axios.get(`http://${DB_HOST}:${PORT}/explorer/${explorer.id}/favourites`);
@@ -119,13 +106,7 @@ const ExplorerProfile = ({route}) => {
         setNumFavourites(0);
       }
     };
-  
-    if (activeTab === 'Favourites' && explorer?.id) {
-      fetchExplorerFavourites();
-    }
-  }, [explorer?.id, activeTab]);
 
-  useEffect(() => {
     const fetchExplorerVisited = async () => {
       try {
         const response = await axios.get(`http://${DB_HOST}:${PORT}/explorer/${explorer.id}/traveled`);
@@ -148,11 +129,14 @@ const ExplorerProfile = ({route}) => {
         setNumVisited(0);
       }
     };
-  
-    if (activeTab === 'Visited' && explorer?.id) {
+
+    if (explorer?.id) {
+      fetchExplorerData();
+      fetchExplorerPosts();
+      fetchExplorerFavourites();
       fetchExplorerVisited();
     }
-  }, [explorer?.id, activeTab]);
+  }, [explorer?.id, setExplorer]);
 
   useEffect(() => {
     if (route.params?.updatedPosts) {
@@ -304,8 +288,12 @@ const ExplorerProfile = ({route}) => {
     </View>
   );
 
-  const handleOptionChange = (option) => {
-    setSelectedOption(option);
+  const toggleMenu = () => {
+    setShowMenu(!showMenu);
+  };
+
+  const handleMenuOption = (option) => {
+    setShowMenu(false);
     if (option === 'Home') {
       navigation.navigate('Main');
     } else if (option === 'AddPost') {
@@ -330,17 +318,28 @@ const ExplorerProfile = ({route}) => {
       <View style={styles.header}>
         <View style={styles.headerContent}>
           <Text style={styles.fullNameText}>{`${explorer.firstname} ${explorer.lastname}`}</Text>
-          <Picker
-            selectedValue={selectedOption}
-            style={styles.picker}
-            onValueChange={(itemValue) => handleOptionChange(itemValue)}
-          >
-            <Picker.Item label="Menu" value="" />
-            <Picker.Item label="Home" value="Home" />
-            <Picker.Item label="Add Post" value="AddPost" />
-          </Picker>
+          <TouchableOpacity onPress={toggleMenu} style={styles.menuIcon}>
+            <Icon name="bars" size={24} color="#000" />
+          </TouchableOpacity>
         </View>
       </View>
+      <Modal
+        visible={showMenu}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowMenu(false)}
+      >
+        <TouchableOpacity style={styles.modalOverlay} onPress={() => setShowMenu(false)}>
+          <View style={styles.menuContainer}>
+            <TouchableOpacity style={styles.menuItem} onPress={() => handleMenuOption('Home')}>
+              <Text style={styles.menuItemText}>Home</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.menuItem} onPress={() => handleMenuOption('AddPost')}>
+              <Text style={styles.menuItemText}>Add Post</Text>
+            </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
+      </Modal>
       <View style={styles.profileContainer}>
         <Image source={{ uri: explorer.image }} style={styles.profileImage} />
         <Text style={styles.usernameText}>@{generateUsername(explorer)}</Text>
@@ -366,7 +365,7 @@ const ExplorerProfile = ({route}) => {
           <View style={styles.userInfoContainer}>
             <Text style={styles.infoText}>Email: {explorer.email}</Text>
             <Text style={styles.infoText}>Location: {explorer.governorate}, {explorer.municipality}</Text>
-            <Text style={styles.infoText}>Phone: {explorer.phone}</Text>
+            <Text style={styles.infoText}>Phone: {explorer.mobileNum}</Text>
           </View>
         )}
         <TouchableOpacity style={styles.editButton} onPress={navigateToEditProfile}>
@@ -382,7 +381,7 @@ const ExplorerProfile = ({route}) => {
           onPress={() => handleTabChange('Posts')}
         >
           <Text style={styles.navBarText}>Posts</Text>
-          </TouchableOpacity>
+        </TouchableOpacity>
         <TouchableOpacity
           style={[styles.navBarItem, activeTab === 'Favourites' && styles.activeTab]}
           onPress={() => handleTabChange('Favourites')}
@@ -450,11 +449,35 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     flex: 1,
   },
-  picker: {
-    width: 120,
-    height: 50,
+  menuIcon: {
     position: 'absolute',
     right: 10,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-start',
+    alignItems: 'flex-end',
+  },
+  menuContainer: {
+    backgroundColor: '#fff',
+    width: 150,
+    marginTop: 60,
+    marginRight: 10,
+    borderRadius: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  menuItem: {
+    padding: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
+  },
+  menuItemText: {
+    fontSize: 16,
   },
   profileContainer: {
     alignItems: 'center',
