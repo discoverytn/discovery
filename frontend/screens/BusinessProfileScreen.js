@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, View, Image, TouchableOpacity, FlatList, ScrollView, Alert } from 'react-native';
+import React, { useEffect, useState, useCallback } from 'react';
+import { StyleSheet, Text, View, Image, TouchableOpacity, FlatList, ScrollView, Alert, RefreshControl } from 'react-native';
 import axios from 'axios';
-import { useNavigation ,useFocusEffect } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { useAuth } from '../context/AuthContext';
 import { Picker } from '@react-native-picker/picker';
 import Icon from 'react-native-vector-icons/FontAwesome5';
@@ -17,99 +17,98 @@ const BusinessProfileScreen = ({route}) => {
   const [numPosts, setNumPosts] = useState(0);
   const [numEvents, setNumEvents] = useState(0);
   const [selectedValue, setSelectedValue] = useState("");
+  const [refreshing, setRefreshing] = useState(false);
 
-  
-  useFocusEffect(
-    React.useCallback(() => {
-      if (route.params?.updatedBusinessData) {
-        setBusiness(route.params.updatedBusinessData);
-        setNumPosts(route.params.updatedBusinessData.Posts?.length || 0);
-        // Clear the parameter after using it
-        navigation.setParams({ updatedBusinessData: undefined });
+  const fetchBusinessData = useCallback(async () => {
+    if (!business?.id) return;
+    try {
+      const response = await axios.get(`http://${DB_HOST}:${PORT}/business/${business.id}`);
+      if (response.status === 200) {
+        setBusiness(response.data);
+        setNumPosts(response.data.Posts?.length || 0);
+        setNumEvents(response.data.numOfEvents || 0);
+      } else {
+        console.error('Failed to fetch business data');
       }
-      if (route.params?.updatedPosts) {
-        setPosts(route.params.updatedPosts);
-        // Clear the parameter after using it
-        navigation.setParams({ updatedPosts: undefined });
-      }
-    }, [route.params?.updatedBusinessData, route.params?.updatedPosts])
-  );
+    } catch (error) {
+      console.error('Error fetching business data:', error.message);
+    }
+  }, [business?.id, setBusiness]);
 
-  useEffect(() => {
-    const fetchBusinessData = async () => {
-      try {
-        const response = await axios.get(`http://${DB_HOST}:${PORT}/business/${business.id}`);
-        if (response.status === 200) {
-          setBusiness(response.data);
-          setNumPosts(response.data.Posts?.length || 0);
-        } else {
-          console.error('Failed to fetch business data');
-        }
-      } catch (error) {
-        console.error('Error fetching business data:', error.message);
+  const fetchBusinessPosts = useCallback(async () => {
+    if (!business?.id) return;
+    try {
+      const response = await axios.get(`http://${DB_HOST}:${PORT}/business/${business.id}/posts`);
+      if (response.status === 200) {
+        const transformedPosts = response.data.map(post => ({
+          id: post.idposts,
+          title: post.title,
+          description: post.description,
+          image1: post.image1
+        }));
+        setPosts(transformedPosts);
+      } else {
+        console.error('Failed to fetch business posts');
+        setPosts([]);
       }
-    };
-
-    if (business?.id) {
-      fetchBusinessData();
+    } catch (error) {
+      console.error('Error fetching business posts:', error.message);
+      setPosts([]);
     }
   }, [business?.id]);
 
-  useEffect(() => {
-    const fetchBusinessPosts = async () => {
-      try {
-        const response = await axios.get(`http://${DB_HOST}:${PORT}/business/${business.id}/posts`);
-        if (response.status === 200) {
-          const transformedPosts = response.data.map(post => ({
-            id: post.idposts,
-            title: post.title,
-            description: post.description,
-            image1: post.image1
-          }));
-          setPosts(transformedPosts);
-        } else {
-          console.error('Failed to fetch business posts');
-          setPosts([]);
-        }
-      } catch (error) {
-        console.error('Error fetching business posts:', error.message);
-        setPosts([]);
-      }
-    };
-
-
-    const fetchBusinessEvents = async () => {
-      try {
-        const response = await axios.get(`http://${DB_HOST}:${PORT}/events/user/${business.id}?userType=business`);
-        if (response.status === 200) {
-          const transformedEvents = response.data.map(event => ({
-            id: event.idevents,
-            eventName: event.eventName,
-            startDate: event.startDate,
-            endDate: event.endDate,
-            eventLocation: event.eventLocation,
-            image: event.image
-          }));
-          setEvents(transformedEvents);
-          setNumEvents(transformedEvents.length || 0);
-        } else {
-          console.error('Failed to fetch business events');
-          setEvents([]);
-          setNumEvents(0);
-        }
-      } catch (error) {
-        console.error('Error fetching business events:', error.message);
+  const fetchBusinessEvents = useCallback(async () => {
+    if (!business?.id) return;
+    try {
+      const response = await axios.get(`http://${DB_HOST}:${PORT}/events/user/${business.id}?userType=business`);
+      if (response.status === 200) {
+        const transformedEvents = response.data.map(event => ({
+          id: event.idevents,
+          eventName: event.eventName,
+          startDate: event.startDate,
+          endDate: event.endDate,
+          eventLocation: event.eventLocation,
+          image: event.image
+        }));
+        setEvents(transformedEvents);
+        setNumEvents(transformedEvents.length);
+      } else {
+        console.error('Failed to fetch business events');
         setEvents([]);
         setNumEvents(0);
       }
+    } catch (error) {
+      console.error('Error fetching business events:', error.message);
+      setEvents([]);
+      setNumEvents(0);
     }
+  }, [business?.id]);
 
-    if (activeTab === 'Business' && business?.id) {
+  useFocusEffect(
+    useCallback(() => {
+      fetchBusinessData();
       fetchBusinessPosts();
-    } else if (activeTab === 'Events' && business?.id) {
       fetchBusinessEvents();
+    }, [fetchBusinessData, fetchBusinessPosts, fetchBusinessEvents])
+  );
+
+  useEffect(() => {
+    if (route.params?.updatedBusinessData) {
+      setBusiness(route.params.updatedBusinessData);
+      setNumPosts(route.params.updatedBusinessData.Posts?.length || 0);
+      setNumEvents(route.params.updatedBusinessData.numOfEvents || 0);
+      navigation.setParams({ updatedBusinessData: undefined });
     }
-  }, [business?.id, activeTab]);
+    if (route.params?.updatedPosts) {
+      setPosts(route.params.updatedPosts);
+      navigation.setParams({ updatedPosts: undefined });
+    }
+    if (route.params?.updatedEvents) {
+      setEvents(route.params.updatedEvents);
+      setNumEvents(route.params.updatedEvents.length);
+      navigation.setParams({ updatedEvents: undefined });
+    }
+  }, [route.params?.updatedBusinessData, route.params?.updatedPosts, route.params?.updatedEvents, setBusiness, navigation]);
 
   const handleTabChange = (tabName) => {
     setActiveTab(tabName);
@@ -123,6 +122,7 @@ const BusinessProfileScreen = ({route}) => {
     logOut();
     navigation.navigate('Login');
   };
+
   const deleteBusinessPost = async (postId) => {
     try {
       const response = await fetch(`http://${DB_HOST}:${PORT}/posts/business/delete/${postId}`, {
@@ -153,45 +153,47 @@ const BusinessProfileScreen = ({route}) => {
     if (value === 'Home') {
       navigation.navigate('Main');
     } else if (value === 'AddPost') {
-      navigation.navigate('BusinessddPostScreen');
+      navigation.navigate('BusinessAddPostScreen');
+    } else if (value === 'AddEvent') {
+      navigation.navigate('ScheduleEvent');
     }
   };
-const deleteBusinessEvent = async (eventId) => {
-  try {
-    const response = await fetch(`http://${DB_HOST}:${PORT}/events/${eventId}/del`, {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${business.token}`,
-      },
-    });
 
-    if (response.ok) {
-      // Check if the response has content
-      const text = await response.text();
-      let data;
-      if (text) {
-        try {
-          data = JSON.parse(text);
-        } catch (parseError) {
-          console.warn('Response is not JSON:', text);
+  const deleteBusinessEvent = async (eventId) => {
+    try {
+      const response = await fetch(`http://${DB_HOST}:${PORT}/events/${eventId}/del`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${business.token}`,
+        },
+      });
+
+      if (response.ok) {
+        const text = await response.text();
+        let data;
+        if (text) {
+          try {
+            data = JSON.parse(text);
+          } catch (parseError) {
+            console.warn('Response is not JSON:', text);
+          }
         }
-      }
 
-      console.log('Event deleted successfully');
-      Alert.alert('Success', 'Event deleted successfully');
-      setEvents(events.filter(event => event.id !== eventId));
-      setNumEvents(prevNumEvents => prevNumEvents - 1);
-    } else {
-      const errorText = await response.text();
-      console.error('Error response:', errorText);
-      Alert.alert('Error', `Failed to delete event. Status: ${response.status}`);
+        console.log('Event deleted successfully');
+        Alert.alert('Success', 'Event deleted successfully');
+        setEvents(events.filter(event => event.id !== eventId));
+        setNumEvents(prevNumEvents => prevNumEvents - 1);
+      } else {
+        const errorText = await response.text();
+        console.error('Error response:', errorText);
+        Alert.alert('Error', `Failed to delete event. Status: ${response.status}`);
+      }
+    } catch (error) {
+      console.error('Error deleting event:', error);
+      Alert.alert('Error', `Failed to delete event: ${error.message}`);
     }
-  } catch (error) {
-    console.error('Error deleting event:', error);
-    Alert.alert('Error', `Failed to delete event: ${error.message}`);
-  }
-};
+  };
 
   const renderPostItem = ({ item }) => (
     <LinearGradient colors={['#667eea', '#764ba2']} style={styles.postItem}>
@@ -217,13 +219,26 @@ const deleteBusinessEvent = async (eventId) => {
     </LinearGradient>
   );
 
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    Promise.all([fetchBusinessData(), fetchBusinessPosts(), fetchBusinessEvents()])
+      .then(() => setRefreshing(false))
+      .catch((error) => {
+        console.error('Error refreshing data:', error);
+        setRefreshing(false);
+      });
+  }, [fetchBusinessData, fetchBusinessPosts, fetchBusinessEvents]);
+
   return (
-    <ScrollView style={styles.container}>
-      <LinearGradient colors={['#1a2a6c', '#b21f1f', '#fdbb2d']} style={styles.header}>
+    <ScrollView 
+      style={styles.container} 
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
+    >
+      <LinearGradient colors={['#1a2a6c', '#e6e9f0', '#eef1f5']} style={styles.header}>
         <View style={styles.profileImageContainer}>
           <Image source={{ uri: business.image }} style={styles.profileImage} />
-          {/* <Icon name="crown" size={30} color="#FFD700" style={styles.crownIcon} /> */}
-          <Image source={require('../assets/VIPpic.gif')} style={styles.crownIcon} />
         </View>
         <Text style={styles.nameText}>{`${business.firstname} ${business.lastname}`}</Text>
         <Text style={styles.usernameText}>@{business.username}</Text>
@@ -241,6 +256,7 @@ const deleteBusinessEvent = async (eventId) => {
             <Picker.Item label="Select an option" value="" color="#000000" />
             <Picker.Item label="Home" value="Home" color="#000000" />
             <Picker.Item label="Add Post" value="AddPost" color="#000000" />
+            <Picker.Item label="Add Event" value="AddEvent" color="#000000" />
           </Picker>
         </View>
       </LinearGradient>
@@ -249,19 +265,17 @@ const deleteBusinessEvent = async (eventId) => {
         <Text style={styles.descriptionText}>{business.description}</Text>
         <View style={styles.statsContainer}>
           <View style={styles.statBox}>
-            <Icon name="chart-line" size={24} color="#FFD700" />
+            <Icon name="chart-line" size={24} color="#6900A3" />
             <Text style={styles.statValue}>{numPosts}</Text>
             <Text style={styles.statLabel}>Posts</Text>
           </View>
           <View style={styles.statBox}>
-            <Icon name="calendar-alt" size={24} color="#FFD700" />
+            <Icon name="calendar-alt" size={24} color="#6900A3" />
             <Text style={styles.statValue}>{numEvents}</Text>
             <Text style={styles.statLabel}>Events</Text>
           </View>
           <View style={styles.statBox}>
-            {/* <Icon name="star" size={24} color="#FFD700" /> */}
             <Image source={require('../assets/vipstar2.gif')} style={styles.vipstar} />
-
             <Text style={styles.statValue}>VIP</Text>
             <Text style={styles.statLabel}>Status</Text>
           </View>
@@ -271,17 +285,17 @@ const deleteBusinessEvent = async (eventId) => {
       <View style={styles.additionalInfoContainer}>
         <Text style={styles.sectionTitle}>Business Details</Text>
         <View style={styles.infoItem}>
-          <Icon name="building" size={20} color="#FFD700" />
+          <Icon name="building" size={20} color="#6900A3" />
           <Text style={styles.infoLabel}>Business Name:</Text>
           <Text style={styles.infoValue}>{business.businessName}</Text>
         </View>
         <View style={styles.infoItem}>
-          <Icon name="map-marker-alt" size={20} color="#FFD700" />
+          <Icon name="map-marker-alt" size={20} color="#6900A3" />
           <Text style={styles.infoLabel}>Location:</Text>
           <Text style={styles.infoValue}>{`${business.governorate}, ${business.municipality}`}</Text>
         </View>
         <View style={styles.infoItem}>
-          <Icon name="phone" size={20} color="#FFD700" />
+          <Icon name="phone" size={20} color="#6900A3" />
           <Text style={styles.infoLabel}>Contact:</Text>
           <Text style={styles.infoValue}>{business.mobileNum}</Text>
         </View>
@@ -315,12 +329,12 @@ const deleteBusinessEvent = async (eventId) => {
 
       {activeTab === 'Business' && (
       <FlatList
-      data={posts}
-      keyExtractor={(item) => (item.id ? item.id.toString() : Math.random().toString())}
-      renderItem={renderPostItem}
-      numColumns={2}
-      contentContainerStyle={styles.postsContainer}
-    />
+        data={posts}
+        keyExtractor={(item) => (item.id ? item.id.toString() : Math.random().toString())}
+        renderItem={renderPostItem}
+        numColumns={2}
+        contentContainerStyle={styles.postsContainer}
+      />
       )}
        {activeTab === 'Events' && (
         <FlatList
@@ -361,29 +375,29 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: -49,
     right: -27,
-    width: 182,  // Adjust the width as needed
-    height: 220, // Adjust the height as needed
+    width: 182, 
+    height: 220, 
   },
   vipstar: {
-    width: 48,  // Adjust the width as needed
-    height: 28, // Adjust the height as needed
+    width: 48,  
+    height: 28, 
 
   },
   
   nameText: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#FFFFFF',
+    color: '#0d3049',
     marginBottom: 5,
   },
   usernameText: {
     fontSize: 18,
-    color: '#FFFFFF',
+    color: '#0d3049',
     marginBottom: 5,
   },
   vipText: {
     fontSize: 16,
-    color: '#FFD700',
+    color: '#5b12d2',
     fontWeight: 'bold',
   },
   pickerContainer: {
