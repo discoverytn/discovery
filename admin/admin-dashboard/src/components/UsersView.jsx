@@ -177,7 +177,7 @@ function UsersView() {
                 <TableCell>Email</TableCell>
                 <TableCell>Posts</TableCell>
                 <TableCell>Visits</TableCell>
-                <TableCell>Reviews</TableCell>
+                <TableCell>Likes</TableCell>
                 <TableCell>Location</TableCell>
               </TableRow>
             </TableHead>
@@ -204,7 +204,7 @@ function UsersView() {
                       <TableCell>{explorer.email}</TableCell>
                       <TableCell>{explorer.numOfPosts}</TableCell>
                       <TableCell>{explorer.numOfVisits}</TableCell>
-                      <TableCell>{explorer.numOfReviews}</TableCell>
+                      <TableCell>{explorer.numOfLikes}</TableCell>
                       <TableCell>
                         {explorer.governorate}, {explorer.municipality}
                       </TableCell>
@@ -251,7 +251,8 @@ function UsersView() {
                 <TableCell>First Name</TableCell>
                 <TableCell>Last Name</TableCell>
                 <TableCell>Email</TableCell>
-                <TableCell>Reviews</TableCell>
+                <TableCell>Posts</TableCell>
+                <TableCell>Events</TableCell>
                 <TableCell>Business Details</TableCell>
               </TableRow>
             </TableHead>
@@ -279,7 +280,8 @@ function UsersView() {
                       <TableCell>{owner.firstname}</TableCell>
                       <TableCell>{owner.lastname}</TableCell>
                       <TableCell>{owner.email}</TableCell>
-                      <TableCell>{owner.numOfReviews}</TableCell>
+                      <TableCell>{owner.numOfPosts}</TableCell>
+                      <TableCell>{owner.numOfEvents}</TableCell>
                       <TableCell>
                         <Button
                           variant="contained"
