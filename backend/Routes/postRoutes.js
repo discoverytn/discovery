@@ -13,7 +13,8 @@ const {
   ratePost,
   getAllBusinessPosts,
   getTopRatedPosts,
-  deletePost
+  deletePost,
+  getRecommendedPosts
   
   
 } = require('../Controllers/postController');
@@ -24,6 +25,7 @@ router.get('/business/posts', getAllBusinessPosts);
 
 router.get('/top5', getTopRatedPosts);
 
+router.get('/recommended/:idexplorer', getRecommendedPosts);
 
 router.post('/explorer/add', ExplorerCreatePost);
 router.delete('/delete/:idposts', deletePost);

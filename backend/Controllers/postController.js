@@ -336,6 +336,39 @@ const deletePost = async (req, res) => {
     res.status(500).json({ error: "Failed to delete post" });
   }
 };
+const getRecommendedPosts = async (req, res) => {
+  const { idexplorer } = req.params;
+
+  try {
+    // Find the explorer by ID
+    const explorer = await Explorer.findByPk(idexplorer);
+
+    if (!explorer) {
+      return res.status(404).json({ error: "Explorer not found" });
+    }
+
+    // Get the explorer's categories
+    const categories = explorer.categories ? explorer.categories.split(',').map(cat => cat.trim()) : [];
+
+    if (categories.length === 0) {
+      return res.status(200).json([]);
+    }
+
+    // Fetch posts that match the explorer's categories
+    const recommendedPosts = await Posts.findAll({
+      where: {
+        category: {
+          [db.Sequelize.Op.in]: categories
+        }
+      }
+    });
+
+    res.status(200).json(recommendedPosts);
+  } catch (error) {
+    console.error("Error fetching recommended posts:", error);
+    res.status(500).json({ error: "Failed to fetch recommended posts" });
+  }
+};
 module.exports = {
   ExplorerCreatePost,
   BusinessCreatePost,
@@ -349,5 +382,6 @@ module.exports = {
   getAllExplorerPosts,
   getAllBusinessPosts,
   getTopRatedPosts,
-  deletePost
+  deletePost,
+  getRecommendedPosts
 };
