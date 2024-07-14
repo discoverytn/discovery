@@ -153,7 +153,7 @@ const BusinessProfileScreen = ({route}) => {
     if (value === 'Home') {
       navigation.navigate('Main');
     } else if (value === 'AddPost') {
-      navigation.navigate('BusinessAddPostScreen');
+      navigation.navigate('BusinessddPostScreen');
     } else if (value === 'AddEvent') {
       navigation.navigate('ScheduleEvent');
     }

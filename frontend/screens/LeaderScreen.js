@@ -1,10 +1,51 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, Image, StyleSheet } from 'react-native';
 import { FontAwesome5 } from '@expo/vector-icons';
+import axios from 'axios';
 import { LinearGradient } from 'expo-linear-gradient';
 import { DB_HOST, PORT } from "@env";
 
-const LeaderScreen = () => {
+const LeaderboardScreen = () => {
+  const [topBusinesses, setTopBusinesses] = useState([]);
+
+  useEffect(() => {
+    fetchTopBusinesses();
+  }, []);
+
+  const fetchTopBusinesses = async () => {
+    try {
+      const response = await axios.get(`http://${DB_HOST}:${PORT}/business/topthreebp`);
+      setTopBusinesses(response.data);
+    } catch (error) {
+      console.error('Error fetching top businesses:', error);
+    }
+  };
+
+  const renderBusinessCard = (business, index) => {
+    const placeColors = [['#FFD700', '#FFA500'], ['#C0C0C0', '#A9A9A9'], ['#CD7F32', '#8B4513']];
+    const caretIcon = index === 0 ? "caret-up" : "caret-down";
+    const caretColor = index === 0 ? "#00FF00" : "#FF0000";
+
+    return (
+      <LinearGradient
+        key={business.idbusiness}
+        colors={placeColors[index]}
+        style={styles.profileContainer}
+      >
+        <FontAwesome5 name={caretIcon} size={24} color={caretColor} style={styles.caretIcon} />
+        <Text style={styles.rank}>{index + 1}</Text>
+        <View style={styles.profileImageContainer}>
+          <Image
+            source={{ uri: business.image || 'https://via.placeholder.com/150' }}
+            style={styles.profileImage}
+          />
+        </View>
+        <Text style={styles.username}>{business.firstname}</Text>
+        <Text style={styles.score}>{business.postCount} posts</Text>
+      </LinearGradient>
+    );
+  };
+
   return (
     <LinearGradient colors={['#1a2a6c', '#b21f1f', '#fdbb2d']} style={styles.container}>
       <View style={styles.titleContainer}>
@@ -12,38 +53,7 @@ const LeaderScreen = () => {
       </View>
       
       <View style={styles.leaderboardContainer}>
-        <View style={[styles.profileContainer, styles.sideProfileContainer]}>
-          <Image
-            source={{ uri: 'https://static.vecteezy.com/system/resources/thumbnails/029/271/062/small_2x/avatar-profile-icon-in-flat-style-male-user-profile-illustration-on-isolated-background-man-profile-sign-business-concept-vector.jpg' }}
-            style={[styles.profileImage, styles.second]}
-          />
-          <Text style={styles.username}>Alex</Text>
-          <Text style={styles.score}>270</Text>
-          <Text style={styles.usernameTag}>@matrix</Text>
-        </View>
-
-        <View style={[styles.profileContainer, styles.middleProfileContainer]}>
-          <View style={styles.profileImageContainer}>
-            <FontAwesome5 name="crown" size={50} color="#FFD700" style={styles.crownIcon} />
-            <Image
-              source={{ uri: 'https://static.vecteezy.com/system/resources/thumbnails/029/271/062/small_2x/avatar-profile-icon-in-flat-style-male-user-profile-illustration-on-isolated-background-man-profile-sign-business-concept-vector.jpg' }}
-              style={[styles.profileImage, styles.first]}
-            />
-          </View>
-          <Text style={styles.username}>Fraj</Text>
-          <Text style={styles.score}>700</Text>
-          <Text style={styles.usernameTag}>@chad</Text>
-        </View>
-
-        <View style={[styles.profileContainer, styles.sideProfileContainer]}>
-          <Image
-            source={{ uri: 'https://static.vecteezy.com/system/resources/thumbnails/029/271/062/small_2x/avatar-profile-icon-in-flat-style-male-user-profile-illustration-on-isolated-background-man-profile-sign-business-concept-vector.jpg' }}
-            style={[styles.profileImage, styles.third]}
-          />
-          <Text style={styles.username}>Amine</Text>
-          <Text style={styles.score}>150</Text>
-          <Text style={styles.usernameTag}>@mramine</Text>
-        </View>
+        {topBusinesses.map((business, index) => renderBusinessCard(business, index))}
       </View>
     </LinearGradient>
   );
@@ -73,68 +83,50 @@ const styles = StyleSheet.create({
     textShadowRadius: 10
   },
   leaderboardContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    width: '100%',
-    paddingHorizontal: 10,
+    width: '90%',
   },
   profileContainer: {
+    flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
     borderRadius: 15,
+    marginVertical: 10,
     padding: 15,
-    width: '30%',
-  },
-  sideProfileContainer: {
-    marginTop: 30,
-  },
-  middleProfileContainer: {
-    marginTop: -30,
+    elevation: 5,
   },
   profileImageContainer: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    overflow: 'hidden',
+    justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 10,
-    position: 'relative',
+    marginRight: 15,
+    borderWidth: 2,
+    borderColor: '#FFFFFF',
   },
   profileImage: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+    width: '100%',
+    height: '100%',
   },
-  first: {
-    borderWidth: 3,
-    borderColor: '#FFD700',
-  },
-  second: {
-    borderWidth: 3,
-    borderColor: '#C0C0C0',
-  },
-  third: {
-    borderWidth: 3,
-    borderColor: '#CD7F32',
-  },
-  crownIcon: {
-    position: 'absolute',
-    top: -40,
-    zIndex: 1,
+  rank: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginRight: 15,
+    color: '#FFFFFF',
   },
   username: {
-    color: '#FFFFFF',
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: 'bold',
-    marginTop: 5,
+    flex: 1,
+    color: '#FFFFFF',
   },
   score: {
-    color: '#FFD700',
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginTop: 5,
+    fontSize: 18,
+    color: '#FFFFFF',
   },
-  usernameTag: {
-    color: 'rgba(255, 255, 255, 0.7)',
-    fontSize: 12,
-    marginTop: 5,
+  caretIcon: {
+    marginRight: 10,
   },
 });
 
-export default LeaderScreen;
+export default LeaderboardScreen;
