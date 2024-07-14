@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View, Image, TouchableOpacity, FlatList, ScrollView, Alert } from 'react-native';
 import axios from 'axios';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation ,useFocusEffect } from '@react-navigation/native';
 import { useAuth } from '../context/AuthContext';
 import { Picker } from '@react-native-picker/picker';
-import Icon from 'react-native-vector-icons/FontAwesome';
+import Icon from 'react-native-vector-icons/FontAwesome5';
+import { LinearGradient } from 'expo-linear-gradient';
 import { DB_HOST, PORT } from "@env";
 
-const BusinessProfileScreen = () => {
+const BusinessProfileScreen = ({route}) => {
   const { business, setBusiness, logOut } = useAuth();
   const navigation = useNavigation();
   const [activeTab, setActiveTab] = useState('Business');
@@ -17,6 +18,22 @@ const BusinessProfileScreen = () => {
   const [numEvents, setNumEvents] = useState(0);
   const [selectedValue, setSelectedValue] = useState("");
 
+  
+  useFocusEffect(
+    React.useCallback(() => {
+      if (route.params?.updatedBusinessData) {
+        setBusiness(route.params.updatedBusinessData);
+        setNumPosts(route.params.updatedBusinessData.Posts?.length || 0);
+        // Clear the parameter after using it
+        navigation.setParams({ updatedBusinessData: undefined });
+      }
+      if (route.params?.updatedPosts) {
+        setPosts(route.params.updatedPosts);
+        // Clear the parameter after using it
+        navigation.setParams({ updatedPosts: undefined });
+      }
+    }, [route.params?.updatedBusinessData, route.params?.updatedPosts])
+  );
 
   useEffect(() => {
     const fetchBusinessData = async () => {
@@ -25,7 +42,6 @@ const BusinessProfileScreen = () => {
         if (response.status === 200) {
           setBusiness(response.data);
           setNumPosts(response.data.Posts?.length || 0);
-          setNumEvents(response.data.Events?.length || 0);
         } else {
           console.error('Failed to fetch business data');
         }
@@ -37,16 +53,13 @@ const BusinessProfileScreen = () => {
     if (business?.id) {
       fetchBusinessData();
     }
-  }, [business?.id, setBusiness]);
+  }, [business?.id]);
 
   useEffect(() => {
     const fetchBusinessPosts = async () => {
       try {
         const response = await axios.get(`http://${DB_HOST}:${PORT}/business/${business.id}/posts`);
-        if (response.status === 200) 
-        
-          {
-            console.log("res",response.data);
+        if (response.status === 200) {
           const transformedPosts = response.data.map(post => ({
             id: post.idposts,
             title: post.title,
@@ -54,30 +67,28 @@ const BusinessProfileScreen = () => {
             image1: post.image1
           }));
           setPosts(transformedPosts);
-        
-          setNumPosts(transformedPosts.length || 0);
         } else {
           console.error('Failed to fetch business posts');
           setPosts([]);
-          setNumPosts(0);
         }
       } catch (error) {
         console.error('Error fetching business posts:', error.message);
         setPosts([]);
-        setNumPosts(0);
       }
     };
-    console.log("the posts",posts);
+
+
     const fetchBusinessEvents = async () => {
       try {
-        const response = await axios.get(`http://${DB_HOST}:${PORT}/business/${business.id}/events`);
+        const response = await axios.get(`http://${DB_HOST}:${PORT}/events/user/${business.id}?userType=business`);
         if (response.status === 200) {
           const transformedEvents = response.data.map(event => ({
-            id: event.id,
-            title: event.title,
-            description: event.description,
-            date: event.date,
-            image: event.image 
+            id: event.idevents,
+            eventName: event.eventName,
+            startDate: event.startDate,
+            endDate: event.endDate,
+            eventLocation: event.eventLocation,
+            image: event.image
           }));
           setEvents(transformedEvents);
           setNumEvents(transformedEvents.length || 0);
@@ -91,7 +102,7 @@ const BusinessProfileScreen = () => {
         setEvents([]);
         setNumEvents(0);
       }
-    };
+    }
 
     if (activeTab === 'Business' && business?.id) {
       fetchBusinessPosts();
@@ -112,14 +123,13 @@ const BusinessProfileScreen = () => {
     logOut();
     navigation.navigate('Login');
   };
-
-  const deleteBusinessPost = async (postId, token) => {
+  const deleteBusinessPost = async (postId) => {
     try {
       const response = await fetch(`http://${DB_HOST}:${PORT}/posts/business/delete/${postId}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
+          'Authorization': `Bearer ${business.token}`,
         },
       });
       const data = await response.json();
@@ -127,38 +137,17 @@ const BusinessProfileScreen = () => {
         console.log(data);
         Alert.alert('Business post deleted successfully');
         setPosts(posts.filter(post => post.id !== postId));
-       
+        setNumPosts(prevNumPosts => prevNumPosts - 1);
       } else {
         console.error('Error:', data);
-        Alert.alert(`Error: ${data.message}`);
+        Alert.alert(`Error: ${data.error}`);
       }
     } catch (error) {
       console.error('Error:', error);
       Alert.alert(`Error: ${error.message}`);
     }
   };
-  
-  
 
-  const renderPostItem = ({ item }) => (
-    <View style={styles.postItem}>
-      <Image source={{ uri: item.image1 }} style={styles.postImage} />
-      <Text style={styles.postTitle}>{item.title}</Text>
-      <Text style={styles.postDescription}>{item.description}</Text>
-      <TouchableOpacity style={styles.deleteButton} onPress={() => {deleteBusinessPost(item.idposts),console.log("item",item)}}>
-        <Text style={styles.deleteButtonText}>Delete</Text>
-      </TouchableOpacity>
-    </View>
-  );
-
-  const renderEventItem = ({ item }) => (
-    <View style={styles.eventItem}>
-      <Image source={{ uri: item.image }} style={styles.eventImage} />
-      <Text style={styles.eventTitle}>{item.title}</Text>
-      <Text style={styles.eventDescription}>{item.description}</Text>
-      <Text style={styles.eventDate}>{item.date}</Text>
-    </View>
-  );
   const handlePickerChange = (value) => {
     setSelectedValue(value);
     if (value === 'Home') {
@@ -167,71 +156,148 @@ const BusinessProfileScreen = () => {
       navigation.navigate('BusinessddPostScreen');
     }
   };
+const deleteBusinessEvent = async (eventId) => {
+  try {
+    const response = await fetch(`http://${DB_HOST}:${PORT}/events/${eventId}/del`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${business.token}`,
+      },
+    });
+
+    if (response.ok) {
+      // Check if the response has content
+      const text = await response.text();
+      let data;
+      if (text) {
+        try {
+          data = JSON.parse(text);
+        } catch (parseError) {
+          console.warn('Response is not JSON:', text);
+        }
+      }
+
+      console.log('Event deleted successfully');
+      Alert.alert('Success', 'Event deleted successfully');
+      setEvents(events.filter(event => event.id !== eventId));
+      setNumEvents(prevNumEvents => prevNumEvents - 1);
+    } else {
+      const errorText = await response.text();
+      console.error('Error response:', errorText);
+      Alert.alert('Error', `Failed to delete event. Status: ${response.status}`);
+    }
+  } catch (error) {
+    console.error('Error deleting event:', error);
+    Alert.alert('Error', `Failed to delete event: ${error.message}`);
+  }
+};
+
+  const renderPostItem = ({ item }) => (
+    <LinearGradient colors={['#667eea', '#764ba2']} style={styles.postItem}>
+      {item.image1 && <Image source={{ uri: item.image1 }} style={styles.postImage} />}
+      <Text style={styles.postTitle}>{item.title || 'Untitled'}</Text>
+      <Text style={styles.postDescription}>{item.description || 'No description'}</Text>
+      <TouchableOpacity style={styles.deleteButton} onPress={() => deleteBusinessPost(item.id)}>
+        <Text style={styles.deleteButtonText}>Delete</Text>
+      </TouchableOpacity>
+    </LinearGradient>
+  );
+
+  const renderEventItem = ({ item }) => (
+    <LinearGradient colors={['#667eea', '#764ba2']} style={styles.eventItem}>
+      {item.image && <Image source={{ uri: item.image }} style={styles.eventImage} />}
+      <Text style={styles.eventName}>{item.eventName || 'Untitled Event'}</Text>
+      <Text style={styles.eventDate}>Start: {new Date(item.startDate).toLocaleDateString()}</Text>
+      <Text style={styles.eventDate}>End: {new Date(item.endDate).toLocaleDateString()}</Text>
+      <Text style={styles.eventLocation}>{item.eventLocation || 'No location specified'}</Text>
+      <TouchableOpacity style={styles.deleteButton} onPress={() => deleteBusinessEvent(item.id)}>
+        <Text style={styles.deleteButtonText}>Delete</Text>
+      </TouchableOpacity>
+    </LinearGradient>
+  );
 
   return (
     <ScrollView style={styles.container}>
-      <View style={styles.profileContainer}>
+      <LinearGradient colors={['#1a2a6c', '#b21f1f', '#fdbb2d']} style={styles.header}>
+        <View style={styles.profileImageContainer}>
+          <Image source={{ uri: business.image }} style={styles.profileImage} />
+          {/* <Icon name="crown" size={30} color="#FFD700" style={styles.crownIcon} /> */}
+          <Image source={require('../assets/VIPpic.gif')} style={styles.crownIcon} />
+        </View>
         <Text style={styles.nameText}>{`${business.firstname} ${business.lastname}`}</Text>
-        <Image source={{ uri: business.image }} style={styles.profileImage} />
+        <Text style={styles.usernameText}>@{business.username}</Text>
+        <Text style={styles.vipText}>VIP Business</Text>
+        
         <View style={styles.pickerContainer}>
-        <Icon name="bars" size={20} color="#333" style={styles.icon} />
-        <Picker
-          selectedValue={selectedValue}
-          onValueChange={handlePickerChange}
-          style={styles.picker}
-          mode="dropdown"
-        >
-          <Picker.Item label="Select an option" value="" />
-          <Picker.Item label="Home" value="Home" />
-          <Picker.Item label="Add Post" value="AddPost" />
-        </Picker>
-      </View>
-        <Text style={styles.usernameText}>{business.username}</Text>
+          <Icon name="bars" size={20} color="#FFFFFF" style={styles.pickerIcon} />
+          <Picker
+            selectedValue={selectedValue}
+            onValueChange={handlePickerChange}
+            style={styles.picker}
+            mode="dropdown"
+            dropdownIconColor="#FFFFFF"
+          >
+            <Picker.Item label="Select an option" value="" color="#000000" />
+            <Picker.Item label="Home" value="Home" color="#000000" />
+            <Picker.Item label="Add Post" value="AddPost" color="#000000" />
+          </Picker>
+        </View>
+      </LinearGradient>
+
+      <View style={styles.infoContainer}>
         <Text style={styles.descriptionText}>{business.description}</Text>
         <View style={styles.statsContainer}>
           <View style={styles.statBox}>
-            <Text style={styles.statLabel}>Posts</Text>
+            <Icon name="chart-line" size={24} color="#FFD700" />
             <Text style={styles.statValue}>{numPosts}</Text>
+            <Text style={styles.statLabel}>Posts</Text>
           </View>
           <View style={styles.statBox}>
-            <Text style={styles.statLabel}>Events</Text>
+            <Icon name="calendar-alt" size={24} color="#FFD700" />
             <Text style={styles.statValue}>{numEvents}</Text>
+            <Text style={styles.statLabel}>Events</Text>
+          </View>
+          <View style={styles.statBox}>
+            {/* <Icon name="star" size={24} color="#FFD700" /> */}
+            <Image source={require('../assets/vipstar2.gif')} style={styles.vipstar} />
+
+            <Text style={styles.statValue}>VIP</Text>
+            <Text style={styles.statLabel}>Status</Text>
           </View>
         </View>
-        <View style={styles.infoContainer}>
-          <View style={styles.infoItem}>
-            <Text style={styles.labelText}>Governorate:</Text>
-            <Text style={styles.valueText}>{business.governorate}</Text>
-          </View>
-          <View style={styles.infoItem}>
-            <Text style={styles.labelText}>Municipality:</Text>
-            <Text style={styles.valueText}>{business.municipality}</Text>
-          </View>
-          <View style={styles.infoItem}>
-            <Text style={styles.labelText}>Mobile Number:</Text>
-            <Text style={styles.valueText}>{business.mobileNum}</Text>
-          </View>
-          {/* Additional Info Section */}
-          <View style={styles.additionalInfoContainer}>
-            <Text style={styles.additionalInfoLabel}>Business Name:</Text>
-            <Text style={styles.additionalInfoValue}>{business.businessName}</Text>
-          </View>
-          <View style={styles.additionalInfoContainer}>
-            <Text style={styles.additionalInfoLabel}>Description:</Text>
-            <Text style={styles.additionalInfoValue}>{`${business.businessDesc}`}</Text>
-          </View>
-          <View style={styles.additionalInfoContainer}>
-            <Text style={styles.additionalInfoLabel}>Location:</Text>
-            <Text style={styles.additionalInfoValue}>{`${business.governorate}, ${business.municipality}`}</Text>
-          </View>
+      </View>
+
+      <View style={styles.additionalInfoContainer}>
+        <Text style={styles.sectionTitle}>Business Details</Text>
+        <View style={styles.infoItem}>
+          <Icon name="building" size={20} color="#FFD700" />
+          <Text style={styles.infoLabel}>Business Name:</Text>
+          <Text style={styles.infoValue}>{business.businessName}</Text>
         </View>
-        <TouchableOpacity style={styles.editButton} onPress={navigateToEditProfile}>
-          <Text style={styles.editButtonText}>Edit Profile</Text>
+        <View style={styles.infoItem}>
+          <Icon name="map-marker-alt" size={20} color="#FFD700" />
+          <Text style={styles.infoLabel}>Location:</Text>
+          <Text style={styles.infoValue}>{`${business.governorate}, ${business.municipality}`}</Text>
+        </View>
+        <View style={styles.infoItem}>
+          <Icon name="phone" size={20} color="#FFD700" />
+          <Text style={styles.infoLabel}>Contact:</Text>
+          <Text style={styles.infoValue}>{business.mobileNum}</Text>
+        </View>
+      </View>
+
+      <View style={styles.actionContainer}>
+        <TouchableOpacity style={styles.actionButton} onPress={navigateToEditProfile}>
+          <Icon name="edit" size={20} color="#FFFFFF" />
+          <Text style={styles.actionButtonText}>Edit Profile</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-          <Text style={styles.logoutButtonText}>Logout</Text>
+        <TouchableOpacity style={styles.actionButton} onPress={handleLogout}>
+          <Icon name="sign-out-alt" size={20} color="#FFFFFF" />
+          <Text style={styles.actionButtonText}>Logout</Text>
         </TouchableOpacity>
       </View>
+
       <View style={styles.navBar}>
         <TouchableOpacity
           style={[styles.navBarItem, activeTab === 'Business' && styles.activeTab]}
@@ -246,20 +312,22 @@ const BusinessProfileScreen = () => {
           <Text style={styles.navBarText}>Events</Text>
         </TouchableOpacity>
       </View>
+
       {activeTab === 'Business' && (
-       <FlatList
-       data={posts}
-       keyExtractor={(item, index) => item.id ? item.id.toString() : index.toString()}
-       renderItem={renderPostItem}
-       numColumns={2}
-       contentContainerStyle={styles.postsContainer}
-     />
+      <FlatList
+      data={posts}
+      keyExtractor={(item) => (item.id ? item.id.toString() : Math.random().toString())}
+      renderItem={renderPostItem}
+      numColumns={2}
+      contentContainerStyle={styles.postsContainer}
+    />
       )}
-      {activeTab === 'Events' && (
+       {activeTab === 'Events' && (
         <FlatList
           data={events}
-          keyExtractor={(item, index) => item.id ? item.id.toString() : index.toString()}
+          keyExtractor={(item) => (item.id ? item.id.toString() : Math.random().toString())}
           renderItem={renderEventItem}
+          numColumns={2}
           contentContainerStyle={styles.eventsContainer}
         />
       )}
@@ -270,125 +338,170 @@ const BusinessProfileScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#f0f0f0',
   },
-  profileContainer: {
+  header: {
     alignItems: 'center',
-    paddingVertical: 20,
+    paddingVertical: 30,
+    borderBottomLeftRadius: 30,
+    borderBottomRightRadius: 30,
   },
-  profileImage: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
+  profileImageContainer: {
+    position: 'relative',
     marginBottom: 10,
   },
+  profileImage: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    borderWidth: 4,
+    borderColor: '#FFD700',
+  },
+  crownIcon: {
+    position: 'absolute',
+    top: -49,
+    right: -27,
+    width: 182,  // Adjust the width as needed
+    height: 220, // Adjust the height as needed
+  },
+  vipstar: {
+    width: 48,  // Adjust the width as needed
+    height: 28, // Adjust the height as needed
+
+  },
+  
   nameText: {
-    fontSize: 18,
+    fontSize: 24,
     fontWeight: 'bold',
+    color: '#FFFFFF',
     marginBottom: 5,
   },
   usernameText: {
-    fontSize: 16,
+    fontSize: 18,
+    color: '#FFFFFF',
     marginBottom: 5,
   },
+  vipText: {
+    fontSize: 16,
+    color: '#FFD700',
+    fontWeight: 'bold',
+  },
+  pickerContainer: {
+    width:170,
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 10,
+    borderColor: '#FFD700',
+    borderWidth: 1,
+    borderRadius: 10,
+    padding: 5,
+    backgroundColor: '#333',
+  },
+  pickerIcon: {
+    marginRight: 10,
+  },
+  picker: {
+    flex: 1,
+    color: '#FFFFFF',
+
+  },
+  infoContainer: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    padding: 20,
+    margin: 15,
+    elevation: 5,
+  },
   descriptionText: {
+    fontSize: 16,
     textAlign: 'center',
-    paddingHorizontal: 20,
-    marginBottom: 10,
+    marginBottom: 20,
   },
   statsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    width: '100%',
-    paddingHorizontal: 20,
-    marginBottom: 10,
   },
   statBox: {
     alignItems: 'center',
   },
+  statValue: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#1a2a6c',
+  },
   statLabel: {
-    fontSize: 12,
+    fontSize: 14,
     color: '#888',
   },
-  statValue: {
-    fontSize: 18,
-    fontWeight: 'bold',
+  additionalInfoContainer: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    padding: 20,
+    margin: 15,
+    elevation: 5,
   },
-  infoContainer: {
-    width: '100%',
-    paddingHorizontal: 20,
-    marginBottom: 20,
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#1a2a6c',
+    marginBottom: 15,
   },
   infoItem: {
     flexDirection: 'row',
+    alignItems: 'center',
     marginBottom: 10,
   },
-  labelText: {
-    width: '40%',
+  infoLabel: {
     fontSize: 16,
     fontWeight: 'bold',
+    marginLeft: 10,
+    width: '30%',
   },
-  valueText: {
-    width: '60%',
+  infoValue: {
     fontSize: 16,
+    flex: 1,
   },
-  additionalInfoContainer: {
+  actionContainer: {
     flexDirection: 'row',
-    marginBottom: 5,
-    paddingHorizontal: 20,
+    justifyContent: 'space-around',
+    marginVertical: 20,
   },
-  additionalInfoLabel: {
-    width: '40%',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  additionalInfoValue: {
-    width: '60%',
-    fontSize: 16,
-  },
-  editButton: {
-    backgroundColor: '#00aacc',
+  actionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#1a2a6c',
     paddingVertical: 10,
     paddingHorizontal: 20,
-    borderRadius: 5,
-    marginBottom: 10,
+    borderRadius: 25,
   },
-  editButtonText: {
-    color: '#fff',
+  actionButtonText: {
+    color: '#FFFFFF',
     fontWeight: 'bold',
     fontSize: 16,
-    textAlign: 'center',
-  },
-  logoutButton: {
-    backgroundColor: '#dc3545',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 5,
-    marginBottom: 20,
-  },
-  logoutButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 16,
-    textAlign: 'center',
+    marginLeft: 10,
   },
   navBar: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    backgroundColor: '#f0f0f0',
-    paddingVertical: 10,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    marginHorizontal: 15,
+    marginBottom: 15,
+    elevation: 5,
   },
   navBarItem: {
     flex: 1,
     alignItems: 'center',
-    paddingVertical: 10,
+    paddingVertical: 15,
   },
   activeTab: {
-    borderBottomWidth: 2,
-    borderBottomColor: '#007bff',
+    borderBottomWidth: 3,
+    borderBottomColor: '#FFD700',
   },
   navBarText: {
     fontSize: 16,
+    fontWeight: 'bold',
+    color: '#1a2a6c',
   },
   postsContainer: {
     paddingHorizontal: 10,
@@ -397,33 +510,35 @@ const styles = StyleSheet.create({
     flex: 1,
     margin: 5,
     padding: 10,
-    backgroundColor: '#f0f0f0',
-    borderRadius: 5,
+    borderRadius: 15,
+    elevation: 5,
   },
   postImage: {
     width: '100%',
     height: 150,
-    borderRadius: 5,
-    marginBottom: 5,
+    borderRadius: 10,
+    marginBottom: 10,
   },
   postTitle: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: 'bold',
+    color: '#FFFFFF',
     marginBottom: 5,
   },
   postDescription: {
     fontSize: 14,
-    marginBottom: 5,
+    color: '#FFFFFF',
+    marginBottom: 10,
   },
   deleteButton: {
     backgroundColor: '#dc3545',
     paddingVertical: 5,
     paddingHorizontal: 10,
-    borderRadius: 3,
+    borderRadius: 5,
     alignSelf: 'flex-end',
   },
   deleteButtonText: {
-    color: '#fff',
+    color: '#FFFFFF',
     fontSize: 12,
     fontWeight: 'bold',
   },
@@ -432,47 +547,44 @@ const styles = StyleSheet.create({
   },
   eventItem: {
     flex: 1,
-    marginVertical: 5,
+    margin: 5,
     padding: 10,
-    backgroundColor: '#f0f0f0',
-    borderRadius: 5,
+    borderRadius: 15,
+    elevation: 5,
   },
   eventImage: {
     width: '100%',
     height: 150,
-    borderRadius: 5,
-    marginBottom: 5,
+    borderRadius: 10,
+    marginBottom: 10,
   },
-  eventTitle: {
-    fontSize: 16,
+  eventName: {
+    fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: 5,
-  },
-  eventDescription: {
-    fontSize: 14,
+    color: '#FFFFFF',
     marginBottom: 5,
   },
   eventDate: {
+    fontSize: 14,
+    color: '#FFFFFF',
+    marginBottom: 3,
+  },
+  eventLocation: {
+    fontSize: 14,
+    color: '#FFFFFF',
+    marginBottom: 10,
+  },
+  deleteButton: {
+    backgroundColor: '#dc3545',
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    borderRadius: 5,
+    alignSelf: 'flex-end',
+  },
+  deleteButtonText: {
+    color: '#FFFFFF',
     fontSize: 12,
-    color: '#888',
-  },
-  pickerContainer: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-    position: 'absolute',
-    top: 30,
-    right: 10,
-    backgroundColor: '#f0f0f0',
-    borderRadius: 8,
-    padding: 5,
-  },
-  icon: {
-    marginRight: 5,
-  },
-  picker: {
-    width: 30,
-    height: 20,
+    fontWeight: 'bold',
   },
 });
 

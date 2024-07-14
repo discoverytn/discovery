@@ -1,10 +1,14 @@
 const bcrypt = require('bcrypt');
 const db = require('../database/index'); 
+const Business = db.Business;
+const Posts = db.Posts;
 
 module.exports = {
   getBusinessById: async function(req, res) {
     try {
-      const business = await db.Business.findByPk(req.params.idbusiness);
+      const business = await db.Business.findByPk(req.params.idbusiness, {
+        include: [{ model: db.Posts, as: 'Posts' }]
+      });
       if (!business) {
         return res.status(404).send("Business not found");
       }

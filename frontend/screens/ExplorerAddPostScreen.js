@@ -22,6 +22,7 @@ const ExplorerAddPostScreen = () => {
   const [category, setCategory] = useState('');
   const [explorerId, setExplorerId] = useState('');
   const navigation = useNavigation();
+
   useEffect(() => {
     if (explorer && explorer.id) {
       setExplorerId(explorer.id);
@@ -53,11 +54,22 @@ const ExplorerAddPostScreen = () => {
 
     try {
       const response = await axios.post(`http://${DB_HOST}:${PORT}/posts/explorer/add`, payload);
-
+  
       if (response.status === 201) {
         Alert.alert('Success', 'Post created successfully');
-       clearFields();
-       navigation.navigate("Login");
+        clearFields();
+        
+        // Fetch updated number of posts and posts list
+        const numPostsResponse = await axios.get(`http://${DB_HOST}:${PORT}/explorer/${explorerId}/numposts`);
+        const postsResponse = await axios.get(`http://${DB_HOST}:${PORT}/explorer/${explorerId}/posts`);
+        
+        if (numPostsResponse.status === 200 && postsResponse.status === 200) {
+          const updatedNumPosts = numPostsResponse.data;
+          const updatedPosts = postsResponse.data;
+          
+          // Navigate back to ExplorerProfile with updated data
+          navigation.navigate("explorerProfil", { updatedNumPosts, updatedPosts });
+        }
       } else {
         Alert.alert('Error', 'Failed to create post');
       }
@@ -132,7 +144,6 @@ const ExplorerAddPostScreen = () => {
     }
   };
   
-
   const removeImage = (imageKey) => {
     setImages(prevImages => ({
       ...prevImages,
@@ -221,7 +232,6 @@ const ExplorerAddPostScreen = () => {
     </ScrollView>
   );
 };
-
 const styles = StyleSheet.create({
   scrollContainer: {
     flexGrow: 1,

@@ -5,6 +5,8 @@ import LeaderScreen from './LeaderScreen';
 import LeaderScreen2 from './LeaderScreen2';
 import RecommendedScreen from './RecommendedScreen';
 import { DB_HOST, PORT } from "@env";
+import { LinearGradient } from 'expo-linear-gradient';
+
 
 const { width } = Dimensions.get('window');
 
@@ -100,28 +102,28 @@ const MainScreen = ({ navigation }) => {
       </ScrollView>
 
       {/* Bottom Navigation */}
-      <View style={styles.bottomNav}>
-        <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Home')}>
-          <Icon name="home" type="font-awesome" color="#fff" />
-          <Text style={styles.navText}>Home</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Categories')}>
-          <Icon name="globe" type="font-awesome" color="#fff" />
-          <Text style={styles.navText}>Explore</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Discover')}>
-        <Icon name="plus-square" type="font-awesome" color="#fff"  />
-        <Text style={styles.navText}>Add</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Favorites')}>
-          <Icon name="heart" type="font-awesome" color="#fff" />
-          <Text style={styles.navText}>Favorites</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('ScheduleEvent')}>
-          <Icon name="calendar" type="font-awesome" color="#fff" />
-          <Text style={styles.navText}>Event</Text>
-        </TouchableOpacity>
-      </View>
+      <LinearGradient colors={['#667eea', '#764ba2']} style={styles.bottomNav}>
+  <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Home')}>
+    <Icon name="home" type="font-awesome" color="#fff" size={24} />
+    <Text style={styles.navText}>Home</Text>
+  </TouchableOpacity>
+  <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Categories')}>
+    <Icon name="globe" type="font-awesome" color="#fff" size={24} />
+    <Text style={styles.navText}>Explore</Text>
+  </TouchableOpacity>
+  <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Discover')}>
+    <Icon name="plus-square" type="font-awesome" color="#fff" size={24} />
+    <Text style={styles.navText}>Add</Text>
+  </TouchableOpacity>
+  <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Favorites')}>
+    <Icon name="heart" type="font-awesome" color="#fff" size={24} />
+    <Text style={styles.navText}>Favorites</Text>
+  </TouchableOpacity>
+  <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('ScheduleEvent')}>
+    <Icon name="calendar" type="font-awesome" color="#fff" size={24} />
+    <Text style={styles.navText}>Event</Text>
+  </TouchableOpacity>
+</LinearGradient>
     </View>
   );
 };

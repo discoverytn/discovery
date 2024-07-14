@@ -172,8 +172,6 @@ const ExplorerDeletePost = async (req, res) => {
     res.status(500).json({ error: "Failed to delete explorer post" });
   }
 };
-
-
 const BusinessDeletePost = async (req, res) => {
   const { id } = req.params;
 
@@ -199,7 +197,6 @@ const BusinessDeletePost = async (req, res) => {
     res.status(500).json({ error: "Failed to delete business post" });
   }
 };
-
 
 
 function hashtagsToString(hashtags) {

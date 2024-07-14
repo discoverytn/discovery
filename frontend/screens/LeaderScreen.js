@@ -1,19 +1,17 @@
 import React from 'react';
 import { View, Text, Image, StyleSheet } from 'react-native';
 import { FontAwesome5 } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { DB_HOST, PORT } from "@env";
 
 const LeaderScreen = () => {
   return (
-    <View style={styles.container}>
-      {/* Title Container */}
+    <LinearGradient colors={['#1a2a6c', '#b21f1f', '#fdbb2d']} style={styles.container}>
       <View style={styles.titleContainer}>
         <Text style={styles.title}>Business Leaderboard</Text>
       </View>
       
-      {/* Leaderboard Container */}
       <View style={styles.leaderboardContainer}>
-        {/* Profile Card 1 */}
         <View style={[styles.profileContainer, styles.sideProfileContainer]}>
           <Image
             source={{ uri: 'https://static.vecteezy.com/system/resources/thumbnails/029/271/062/small_2x/avatar-profile-icon-in-flat-style-male-user-profile-illustration-on-isolated-background-man-profile-sign-business-concept-vector.jpg' }}
@@ -24,7 +22,6 @@ const LeaderScreen = () => {
           <Text style={styles.usernameTag}>@matrix</Text>
         </View>
 
-        {/* Profile Card 2 */}
         <View style={[styles.profileContainer, styles.middleProfileContainer]}>
           <View style={styles.profileImageContainer}>
             <FontAwesome5 name="crown" size={50} color="#FFD700" style={styles.crownIcon} />
@@ -38,55 +35,55 @@ const LeaderScreen = () => {
           <Text style={styles.usernameTag}>@chad</Text>
         </View>
 
-        {/* Profile Card 3 */}
         <View style={[styles.profileContainer, styles.sideProfileContainer]}>
           <Image
             source={{ uri: 'https://static.vecteezy.com/system/resources/thumbnails/029/271/062/small_2x/avatar-profile-icon-in-flat-style-male-user-profile-illustration-on-isolated-background-man-profile-sign-business-concept-vector.jpg' }}
-            style={[styles.profileImage, styles.third, styles.bronzeBorder]}
+            style={[styles.profileImage, styles.third]}
           />
           <Text style={styles.username}>Amine</Text>
           <Text style={styles.score}>150</Text>
           <Text style={styles.usernameTag}>@mramine</Text>
         </View>
       </View>
-    </View>
+    </LinearGradient>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: '#452E56',
-    paddingTop: 60,
+    paddingVertical: 40,
     alignItems: 'center',
+    borderRadius: 20,
+    margin: 10,
+    overflow: 'hidden',
   },
   titleContainer: {
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
     borderRadius: 20,
-    paddingVertical: 20,
-    paddingHorizontal: 20,
-    marginBottom: 20,
-    borderWidth: 6,
-    borderColor: '#FFD700',
-    alignItems: 'center',
-    backgroundColor: '#FFD700', 
+    paddingVertical: 15,
+    paddingHorizontal: 25,
+    marginBottom: 30,
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#131A26',  
+    color: '#FFFFFF',
+    textShadowColor: 'rgba(0, 0, 0, 0.75)',
+    textShadowOffset: {width: -1, height: 1},
+    textShadowRadius: 10
   },
   leaderboardContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
     width: '100%',
-    paddingVertical: 20,
-    marginTop:50
+    paddingHorizontal: 10,
   },
   profileContainer: {
     alignItems: 'center',
-    backgroundColor: '#1E2736', 
-    borderRadius: 10,
-    padding: 10,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: 15,
+    padding: 15,
+    width: '30%',
   },
   sideProfileContainer: {
     marginTop: 30,
@@ -100,43 +97,43 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   profileImage: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
+    width: 80,
+    height: 80,
+    borderRadius: 40,
   },
   first: {
-    borderWidth: 5,
-    borderColor: '#F5D02E',
+    borderWidth: 3,
+    borderColor: '#FFD700',
   },
   second: {
-    borderWidth: 5,
-    borderColor: '#8A94A6',
+    borderWidth: 3,
+    borderColor: '#C0C0C0',
   },
   third: {
-    borderWidth: 5,
-    borderColor: '#34A853',
-  },
-  bronzeBorder: {
+    borderWidth: 3,
     borderColor: '#CD7F32',
   },
   crownIcon: {
     position: 'absolute',
-    top: -30,
+    top: -40,
     zIndex: 1,
   },
   username: {
     color: '#FFFFFF',
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: 'bold',
+    marginTop: 5,
   },
   score: {
-    color: '#F0A500',
-    fontSize: 22,
+    color: '#FFD700',
+    fontSize: 20,
     fontWeight: 'bold',
+    marginTop: 5,
   },
   usernameTag: {
-    color: '#5B6473',
-    fontSize: 14,
+    color: 'rgba(255, 255, 255, 0.7)',
+    fontSize: 12,
+    marginTop: 5,
   },
 });
 

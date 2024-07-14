@@ -112,15 +112,15 @@ const login = async (req, res) => {
 
     let role;
     let id;
-    let categories = null; // Initialize categories variable
-    let subscribed;
+    let categories = null; 
+    let subscribed
     if (user instanceof db.Admin) {
       role = "admin";
       id = user.idadmin;
     } else if (user instanceof db.Explorer) {
       role = "explorer";
       id = user.idexplorer;
-      categories = user.categories; // Assign categories from user object
+      categories = user.categories; 
     } else if (user instanceof db.Business) {
       role = "business";
       id = user.idbusiness;

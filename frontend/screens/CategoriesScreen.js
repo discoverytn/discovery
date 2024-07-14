@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState } from 'react';
 import { View, Text, Image, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
 import { DB_HOST, PORT } from "@env";
 import { useNavigation } from '@react-navigation/native';
@@ -19,18 +19,17 @@ const categories = [
 const CategoriesScreen = () => {
   const [selectedCategories, setSelectedCategories] = useState([]);
   const navigation = useNavigation();
-  const { explorer} = useAuth();
+  const { explorer } = useAuth();
 
-
-  const toggleCategory = (id) => {
+  const toggleCategory = (name) => {
     setSelectedCategories((prevSelected) =>
-      prevSelected.includes(id)
-        ? prevSelected.filter((categoryId) => categoryId !== id)
-        : [...prevSelected, id]
+      prevSelected.includes(name)
+        ? prevSelected.filter((categoryName) => categoryName !== name)
+        : [...prevSelected, name]
     );
   };
 
-  const isCategorySelected = (id) => selectedCategories.includes(id);
+  const isCategorySelected = (name) => selectedCategories.includes(name);
 
   const handleProceed = async () => {
     if (selectedCategories.length >= 3) {
@@ -59,11 +58,11 @@ const CategoriesScreen = () => {
           <TouchableOpacity
             key={category.id}
             style={styles.category}
-            onPress={() => toggleCategory(category.id)}
+            onPress={() => toggleCategory(category.name)}
           >
             <Image source={category.image} style={styles.categoryImage} />
             <View style={styles.selectedIndicator}>
-              {isCategorySelected(category.id) && (
+              {isCategorySelected(category.name) && (
                 <Image source={selectedLogo} style={styles.selectedIcon} />
               )}
             </View>
