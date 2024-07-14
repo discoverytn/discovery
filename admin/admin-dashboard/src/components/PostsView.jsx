@@ -20,22 +20,11 @@ const API_URL = import.meta.env.VITE_API_URL;
 const FullWidthPaper = styled(Paper)({
   width: "100%",
   marginBottom: "20px",
-  overflowX: "auto",
 });
 
 const FullWidthTextField = styled(TextField)({
   width: "100%",
   marginBottom: "20px",
-});
-
-const CustomTableContainer = styled(TableContainer)({
-  flexGrow: 1,
-  display: "flex",
-  flexDirection: "column",
-});
-
-const CustomTable = styled(Table)({
-  flexGrow: 1,
 });
 
 const DeleteButton = styled('button')({
@@ -148,8 +137,8 @@ function PostsView() {
 
   const renderTable = (posts, page, handleChangePage, search, isExplorer) => (
     <FullWidthPaper elevation={3}>
-      <TableContainer sx={{ flexGrow: 1 }}>
-        <Table sx={{ minWidth: 650 }}>
+      <TableContainer>
+        <Table>
           <TableHead>
             <TableRow>
               <NarrowTableCell>Delete</NarrowTableCell>
@@ -197,7 +186,7 @@ function PostsView() {
   );
   
   return (
-    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column' }}>
       <Typography variant="h4" gutterBottom>
         Explorer Posts
       </Typography>
@@ -207,15 +196,13 @@ function PostsView() {
         value={explorerSearch}
         onChange={(e) => setExplorerSearch(e.target.value)}
       />
-      <Box sx={{ flexGrow: 1, overflow: 'auto', mb: 4 }}>
-        {renderTable(
-          explorerPosts,
-          explorerPage,
-          handleChangeExplorerPage,
-          explorerSearch,
-          true
-        )}
-      </Box>
+      {renderTable(
+        explorerPosts,
+        explorerPage,
+        handleChangeExplorerPage,
+        explorerSearch,
+        true
+      )}
 
       <Typography variant="h4" gutterBottom>
         Business Posts
@@ -226,15 +213,13 @@ function PostsView() {
         value={businessSearch}
         onChange={(e) => setBusinessSearch(e.target.value)}
       />
-      <Box sx={{ flexGrow: 1, overflow: 'auto' }}>
-        {renderTable(
-          businessPosts,
-          businessPage,
-          handleChangeBusinessPage,
-          businessSearch,
-          false
-        )}
-      </Box>
+      {renderTable(
+        businessPosts,
+        businessPage,
+        handleChangeBusinessPage,
+        businessSearch,
+        false
+      )}
     </Box>
   );
 }

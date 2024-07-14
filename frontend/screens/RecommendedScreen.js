@@ -17,21 +17,8 @@ const RecommendedScreen = ({ navigation }) => {
   const fetchRecommendedPosts = async () => {
     try {
       const response = await axios.get(`http://${DB_HOST}:${PORT}/posts/recommended/${explorer.idexplorer}`);
-      const allPosts = response.data;
-      const categorizedPosts = {};
-      
-      allPosts.forEach(post => {
-        if (!categorizedPosts[post.category]) {
-          categorizedPosts[post.category] = [];
-        }
-        if (categorizedPosts[post.category].length < 2) {
-          categorizedPosts[post.category].push(post);
-        }
-      });
-
-      const limitedPosts = Object.values(categorizedPosts).flat();
-      setPosts(limitedPosts);
-      checkFavouritePosts(limitedPosts);
+      setPosts(response.data);
+      checkFavouritePosts(response.data);
     } catch (error) {
       console.error('Error fetching recommended posts:', error);
     }
