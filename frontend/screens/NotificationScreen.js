@@ -45,13 +45,13 @@ const NotificationScreen = () => {
     } catch (error) {
       console.error('Error fetching notifications:', error);
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  }, [explorer, business]);
+  }, [explorer, business])
 
     
   useEffect(() => {
-    fetchNotifications();
+    fetchNotifications()
   }, [fetchNotifications]);
 
   const onRefresh = useCallback(() => {
