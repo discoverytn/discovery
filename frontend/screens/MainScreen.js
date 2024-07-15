@@ -100,7 +100,7 @@ const MainScreen = ({ navigation }) => {
           <TouchableOpacity style={styles.searchIcon}>
             <Image source={require('../assets/search.gif')} style={styles.searchImage} />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.notificationIcon}>
+          <TouchableOpacity style={styles.notificationIcon} onPress={() => navigation.navigate('NotificationScreen')} >
             <Image source={require('../assets/notification.gif')} style={styles.notificationImage} />
           </TouchableOpacity>
         </View>
@@ -164,11 +164,11 @@ const MainScreen = ({ navigation }) => {
           <Icon name="home" type="font-awesome" color="#fff" size={24} />
           <Text style={styles.navText}>Home</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Categories')}>
+        <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Discover')}>
           <Icon name="globe" type="font-awesome" color="#fff" size={24} />
           <Text style={styles.navText}>Explore</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Discover')}>
+        <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('ExplorerAddPostScreen')}>
           <Icon name="plus-square" type="font-awesome" color="#fff" size={24} />
           <Text style={styles.navText}>Add</Text>
         </TouchableOpacity>
@@ -176,7 +176,7 @@ const MainScreen = ({ navigation }) => {
           <Icon name="heart" type="font-awesome" color="#fff" size={24} />
           <Text style={styles.navText}>Favorites</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('ScheduleEvent')}>
+        <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('EventList')}>
           <Icon name="calendar" type="font-awesome" color="#fff" size={24} />
           <Text style={styles.navText}>Event</Text>
         </TouchableOpacity>
