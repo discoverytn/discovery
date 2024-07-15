@@ -2,11 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 import axios from "axios";
 import { Alert } from "react-native";
 import * as SecureStore from "expo-secure-store";
-import {jwtDecode} from "jwt-decode";
-import { DB_HOST, PORT } from "@env";
-
-// Log the DB_HOST variable
-console.log("DB_HOSTTTTTTTTTTTTTTTT:", DB_HOST);
+import {jwtDecode} from "jwt-decode"; 
 
 const AuthContext = createContext({
   token: "",
@@ -86,17 +82,18 @@ const AuthProvider = ({ children }) => {
 
   const loginAction = async (data) => {
     try {
-      const response = await axios.post(`http://${DB_HOST}:${PORT}/auth/login`, data);
-      
+      const response = await axios.post("http://192.168.1.15:3000/auth/login", data);
+  
       if (response.status === 200) {
         const { token } = response.data;
         Alert.alert("Success", response.data.message);
-
+  
         setToken(token);
         await storeData("token", token);
-
+  
+        
         console.log("Login response data:", response.data);
-
+  
         if (response.data.explorer) {
           setExplorer(response.data.explorer);
           await storeData("explorer", response.data.explorer);
@@ -108,7 +105,7 @@ const AuthProvider = ({ children }) => {
         } else {
           console.log("Unknown role or missing user data in response");
         }
-
+  
         return { token };
       }
     } catch (err) {
@@ -117,6 +114,7 @@ const AuthProvider = ({ children }) => {
       throw err;
     }
   };
+  
 
   const signupAction = async (data) => {
     console.log('Signup Data:', data);
@@ -124,8 +122,8 @@ const AuthProvider = ({ children }) => {
     try {
       const endpoint =
         data.role === "explorer"
-          ? `http://${DB_HOST}:${PORT}/auth/register/explorer`
-          : `http://${DB_HOST}:${PORT}/auth/register/business`;
+          ? "http://192.168.1.15:3000/auth/register/explorer"
+          : "http://192.168.1.15:3000/auth/register/business";
 
       const response = await axios.post(endpoint, data);
 
@@ -169,7 +167,7 @@ const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider
-      value={{ token, explorer, business, loginAction, signupAction, setExplorer, setBusiness, logOut }}
+      value={{ token, explorer, business, loginAction, signupAction, setExplorer,setBusiness, logOut }}
     >
       {children}
     </AuthContext.Provider>

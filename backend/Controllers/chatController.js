@@ -56,8 +56,8 @@ const getMessages = async (req, res) => {
 
     const formattedMessages = messages.map((msg) => ({
       ...msg.toJSON(),
-      explorerName: msg.explorer ? msg.explorer.name : null,
-      businessName: msg.business ? msg.business.name : null,
+      explorerName: msg.explorer ? msg.ExplorerInfo.username : null,
+      businessName: msg.business ? msg.BusinessInfo.usernameame : null,
     }));
 
     return res.status(200).json(formattedMessages);

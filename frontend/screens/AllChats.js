@@ -82,6 +82,7 @@
 // });
 
 // export default AllChats;
+
 import React, {useState,useEffect} from "react";
 import { View, Text, Pressable } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
@@ -106,11 +107,11 @@ const AllChats = ({item}) => {
         
     };
     
-    const socket = io("http://192.168.1.21:3000");
+    const socket = io("http://192.168.1.15:3000");
     console.log(socket,"socketttttt");
     useEffect(()=>{
         try {
-            const socket = io("http://192.168.1.21:3000");
+            const socket = io("http://192.168.1.15:3000");
           
             console.log("socket=>",socket);} 
         catch (error) {
@@ -131,7 +132,10 @@ const AllChats = ({item}) => {
 
         <View style={styles.crightContainer}>
             <View>
+                
                 {/* <Text style={styles.cusername}>{item.explorer}</Text> */}
+                <Text style={styles.name}>{item.explorer}</Text>
+
 
                 <Text style={styles.cmessage}>
                     {item?.message ? item.message : "Tap to start chatting"}

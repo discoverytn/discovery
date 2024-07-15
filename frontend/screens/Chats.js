@@ -1,39 +1,31 @@
 import React, { useState, useEffect } from 'react';
-import { Text, View, FlatList, TextInput, Pressable, StyleSheet, KeyboardAvoidingView, Platform, SafeAreaView } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Text, View, TextInput, Pressable, StyleSheet, KeyboardAvoidingView, Platform, SafeAreaView, ScrollView } from 'react-native';
 import { io } from 'socket.io-client';
 import axios from 'axios';
 import { useRoute } from '@react-navigation/native';
-import { useAuth } from '../context/AuthContext';
-import  LottieView  from 'lottie-react-native';
-import RecordAnimation from '../assets/Animation.json';
-import AudioRecord from 'react-native-audio-record';
 
 const Chats = ({ navigation, route }) => {
   const params = route.params || {};
   const { idbusiness, idexplorer, eventName } = params;
-  const auth = useAuth();
-
+// const idbusiness = params
   const [message, setMessage] = useState("");
   const [chatMessages, setChatMessages] = useState([]);
   const [socket, setSocket] = useState(null);
-  const [isRecording, setIsRecording] = useState(false);
-  const [recordedAudioPath, setRecordedAudioPath] = useState(null);
 
   useEffect(() => {
-    const socket = io('http://192.168.58.72:3000');
-    setSocket(socket);
+    const socketInstance = io('http://192.168.1.15:3000');
+    setSocket(socketInstance);
 
-    socket.on('receive-message', (newMessage) => {
-      setChatMessages(prevMessages => [...prevMessages, newMessage]);
+    socketInstance.on('receive-message', (newMessage) => {
+      setChatMessages((prevMessages) => [...prevMessages, newMessage]);
     });
 
     if (idexplorer && idbusiness && eventName) {
-      socket.emit('join-room', { eventName, idexplorer, idbusiness });
+      socketInstance.emit('join-room', { eventName, idexplorer, idbusiness });
     }
 
     return () => {
-      socket.disconnect();
+      socketInstance.disconnect();
     };
   }, [idexplorer, idbusiness, eventName]);
 
@@ -42,65 +34,42 @@ const Chats = ({ navigation, route }) => {
   }, [idexplorer, idbusiness]);
 
   const getMessage = () => {
-    axios.get(`http://192.168.1.21:3000/api/chat/getmsg/${idexplorer}/${idbusiness}`)
+    axios.get("http://192.168.1.15:3000/chat/get", { explorer_idexplorer: idexplorer, business_idbusiness: idbusiness })
       .then((res) => {
         setChatMessages(res.data);
-      })
-      .catch(err => console.log(err));
-  };
-
-  const sendMessage = (message) => {
-    if (socket) {
-      socket.emit("send-message", message);
-    }
-    axios.post(`http://192.168.1.21:3000/api/chat/send`, { 
-      message, 
-      idexplorer: idexplorer, 
-      idbusiness: idbusiness 
-    })
-      .then((res) => {
-        setMessage("");
-        getMessage();
       })
       .catch((err) => console.log(err));
   };
 
-  const handleAdd = () => {
-    if (message.trim()) {
-      sendMessage(message);
+  const sendMessage = () => {
+    if (!idexplorer || !idbusiness) {
+      console.error("Missing idexplorer or idbusiness");
+      return;
+    }
+
+    if (message.length > 0) {
+      if (socket) {
+        socket.emit('send-message', { message, explorer_idexplorer: idexplorer, business_idbusiness: idbusiness });
+      }
+
+      axios.post("http://192.168.1.15:3000/chat/send", {
+        message,
+        explorer_idexplorer: idexplorer,
+        business_idbusiness: idbusiness
+      })
+        .then((res) => {
+          setChatMessages((prevMessages) => [...prevMessages, res.data]);
+          setMessage("");
+        })
+        .catch((err) => {
+          if (err.response) {
+            console.log("Server responded with:", err.response.data);
+          }
+          console.error('Error sending message:', error);
+
+        });
     }
   };
-
-  useEffect(() => {
-    const socketConnection = io("http://192.168.1.21:3000");
-    setSocket(socketConnection);
-
-    socketConnection.on("connect", () => {
-      console.log("Socket connected.");
-    });
-
-    socketConnection.on("disconnect", () => {
-      console.log("Socket disconnected !");
-    });
-
-    return () => {
-      if (socketConnection) {
-        socketConnection.disconnect();
-      }
-    };
-  }, []);
-
-  useEffect(() => {
-    const fetchSessionData = async () => {
-      const storedIdExplorer = await AsyncStorage.getItem("idexplorer");
-      const storedIdBusiness = await AsyncStorage.getItem("idbusiness");
-      setIdExplorer(storedIdExplorer);
-      setIdBusiness(storedIdBusiness);
-    };
-
-    fetchSessionData();
-    getMessage();
-  }, []);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -114,41 +83,26 @@ const Chats = ({ navigation, route }) => {
             ]}
           >
             <Text style={styles.senderText}>
-              {msg.explorer_idexplorer === idexplorer ? auth.explorer.username : msg.Business?.businessname}
+              {msg.explorer_idexplorer === idexplorer ? 'You' : msg.businessName}
             </Text>
             <Text style={styles.messageText}>{msg.message}</Text>
             <Text style={styles.receiverText}>
-              {msg.business_idbusiness === idbusiness ? msg.Business?.businessname : auth.explorer.username}
+              {msg.business_idbusiness === idbusiness ? msg.businessName : 'You'}
             </Text>
           </View>
         ))}
       </ScrollView>
-
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 20}
         style={styles.inputContainer}
       >
-        <Pressable onPress={isRecording ? stopRecording : startRecording} style={styles.recordButton}>
-          {isRecording ? (
-            <LottieView
-              source={RecordAnimation}
-              style={styles.animation}
-              autoPlay
-              loop
-            />
-          ) : (
-            <Text style={styles.recordButtonText}>Record</Text>
-          )}
-        </Pressable>
-
         <TextInput
           style={styles.input}
           value={message}
           onChangeText={setMessage}
           placeholder="Type your message..."
         />
-
         <Pressable onPress={sendMessage} style={styles.sendButton}>
           <Text style={styles.sendButtonText}>Send</Text>
         </Pressable>
@@ -186,7 +140,7 @@ const styles = StyleSheet.create({
   },
   messageText: {
     fontSize: 16,
-    color: "#000000", 
+    color: "#000000",
   },
   receiverText: {
     fontSize: 12,
@@ -217,19 +171,6 @@ const styles = StyleSheet.create({
   sendButtonText: {
     color: "#FFFFFF",
     fontWeight: "bold",
-  },
-  recordButton: {
-    backgroundColor: "#FF0000", 
-    padding: 5,
-    borderRadius: 20,
-  },
-  recordButtonText: {
-    color: "#FFFFFF",
-    fontWeight: "bold",
-  },
-  animation: {
-    width: 50, 
-    height: 50,
   },
 });
 

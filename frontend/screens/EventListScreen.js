@@ -1,26 +1,23 @@
 import React, { useState, useCallback } from 'react';
-import { View, Text, Image, TouchableOpacity, FlatList, StyleSheet } from 'react-native';
+import { View, Text, Image, TouchableOpacity, FlatList, StyleSheet, Modal } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import LottieView from 'lottie-react-native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faLocationDot, faCalendarDays, faUser } from '@fortawesome/free-solid-svg-icons';
-import CustomModal from './CustomModal';
 import axios from 'axios';
 import join from '../assets/join.gif';
 import { useAuth } from '../context/AuthContext';
-import { DB_HOST, PORT } from "@env";
 
 const EventListScreen = () => {
   const navigation = useNavigation();
   const [showModal, setShowModal] = useState(false);
+  const [modalMessage, setModalMessage] = useState('');
   const [events, setEvents] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
-  const [currentEvent, setCurrentEvent] = useState(null); 
-  const { explorer } = useAuth();
 
   const fetchEvents = async () => {
     try {
-      const response = await axios.get(`http://${DB_HOST}:${PORT}/events/getAll`);
+      const response = await axios.get('http://192.168.1.15:3000/events/getAll');
       setEvents(response.data);
     } catch (error) {
       console.error('Error fetching events:', error);
@@ -41,65 +38,78 @@ const EventListScreen = () => {
     fetchEvents().then(() => setRefreshing(false));
   }, []);
 
-  const toggleModal = async (event) => {
-    setShowModal(!showModal);
-    if (!showModal && event !== currentEvent) {
-     
-      setCurrentEvent(event);
-      if (explorer && explorer.idexplorer) {
-        try {
-          await axios.post(`http://${DB_HOST}:${PORT}/notifications/create`, {
-            type: 'event_join',
-            message: `${explorer.firstname} ${explorer.lastname} wants to join your event "${event.eventName}"`,
-            business_idbusiness: event.business_idbusiness,
-            explorer_idexplorer: explorer.idexplorer,
-            senderImage: explorer.image
-          });
-          console.log('Notification sent successfully');
-        } catch (error) {
-          console.error('Error sending notification:', error);
-        }
-      } else {
-        console.log('Explorer information is not available');
-      }
+  const handleJoinEvent = async (event) => {
+    try {
+      await axios.post('http://192.168.1.15:3000/events/join', {
+        idexplorer: auth.explorer.idexplorer,
+        idbusiness: event.Business.idbusiness,
+        idevent: event.idevents,
+        eventName: event.eventName
+      });
+  
+      // create a notification for the business
+      await axios.post('http://192.168.1.15:3000/notifications/create', {
+        type: 'event_join',
+        message: `${auth.explorer.username} wants to join your event "${event.eventName}"`,
+        explorer_idexplorer: auth.explorer.idexplorer,
+        business_idbusiness: event.Business.idbusiness,
+        senderImage: auth.explorer.image
+      });
+  
+      setModalMessage('Joining request sent! Waiting for business approval.');
+      setShowModal(true);
+    } catch (error) {
+      console.error('Error sending join request:', error);
+      setModalMessage('Error sending join request.');
+      setShowModal(true);
     }
   };
+  
+  const renderItem = ({ item }) => {
+    console.log("Event item:", item);
 
-  const renderItem = ({ item }) => (
-    <TouchableOpacity
-      style={styles.eventItem}
-      onPress={() => navigation.navigate('OneEvent', { event: item })}
-    >
-      <Image
-        source={item.image ? { uri: item.image } : require('../assets/event-placeholder.jpg')}
-        style={styles.eventImage}
-      />
-      <View style={styles.eventDetails}>
-        <Text style={styles.eventName}>{item.eventName}</Text>
-        <View style={styles.infoRow}>
-          <FontAwesomeIcon icon={faLocationDot} size={16} color="#32CD32" />
-          <Text style={styles.infoText}>{item.eventLocation}</Text>
+   
+    
+  
+    return (
+      <TouchableOpacity 
+        style={styles.eventItem}
+        onPress={() => handleJoinEvent(item)}
+      >
+        <Image 
+          source={item.image ? { uri: item.image } : require('../assets/event-placeholder.jpg')} 
+          style={styles.eventImage} 
+        />
+        <View style={styles.eventDetails}>
+          <Text style={styles.eventName}>{item.eventName}</Text>
+          <View style={styles.infoRow}>
+            <FontAwesomeIcon icon={faLocationDot} size={16} color="#32CD32" />
+            <Text style={styles.infoText}>{item.eventLocation}</Text>
+          </View>
+          <View style={styles.infoRow}>
+            <FontAwesomeIcon icon={faCalendarDays} size={16} color="#32CD32" />
+            <Text style={styles.infoText}>{item.startDate} - {item.endDate}</Text>
+          </View>
+          <View style={styles.infoRow}>
+            <FontAwesomeIcon icon={faUser} size={16} color="#32CD32" />
+            <Text style={styles.infoText}>
+              By: {item.Explorer ? item.Explorer.username : item.Business ? item.Business.businessname : 'Unknown'}
+            </Text>
+          </View>
+          <Text style={styles.eventDescription} numberOfLines={2}>{item.eventDescription}</Text>
+          <View style={styles.footer}>
+            <Text style={styles.eventPrice}>{item.eventPrice} DT</Text>
+            <TouchableOpacity 
+              style={styles.joinButton} 
+              onPress={() => handleJoinEvent(item)}
+            >
+              <Image source={join} style={styles.gif} />
+            </TouchableOpacity>
+          </View>
         </View>
-        <View style={styles.infoRow}>
-          <FontAwesomeIcon icon={faCalendarDays} size={16} color="#32CD32" />
-          <Text style={styles.infoText}>{item.startDate} - {item.endDate}</Text>
-        </View>
-        <View style={styles.infoRow}>
-          <FontAwesomeIcon icon={faUser} size={16} color="#32CD32" />
-          <Text style={styles.infoText}>
-            By: {item.Explorer ? item.Explorer.username : item.Business ? item.Business.businessname : 'Unknown'}
-          </Text>
-        </View>
-        <Text style={styles.eventDescription} numberOfLines={2}>{item.eventDescription}</Text>
-        <View style={styles.footer}>
-          <Text style={styles.eventPrice}>{item.eventPrice} DT</Text>
-          <TouchableOpacity style={styles.joinButton} onPress={() => toggleModal(item)}>
-            <Image source={join} style={styles.gif} />
-          </TouchableOpacity>
-        </View>
-      </View>
-    </TouchableOpacity>
-  );
+      </TouchableOpacity>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -110,7 +120,7 @@ const EventListScreen = () => {
         <Text style={styles.headerText}></Text>
       </View>
       <View style={styles.subHeader}>
-        <Text style={styles.subHeaderText}>Available Events</Text>
+        <Text style={styles.subHeaderText}>Available Events </Text>
         <LottieView
           source={require('../assets/sand-clock.json')}
           autoPlay
@@ -126,11 +136,24 @@ const EventListScreen = () => {
         refreshing={refreshing}
         onRefresh={onRefresh}
       />
-      <CustomModal
+      <Modal
         visible={showModal}
-        onClose={() => setShowModal(false)}
-        message="Event request was sent!"
-      />
+        transparent
+        animationType="slide"
+        onRequestClose={() => setShowModal(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalMessage}>{modalMessage}</Text>
+            <TouchableOpacity 
+              style={styles.closeButton}
+              onPress={() => setShowModal(false)}
+            >
+              <Text style={styles.closeButtonText}>Close</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -238,6 +261,33 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     resizeMode: 'contain',
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    backgroundColor: '#FFFFFF',
+    padding: 20,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  modalMessage: {
+    fontSize: 18,
+    color: '#333333',
+    textAlign: 'center',
+    marginBottom: 10,
+  },
+  closeButton: {
+    backgroundColor: '#32CD32',
+    padding: 10,
+    borderRadius: 5,
+  },
+  closeButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
   },
 });
 

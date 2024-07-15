@@ -5,7 +5,7 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: "http://192.168.58.72:3000",
+    origin: "http://192.168.1.15:3000",
     methods: ["GET", "POST"],
     allowedHeaders: ["my-custom-header"],
     credentials: true
@@ -40,7 +40,7 @@ app.get("/api", (req, res) => {
 });
 
 server.listen(3001, () => {
-  console.log('Server started - http://192.168.58.72:3000');
+  console.log('Server of chat  started - http://192.168.1.15:3000');
 });
 
 module.exports = { io }

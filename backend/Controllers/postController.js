@@ -1,6 +1,5 @@
 const db = require('../database/index');
 const Posts = db.Posts;
-const Explorer = db.Explorer;
 
 const ExplorerCreatePost = async (req, res) => {
   const { title, description, hashtags, location, long, latt, image1, image2, image3, image4, category, explorer_idexplorer } = req.body;
@@ -21,34 +20,12 @@ const ExplorerCreatePost = async (req, res) => {
       explorer_idexplorer,
     });
 
-    // Update numOfPosts in Explorer model
-    await updateExplorerNumOfPosts(explorer_idexplorer);
-
     res.status(201).json(post);
   } catch (error) {
     console.error("Error creating explorer post:", error);
     res.status(500).json({ error: "Failed to create explorer post" });
   }
 };
-
-// Function to update numOfPosts in Explorer model
-const updateExplorerNumOfPosts = async (explorerId) => {
-  try {
-    const count = await Posts.count({ where: { explorer_idexplorer: explorerId } });
-    const explorer = await Explorer.findByPk(explorerId);
-
-    if (explorer) {
-      explorer.numOfPosts = count;
-      await explorer.save();
-    }
-  } catch (error) {
-    console.error("Error updating numOfPosts in Explorer model:", error);
-  }
-};
-
-function hashtagsToString(hashtags) {
-  return Array.isArray(hashtags) ? hashtags.join(', ') : hashtags;
-}
 
 const BusinessCreatePost = async (req, res) => {
   const { title, description, hashtags, location, long, latt, image1, image2, image3, image4, category, business_idbusiness } = req.body;
@@ -69,20 +46,12 @@ const BusinessCreatePost = async (req, res) => {
       business_idbusiness,
     });
 
-    // Increase numOfPosts in Business model
-    const business = await db.Business.findByPk(business_idbusiness);
-    if (business) {
-      business.numOfPosts += 1;
-      await business.save();
-    }
-
     res.status(201).json(post);
   } catch (error) {
     console.error("Error creating business post:", error);
     res.status(500).json({ error: "Failed to create business post" });
   }
 };
-
 
 const ExplorerUpdatePost = async (req, res) => {
   const { id } = req.params;
@@ -155,14 +124,7 @@ const ExplorerDeletePost = async (req, res) => {
     const post = await Posts.findOne({ where: { idposts: id } });
 
     if (post && post.explorer_idexplorer !== null) {
-      const explorerId = post.explorer_idexplorer;
-
-      // Delete the post
       await post.destroy();
-      
-      // Update numOfPosts in Explorer model by decrementing
-      await Explorer.decrement('numOfPosts', { where: { idexplorer: explorerId } });
-
       res.status(200).json({ message: "Explorer post deleted successfully" });
     } else {
       res.status(404).json({ error: "Explorer post not found or not associated with an explorer" });
@@ -173,7 +135,6 @@ const ExplorerDeletePost = async (req, res) => {
   }
 };
 
-
 const BusinessDeletePost = async (req, res) => {
   const { id } = req.params;
 
@@ -182,24 +143,15 @@ const BusinessDeletePost = async (req, res) => {
 
     if (post && post.business_idbusiness !== null) {
       await post.destroy();
-
-      // Decrease numOfPosts in Business model
-      const business = await db.Business.findByPk(post.business_idbusiness);
-      if (business) {
-        business.numOfPosts -= 1;
-        await business.save();
-      }
-
       res.status(200).json({ message: "Business post deleted successfully" });
     } else {
-      res.status(404).json({ error: "Business post not found or not associated with a business" });
+      res.status(404).json({ error: "Business post not found or not associated with an business" });
     }
   } catch (error) {
     console.error("Error deleting business post:", error);
     res.status(500).json({ error: "Failed to delete business post" });
   }
 };
-
 
 
 function hashtagsToString(hashtags) {
@@ -289,36 +241,38 @@ const getAllBusinessPosts = async (req, res) => {
     res.status(500).json({ error: "Failed to fetch business posts" });
   }
 };
-const getTopRatedPosts = async (req, res) => {
+const getTopFavoritePosts = async (req, res) => {
   try {
-    const topRatedPosts = await db.Posts.findAll({
+    const topFavoritePosts = await db.Favorites.findAll({
       attributes: [
-        'idposts',
-        'title',
-        'description',
-        'hashtags',
-        'location',
-        'image1',
-        'averageRating'
+        'posts_idposts',
+        [db.Sequelize.fn('COUNT', 'posts_idposts'), 'count']
       ],
-      order: [[db.Sequelize.literal('averageRating'), 'DESC']],
-      limit: 5
+      group: ['posts_idposts'],
+      order: [[db.Sequelize.literal('count'), 'DESC']],
+      limit: 5,
+      include: [
+        {
+          model: Posts,
+          attributes: ['idposts', 'title', 'description', 'hashtags', 'location', 'image1'],
+        },
+      ],
     });
 
-    const formattedTopPosts = topRatedPosts.map(post => ({
-      idposts: post.idposts,
-      title: post.title,
-      description: post.description,
-      hashtags: post.hashtags,
-      location: post.location,
-      image1: post.image1,
-      averageRating: post.averageRating
+    const formattedTopPosts = topFavoritePosts.map(favorite => ({
+      idposts: favorite.Post.idposts,
+      title: favorite.Post.title,
+      description: favorite.Post.description,
+      hashtags: favorite.Post.hashtags,
+      location: favorite.Post.location,
+      image1: favorite.Post.image1,
+      totalFavorites: favorite.get('count'),
     }));
 
     res.status(200).json(formattedTopPosts);
   } catch (error) {
-    console.error("Error fetching top rated posts:", error);
-    res.status(500).json({ error: "Failed to fetch top rated posts" });
+    console.error("Error fetching top favorite posts:", error);
+    res.status(500).json({ error: "Failed to fetch top favorite posts" });
   }
 };
 const deletePost = async (req, res) => {
@@ -351,6 +305,6 @@ module.exports = {
   ratePost,
   getAllExplorerPosts,
   getAllBusinessPosts,
-  getTopRatedPosts,
+  getTopFavoritePosts,
   deletePost
 };
