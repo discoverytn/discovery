@@ -4,7 +4,7 @@ const Business = db.Business;
 const Payment = db.Payment;
 
 const createPayment = async (req, res) => {
-  const { cardholderName, amount, business_idbusiness, subMonths } = req.body;
+  const { cardholderName, amount, business_idbusiness, subMonths, paymentIntent } = req.body;
 
   try {
     const business = await Business.findByPk(business_idbusiness);
@@ -23,7 +23,7 @@ const createPayment = async (req, res) => {
       amount: Math.round(amount * 100),
       currency: "usd",
       description: `Payment for ${business.businessName}`,
-      payment_method_types: ["card"],
+      payment_method_types: ["card", "link"],
       metadata: {
         integration_check: "accept_a_payment",
         business_id: business.idbusiness,
@@ -32,10 +32,12 @@ const createPayment = async (req, res) => {
 
     await business.update({ subscribed: "yes" });
 
-    res.status(200).json({ client_secret: paymentIntent.client_secret });
+    res.status(200).json({ 
+      client_secret: paymentIntent.client_secret,
+    });
   } catch (error) {
     console.error("Error creating payment:", error);
-    res.status(500).json({ error: "Failed to process payment" });
+    res.status(500).json({ error: "Failed to process payment", details: error.message });
   }
 };
 

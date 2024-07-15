@@ -5,17 +5,25 @@ import { CardField, useStripe } from '@stripe/stripe-react-native';
 import axios from "axios";
 import { DB_HOST, PORT } from "@env";
 import { useAuth } from '../context/AuthContext';
+import { Picker } from '@react-native-picker/picker';
 
 const PaymentScreen = () => {
   const { createPaymentMethod, confirmPayment } = useStripe();
   const [cardholderName, setCardholderName] = useState('');
-  const [amount, setAmount] = useState('');
+  const [duration, setDuration] = useState('1 month');
   const [loading, setLoading] = useState(false);
   const { business } = useAuth();
 
+  const durationFees = {
+    '1 month': 10,
+    '2 months': 18,
+    '3 months': 27,
+    '6 months': 50,
+    '1 year': 90
+  };
+
   const handleContinue = async () => {
-    // Check if all required fields are filled
-    if (!cardholderName || !amount) {
+    if (!cardholderName || !duration) {
       Alert.alert('Invalid Input', 'Please complete all the fields.');
       return;
     }
@@ -25,7 +33,6 @@ const PaymentScreen = () => {
     try {
       const { paymentMethod, error: paymentMethodError } = await createPaymentMethod({
         type: 'Card',
-        card: {}, // Add card details here
         billingDetails: { name: cardholderName },
       });
 
@@ -36,17 +43,17 @@ const PaymentScreen = () => {
       }
 
       const response = await axios.post(`http://${DB_HOST}:${PORT}/payment/create`, {
-        amount: parseFloat(amount),
+        amount: durationFees[duration],
         business_idbusiness: business.idbusiness,
         payment_method: paymentMethod.id,
+        cardholderName,
+        subMonths: parseInt(duration),
       });
 
       const { client_secret } = response.data;
 
-      // Confirm payment with Stripe
       const { error: confirmError, paymentIntent } = await confirmPayment(client_secret, {
         paymentMethodType: 'Card',
-        paymentMethodId: paymentMethod.id,
       });
 
       if (confirmError) {
@@ -79,28 +86,38 @@ const PaymentScreen = () => {
           />
         </View>
 
-        {/* Use CardField for Card Details */}
         <View style={styles.inputContainer}>
           <Text style={styles.label}>Card Details</Text>
-          <CardField
+          {/* <CardField
             postalCodeEnabled={false}
             placeholder={{
               number: '4242 4242 4242 4242',
             }}
             cardStyle={styles.card}
             style={styles.cardContainer}
-          />
+          /> */}
         </View>
 
         <View style={styles.inputContainer}>
-          <Text style={styles.label}>Amount</Text>
-          <TextInput
-            value={amount}
-            onChangeText={setAmount}
-            style={styles.input}
-            keyboardType="numeric"
-            theme={{ colors: { primary: '#FF0000', text: '#333333' } }}
-          />
+          <Text style={styles.label}>Duration of Subscription</Text>
+          <View style={styles.pickerContainer}>
+            <Picker
+              selectedValue={duration}
+              onValueChange={(itemValue) => setDuration(itemValue)}
+              style={styles.picker}
+            >
+              <Picker.Item label="1 month" value="1" />
+              <Picker.Item label="2 months" value="2" />
+              <Picker.Item label="3 months" value="3" />
+              <Picker.Item label="6 months" value="6" />
+              <Picker.Item label="1 year" value="12" />
+            </Picker>
+          </View>
+        </View>
+
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Price </Text>
+          <Text style={styles.feeText}>{durationFees[`${duration} month${duration > 1 ? 's' : ''}`]} dt</Text>
         </View>
 
         <Button
@@ -165,6 +182,21 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderRadius: 8,
     fontSize: 18,
+  },
+  pickerContainer: {
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+    borderRadius: 8,
+    overflow: 'hidden',
+  },
+  picker: {
+    height: 50,
+    width: '100%',
+  },
+  feeText: {
+    fontSize: 18,
+    color: '#333333',
+    fontWeight: 'bold',
   },
   continueButton: {
     margin: 24,

@@ -118,7 +118,6 @@ const updateEvent = async (req, res) => {
 };
 
 // Delete an event
-// In eventController.js, modify the deleteEvent function
 const deleteEvent = async (req, res) => {
   const { idevents } = req.params;
 
@@ -133,14 +132,12 @@ const deleteEvent = async (req, res) => {
     });
 
     if (deleted) {
-      // Decrease numOfEvents in Business model
       const business = await db.Business.findByPk(event.business_idbusiness);
       if (business && business.numOfEvents > 0) {
         business.numOfEvents -= 1;
         await business.save();
       }
       
-      // Send a JSON response instead of no content
       res.status(200).json({ message: 'Event deleted successfully' });
     } else {
       res.status(404).json({ error: 'Event not found' });
