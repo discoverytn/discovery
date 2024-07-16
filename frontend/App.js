@@ -49,9 +49,7 @@ function MainNavigator() {
       
     >
       <Tab.Screen name="PaymentScreen" component={PaymentScreen} options={{ tabBarLabel: () => null }} />
-                  <Tab.Screen name="Chat" component={Chat} options={{ tabBarLabel: () => null }} />
 
-            <Tab.Screen name="Chats" component={Chats} options={{ tabBarLabel: () => null }} />
             {/* <Tab.Screen name="AllChats" component={AllChats} options={{ tabBarLabel: () => null }} /> */}
       {/* <Tab.Screen name="ChatCopie" component={ChatCopie} options={{ tabBarLabel: () => null }} /> */}
 
@@ -76,12 +74,15 @@ function MainNavigator() {
       <Tab.Screen name="EventList" component={EventListScreen} options={{ tabBarLabel: () => null }} />
       <Tab.Screen name="NotificationScreen" component={NotificationScreen} options={{ tabBarLabel: () => null }} />
       <Tab.Screen name="OneEvent" component={OneEventScreen} options={{ tabBarLabel: () => null }} />
+
+      <Tab.Screen name="Chats" component={Chats} options={{ tabBarLabel: () => null }} />
+
      
 
     </Tab.Navigator>
     
   );
-}
+} 
 
 export default function App() {
   return (

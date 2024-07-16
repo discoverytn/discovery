@@ -123,11 +123,44 @@ const getUnreadNotificationCount = async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch unread notification count' });
   }
 };
+// this function for giving infromation when joining event 
+const eventsGroup = async (req, res) => {
+  try {
+    const eventJoinNotifications = await Notif.findAll({
+      where: {
+        type: 'event_join'
+      },
+      attributes: [
+        'business_idbusiness', 
+        'explorer_idexplorer',
+        [db.sequelize.fn('MAX', db.sequelize.col('message')), 'message'],
+        [db.sequelize.fn('MAX', db.sequelize.col('senderImage')), 'senderImage'],
+        [db.sequelize.fn('SUBSTRING_INDEX', db.sequelize.fn('MAX', db.sequelize.col('message')), ' ', 1), 'expName']
+      ],
+      group: ['business_idbusiness', 'explorer_idexplorer']
+    });
+
+    // Process the results
+    const processedNotifications = eventJoinNotifications.map(notification => ({
+      business_idbusiness: notification.business_idbusiness,
+      explorer_idexplorer: notification.explorer_idexplorer,
+      expName: notification.getDataValue('expName'),
+      senderImage: notification.senderImage
+    }));
+
+    res.status(200).json(processedNotifications);
+  } catch (error) {
+    console.error('Error fetching events group:', error);
+    res.status(500).json({ error: 'Failed to fetch events group' });
+  }
+};
+
 
 module.exports = {
   createNotification,
   getUserNotifications,
   markNotificationAsRead,
   deleteNotification,
-  getUnreadNotificationCount
+  getUnreadNotificationCount,
+  eventsGroup
 };
