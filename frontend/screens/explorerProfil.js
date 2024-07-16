@@ -5,6 +5,7 @@ import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { useAuth } from '../context/AuthContext';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { DB_HOST, PORT } from "@env";
+import Navbar from './Navbar'; 
 
 const ExplorerProfile = ({route}) => {
   const { explorer, setExplorer, logOut } = useAuth();
@@ -425,6 +426,8 @@ const ExplorerProfile = ({route}) => {
           contentContainerStyle={styles.postsContainer}
         />
       )}
+              <Navbar navigation={navigation} />
+
     </View>
   );
 };

@@ -6,6 +6,7 @@ import axios from 'axios';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faHome ,faCircleLeft} from '@fortawesome/free-solid-svg-icons';
 import { DB_HOST, PORT } from "@env";
+import Navbar from './Navbar'; 
 
 const NotificationScreen = () => {
   const [notifications, setNotifications] = useState([]);
@@ -117,6 +118,8 @@ const NotificationScreen = () => {
           <Text style={styles.emptyText}>No notifications yet</Text>
         }
       />
+            <Navbar navigation={navigation} />
+
     </View>
   );
 };
