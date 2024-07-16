@@ -5,7 +5,7 @@ import LeaderScreen from './LeaderScreen';
 import LeaderScreen2 from './LeaderScreen2';
 import RecommendedScreen from './RecommendedScreen';
 import { DB_HOST, PORT } from "@env";
-import { LinearGradient } from 'expo-linear-gradient';
+import Navbar from './Navbar'; 
 import axios from 'axios';
 
 const { width } = Dimensions.get('window');
@@ -158,29 +158,7 @@ const MainScreen = ({ navigation }) => {
         <View style={{ paddingBottom: 80 }} />
       </ScrollView>
 
-      {/* Bottom Navigation */}
-      <LinearGradient colors={['#667eea', '#764ba2']} style={styles.bottomNav}>
-        <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Home')}>
-          <Icon name="home" type="font-awesome" color="#fff" size={24} />
-          <Text style={styles.navText}>Home</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Discover')}>
-          <Icon name="globe" type="font-awesome" color="#fff" size={24} />
-          <Text style={styles.navText}>Explore</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('ExplorerAddPostScreen')}>
-          <Icon name="plus-square" type="font-awesome" color="#fff" size={24} />
-          <Text style={styles.navText}>Add</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Favorites')}>
-          <Icon name="heart" type="font-awesome" color="#fff" size={24} />
-          <Text style={styles.navText}>Favorites</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('EventList')}>
-          <Icon name="calendar" type="font-awesome" color="#fff" size={24} />
-          <Text style={styles.navText}>Event</Text>
-        </TouchableOpacity>
-      </LinearGradient>
+      <Navbar navigation={navigation} />
     </View>
   );
 };
@@ -291,24 +269,7 @@ const styles = StyleSheet.create({
     padding: 5,
     borderRadius: 5,
   },
-  bottomNav: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    backgroundColor: '#29738C',
-    paddingVertical: 10,
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-  },
-  navItem: {
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  navText: {
-    color: '#fff',
-    fontSize: 12,
-  },
+
   flagimage: {
     width: 30,
     height: 40,

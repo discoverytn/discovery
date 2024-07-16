@@ -1,12 +1,13 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { StyleSheet, Text, View, Image, TouchableOpacity, FlatList, ScrollView, Alert, RefreshControl } from 'react-native';
 import axios from 'axios';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { useAuth } from '../context/AuthContext';
-import { Picker } from '@react-native-picker/picker';
 import Icon from 'react-native-vector-icons/FontAwesome5';
 import { LinearGradient } from 'expo-linear-gradient';
 import { DB_HOST, PORT } from "@env";
+import Navbar from './Navbar'; 
+import LottieView from 'lottie-react-native';
 
 const BusinessProfileScreen = ({route}) => {
   const { business, setBusiness, logOut } = useAuth();
@@ -16,8 +17,10 @@ const BusinessProfileScreen = ({route}) => {
   const [events, setEvents] = useState([]);
   const [numPosts, setNumPosts] = useState(0);
   const [numEvents, setNumEvents] = useState(0);
-  const [selectedValue, setSelectedValue] = useState("");
   const [refreshing, setRefreshing] = useState(false);
+  const [isOptionsOpen, setIsOptionsOpen] = useState(false);
+  const [showBusinessDetails, setShowBusinessDetails] = useState(false);
+  const lottieRef = useRef(null);
 
   const fetchBusinessData = useCallback(async () => {
     if (!business?.id) return;
@@ -114,10 +117,6 @@ const BusinessProfileScreen = ({route}) => {
     setActiveTab(tabName);
   };
 
-  const navigateToEditProfile = () => {
-    navigation.navigate('BusinessEditProfileScreen');
-  };
-
   const handleLogout = () => {
     logOut();
     navigation.navigate('Login');
@@ -145,17 +144,6 @@ const BusinessProfileScreen = ({route}) => {
     } catch (error) {
       console.error('Error:', error);
       Alert.alert(`Error: ${error.message}`);
-    }
-  };
-
-  const handlePickerChange = (value) => {
-    setSelectedValue(value);
-    if (value === 'Home') {
-      navigation.navigate('Main');
-    } else if (value === 'AddPost') {
-      navigation.navigate('BusinessddPostScreen');
-    } else if (value === 'AddEvent') {
-      navigation.navigate('ScheduleEvent');
     }
   };
 
@@ -196,7 +184,7 @@ const BusinessProfileScreen = ({route}) => {
   };
 
   const renderPostItem = ({ item }) => (
-    <LinearGradient colors={['#667eea', '#764ba2']} style={styles.postItem}>
+    <LinearGradient colors={['#e6e9f0', '#eef1f5']} style={styles.postItem}>
       {item.image1 && <Image source={{ uri: item.image1 }} style={styles.postImage} />}
       <Text style={styles.postTitle}>{item.title || 'Untitled'}</Text>
       <Text style={styles.postDescription}>{item.description || 'No description'}</Text>
@@ -229,123 +217,163 @@ const BusinessProfileScreen = ({route}) => {
       });
   }, [fetchBusinessData, fetchBusinessPosts, fetchBusinessEvents]);
 
-  return (
-    <ScrollView 
-      style={styles.container} 
-      refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+  const toggleOptions = () => {
+    setIsOptionsOpen(!isOptionsOpen);
+    if (lottieRef.current) {
+      if (!isOptionsOpen) {
+        lottieRef.current.play();
+      } else {
+        lottieRef.current.reset();
       }
-    >
-      <LinearGradient colors={['#1a2a6c', '#e6e9f0', '#eef1f5']} style={styles.header}>
-        <View style={styles.profileImageContainer}>
-          <Image source={{ uri: business.image }} style={styles.profileImage} />
+    }
+  };
+
+  const handleOptionSelect = (option) => {
+    setIsOptionsOpen(false);
+    switch (option) {
+      case 'Home':
+        navigation.navigate('Main');
+        break;
+      case 'EditProfile':
+        navigation.navigate('BusinessEditProfileScreen');
+        break;
+      case 'Logout':
+        handleLogout();
+        break;
+    }
+  };
+
+  const toggleBusinessDetails = () => {
+    setShowBusinessDetails(!showBusinessDetails);
+  };
+
+  return (
+    <View style={styles.container}>
+      <ScrollView 
+        style={styles.scrollView} 
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
+        <LinearGradient colors={['#333333', '#e6e9f0', '#eef1f5']} style={styles.header}>
+  <View style={styles.profileImageContainer}>
+    <Image source={require('../assets/profilepic.jpg')} style={styles.profileBackground} />
+    <Image source={{ uri: business.image }} style={styles.profileImage} />
+  </View>
+  <Text style={styles.nameText}>{`${business.firstname} ${business.lastname}`}</Text>
+  <Text style={styles.usernameText}>@{business.username}</Text>
+  <Text style={styles.descriptionText}>{business.description}</Text>
+          
+          <TouchableOpacity style={styles.optionsContainer} onPress={toggleOptions}>
+            <LottieView
+              ref={lottieRef}
+              source={require('../assets/dropdown.json')}
+              style={styles.dropdownAnimation}
+              loop={false}
+            />
+          </TouchableOpacity>
+          {isOptionsOpen && (
+            <View style={styles.optionsWrapper}>
+              <TouchableOpacity style={styles.optionItem} onPress={() => handleOptionSelect('Home')}>
+                <Text style={styles.optionText}>Home</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.optionItem} onPress={() => handleOptionSelect('EditProfile')}>
+                <Text style={styles.optionText}>Edit Profile</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.optionItem} onPress={() => handleOptionSelect('Logout')}>
+                <Text style={styles.optionText}>Logout</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+        </LinearGradient>
+
+        <View style={styles.infoContainer}>
+     
+          <View style={styles.statsContainer}>
+            <View style={styles.statBox}>
+              <Icon name="image" size={24} color="#333333" />
+              <Text style={styles.statValue}>{numPosts}</Text>
+              <Text style={styles.statLabel}>Posts</Text>
+            </View>
+            <View style={styles.statBox}>
+              <Icon name="calendar-alt" size={24} color="#333333" />
+              <Text style={styles.statValue}>{numEvents}</Text>
+              <Text style={styles.statLabel}>Events</Text>
+            </View>
+            <View style={styles.statBox}>
+              <Image source={require('../assets/vipstar2.gif')} style={styles.vipstar} />
+              <Text style={styles.statValue}>VIP</Text>
+              <Text style={styles.statLabel}>Status</Text>
+            </View>
+          </View>
         </View>
-        <Text style={styles.nameText}>{`${business.firstname} ${business.lastname}`}</Text>
-        <Text style={styles.usernameText}>@{business.username}</Text>
-        <Text style={styles.vipText}>VIP Business</Text>
-        
-        <View style={styles.pickerContainer}>
-          <Icon name="bars" size={20} color="#FFFFFF" style={styles.pickerIcon} />
-          <Picker
-            selectedValue={selectedValue}
-            onValueChange={handlePickerChange}
-            style={styles.picker}
-            mode="dropdown"
-            dropdownIconColor="#FFFFFF"
+
+        <TouchableOpacity style={styles.businessDetailsToggle} onPress={toggleBusinessDetails}>
+          <Text style={styles.businessDetailsToggleText}>
+            {showBusinessDetails ? 'Hide Business Details' : 'Show Business Details'}
+          </Text>
+          <Icon name={showBusinessDetails ? 'chevron-up' : 'chevron-down'} size={20} color="#333333" />
+        </TouchableOpacity>
+
+        {showBusinessDetails && (
+          <View style={styles.additionalInfoContainer}>
+            <Text style={styles.sectionTitle}>Business Details</Text>
+            <View style={styles.infoItem}>
+              <Icon name="building" size={20} color="#6900A3" />
+              <Text style={styles.infoLabel}>Business Name:</Text>
+              <Text style={styles.infoValue}>{business.businessName}</Text>
+            </View>
+            <View style={styles.infoItem}>
+              <Icon name="map-marker-alt" size={20} color="#6900A3" />
+              <Text style={styles.infoLabel}>Location:</Text>
+              <Text style={styles.infoValue}>{`${business.governorate}, ${business.municipality}`}</Text>
+            </View>
+            <View style={styles.infoItem}>
+              <Icon name="phone" size={20} color="#6900A3" />
+              <Text style={styles.infoLabel}>Contact:</Text>
+              <Text style={styles.infoValue}>{business.mobileNum}</Text>
+            </View>
+          </View>
+        )}
+
+        <View style={styles.navBar}>
+          <TouchableOpacity
+            style={[styles.navBarItem, activeTab === 'Business' && styles.activeTab]}
+            onPress={() => handleTabChange('Business')}
           >
-            <Picker.Item label="Select an option" value="" color="#000000" />
-            <Picker.Item label="Home" value="Home" color="#000000" />
-            <Picker.Item label="Add Post" value="AddPost" color="#000000" />
-            <Picker.Item label="Add Event" value="AddEvent" color="#000000" />
-          </Picker>
+            <Text style={styles.navBarText}>Business Posts</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.navBarItem, activeTab === 'Events' && styles.activeTab]}
+            onPress={() => handleTabChange('Events')}
+          >
+            <Text style={styles.navBarText}>Events</Text>
+          </TouchableOpacity>
         </View>
-      </LinearGradient>
 
-      <View style={styles.infoContainer}>
-        <Text style={styles.descriptionText}>{business.description}</Text>
-        <View style={styles.statsContainer}>
-          <View style={styles.statBox}>
-            <Icon name="chart-line" size={24} color="#6900A3" />
-            <Text style={styles.statValue}>{numPosts}</Text>
-            <Text style={styles.statLabel}>Posts</Text>
-          </View>
-          <View style={styles.statBox}>
-            <Icon name="calendar-alt" size={24} color="#6900A3" />
-            <Text style={styles.statValue}>{numEvents}</Text>
-            <Text style={styles.statLabel}>Events</Text>
-          </View>
-          <View style={styles.statBox}>
-            <Image source={require('../assets/vipstar2.gif')} style={styles.vipstar} />
-            <Text style={styles.statValue}>VIP</Text>
-            <Text style={styles.statLabel}>Status</Text>
-          </View>
-        </View>
-      </View>
-
-      <View style={styles.additionalInfoContainer}>
-        <Text style={styles.sectionTitle}>Business Details</Text>
-        <View style={styles.infoItem}>
-          <Icon name="building" size={20} color="#6900A3" />
-          <Text style={styles.infoLabel}>Business Name:</Text>
-          <Text style={styles.infoValue}>{business.businessName}</Text>
-        </View>
-        <View style={styles.infoItem}>
-          <Icon name="map-marker-alt" size={20} color="#6900A3" />
-          <Text style={styles.infoLabel}>Location:</Text>
-          <Text style={styles.infoValue}>{`${business.governorate}, ${business.municipality}`}</Text>
-        </View>
-        <View style={styles.infoItem}>
-          <Icon name="phone" size={20} color="#6900A3" />
-          <Text style={styles.infoLabel}>Contact:</Text>
-          <Text style={styles.infoValue}>{business.mobileNum}</Text>
-        </View>
-      </View>
-
-      <View style={styles.actionContainer}>
-        <TouchableOpacity style={styles.actionButton} onPress={navigateToEditProfile}>
-          <Icon name="edit" size={20} color="#FFFFFF" />
-          <Text style={styles.actionButtonText}>Edit Profile</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.actionButton} onPress={handleLogout}>
-          <Icon name="sign-out-alt" size={20} color="#FFFFFF" />
-          <Text style={styles.actionButtonText}>Logout</Text>
-        </TouchableOpacity>
-      </View>
-
-      <View style={styles.navBar}>
-        <TouchableOpacity
-          style={[styles.navBarItem, activeTab === 'Business' && styles.activeTab]}
-          onPress={() => handleTabChange('Business')}
-        >
-          <Text style={styles.navBarText}>Business Posts</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.navBarItem, activeTab === 'Events' && styles.activeTab]}
-          onPress={() => handleTabChange('Events')}
-        >
-          <Text style={styles.navBarText}>Events</Text>
-        </TouchableOpacity>
-      </View>
-
-      {activeTab === 'Business' && (
-      <FlatList
-        data={posts}
-        keyExtractor={(item) => (item.id ? item.id.toString() : Math.random().toString())}
-        renderItem={renderPostItem}
-        numColumns={2}
-        contentContainerStyle={styles.postsContainer}
-      />
-      )}
-       {activeTab === 'Events' && (
+        {activeTab === 'Business' && (
         <FlatList
-          data={events}
+          data={posts}
           keyExtractor={(item) => (item.id ? item.id.toString() : Math.random().toString())}
-          renderItem={renderEventItem}
+          renderItem={renderPostItem}
           numColumns={2}
-          contentContainerStyle={styles.eventsContainer}
+          contentContainerStyle={styles.postsContainer}
         />
-      )}
-    </ScrollView>
+        )}
+        {activeTab === 'Events' && (
+          <FlatList
+            data={events}
+            keyExtractor={(item) => (item.id ? item.id.toString() : Math.random().toString())}
+            renderItem={renderEventItem}
+            numColumns={2}
+            contentContainerStyle={styles.eventsContainer}
+          />
+        )}
+        </ScrollView>
+      <View style={styles.navbarContainer}>
+        <Navbar navigation={navigation} />
+      </View>
+    </View>
   );
 };
 
@@ -353,6 +381,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f0f0f0',
+  },
+  scrollView: {
+    flex: 1,
   },
   header: {
     alignItems: 'center',
@@ -363,27 +394,30 @@ const styles = StyleSheet.create({
   profileImageContainer: {
     position: 'relative',
     marginBottom: 10,
+    width: 140,
+    height: 140,
+    borderRadius: 70,
+    overflow: 'hidden',
+  },
+  profileBackground: {
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
   },
   profileImage: {
     width: 120,
     height: 120,
     borderRadius: 60,
     borderWidth: 4,
-    borderColor: '#FFD700',
-  },
-  crownIcon: {
     position: 'absolute',
-    top: -49,
-    right: -27,
-    width: 182, 
-    height: 220, 
+    top: 10,
+    left: 10,
   },
   vipstar: {
     width: 48,  
     height: 28, 
-
   },
-  
   nameText: {
     fontSize: 24,
     fontWeight: 'bold',
@@ -396,28 +430,40 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   vipText: {
-    fontSize: 16,
-    color: '#5b12d2',
+    fontSize: 17,
+    color: '#59dae2',
     fontWeight: 'bold',
   },
-  pickerContainer: {
-    width:170,
-    flexDirection: 'row',
+  optionsContainer: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    width: 30,
+    height: 30,
+    justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 10,
-    borderColor: '#FFD700',
-    borderWidth: 1,
+  },
+  dropdownAnimation: {
+    marginTop: 50,
+    width: 170,
+    height: 170,
+  },
+  optionsWrapper: {
+    position: 'absolute',
+    top: 64,
+    right: 10,
+    backgroundColor: '#FFFFFF',
     borderRadius: 10,
     padding: 5,
-    backgroundColor: '#333',
+    elevation: 5,
   },
-  pickerIcon: {
-    marginRight: 10,
+  optionItem: {
+    paddingVertical: 10,
+    paddingHorizontal: 15,
   },
-  picker: {
-    flex: 1,
-    color: '#FFFFFF',
-
+  optionText: {
+    fontSize: 16,
+    color: '#1a2a6c',
   },
   infoContainer: {
     backgroundColor: '#FFFFFF',
@@ -427,9 +473,10 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   descriptionText: {
+    marginTop:4,
     fontSize: 16,
     textAlign: 'center',
-    marginBottom: 20,
+    marginBottom: 0,
   },
   statsContainer: {
     flexDirection: 'row',
@@ -441,11 +488,26 @@ const styles = StyleSheet.create({
   statValue: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#1a2a6c',
+    color: '#3333333',
   },
   statLabel: {
     fontSize: 14,
     color: '#888',
+  },
+  businessDetailsToggle: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    padding: 15,
+    margin: 15,
+    elevation: 5,
+  },
+  businessDetailsToggleText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#333333',
   },
   additionalInfoContainer: {
     backgroundColor: '#FFFFFF',
@@ -475,25 +537,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     flex: 1,
   },
-  actionContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginVertical: 20,
-  },
-  actionButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#1a2a6c',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 25,
-  },
-  actionButtonText: {
-    color: '#FFFFFF',
-    fontWeight: 'bold',
-    fontSize: 16,
-    marginLeft: 10,
-  },
   navBar: {
     flexDirection: 'row',
     justifyContent: 'space-around',
@@ -519,6 +562,7 @@ const styles = StyleSheet.create({
   },
   postsContainer: {
     paddingHorizontal: 10,
+    paddingBottom: 80,
   },
   postItem: {
     flex: 1,
@@ -536,12 +580,12 @@ const styles = StyleSheet.create({
   postTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#FFFFFF',
+    color: '#000000',
     marginBottom: 5,
   },
   postDescription: {
     fontSize: 14,
-    color: '#FFFFFF',
+    color: '#000000',
     marginBottom: 10,
   },
   deleteButton: {
@@ -558,6 +602,7 @@ const styles = StyleSheet.create({
   },
   eventsContainer: {
     paddingHorizontal: 10,
+    paddingBottom: 80,
   },
   eventItem: {
     flex: 1,
@@ -588,17 +633,11 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     marginBottom: 10,
   },
-  deleteButton: {
-    backgroundColor: '#dc3545',
-    paddingVertical: 5,
-    paddingHorizontal: 10,
-    borderRadius: 5,
-    alignSelf: 'flex-end',
-  },
-  deleteButtonText: {
-    color: '#FFFFFF',
-    fontSize: 12,
-    fontWeight: 'bold',
+  navbarContainer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
   },
 });
 

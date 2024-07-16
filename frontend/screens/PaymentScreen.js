@@ -1,30 +1,27 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, SafeAreaView, Alert } from 'react-native';
+import { StyleSheet, View, SafeAreaView, Alert, ScrollView } from 'react-native';
 import { TextInput, Button, Text } from 'react-native-paper';
-import { CardField, useStripe } from '@stripe/stripe-react-native'; 
+import { useStripe, CardField } from '@stripe/stripe-react-native';
 import axios from "axios";
 import { DB_HOST, PORT } from "@env";
 import { useAuth } from '../context/AuthContext';
-import { Picker } from '@react-native-picker/picker';
 
 const PaymentScreen = () => {
-  const { createPaymentMethod, confirmPayment } = useStripe();
-  const [cardholderName, setCardholderName] = useState('');
-  const [duration, setDuration] = useState('1 month');
+  const { confirmPayment, createPaymentMethod } = useStripe();
+  const [cardName, setCardName] = useState('');
+  const [amount, setAmount] = useState('');
+  const [cardDetails, setCardDetails] = useState(null);
   const [loading, setLoading] = useState(false);
   const { business } = useAuth();
 
-  const durationFees = {
-    '1 month': 10,
-    '2 months': 18,
-    '3 months': 27,
-    '6 months': 50,
-    '1 year': 90
-  };
+  const handlePayment = async () => {
+    if (!amount || !cardName) {
+      Alert.alert('Invalid Input', 'Please enter cardholder name and amount.');
+      return;
+    }
 
-  const handleContinue = async () => {
-    if (!cardholderName || !duration) {
-      Alert.alert('Invalid Input', 'Please complete all the fields.');
+    if (!cardDetails?.complete) {
+      Alert.alert('Incomplete Card Details', 'Please enter all card information correctly.');
       return;
     }
 
@@ -32,38 +29,37 @@ const PaymentScreen = () => {
 
     try {
       const { paymentMethod, error: paymentMethodError } = await createPaymentMethod({
-        type: 'Card',
-        billingDetails: { name: cardholderName },
+        paymentMethodType: 'Card',
+        card: cardDetails,
+        billingDetails: { name: cardName }
       });
 
       if (paymentMethodError) {
-        Alert.alert('Payment Error', paymentMethodError.message);
-        setLoading(false);
-        return;
+        throw new Error(paymentMethodError.message);
       }
 
       const response = await axios.post(`http://${DB_HOST}:${PORT}/payment/create`, {
-        amount: durationFees[duration],
-        business_idbusiness: business.idbusiness,
-        payment_method: paymentMethod.id,
-        cardholderName,
-        subMonths: parseInt(duration),
+        amount: parseFloat(amount),
+        business_idbusiness: business.id,
+        cardholderName: cardName,
+        paymentMethodId: paymentMethod.id
       });
 
       const { client_secret } = response.data;
 
-      const { error: confirmError, paymentIntent } = await confirmPayment(client_secret, {
+      const { error, paymentIntent } = await confirmPayment(client_secret, {
         paymentMethodType: 'Card',
+        billingDetails: { name: cardName }
       });
 
-      if (confirmError) {
-        Alert.alert('Payment Error', confirmError.message);
+      if (error) {
+        throw new Error(error.message);
       } else if (paymentIntent) {
         Alert.alert('Payment Success', 'Your payment was successful!');
       }
     } catch (error) {
       console.error('Error processing payment:', error);
-      Alert.alert('Payment Error', 'Failed to process payment. Please try again.');
+      Alert.alert('Payment Error', error.message || 'An unexpected error occurred. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -71,67 +67,57 @@ const PaymentScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerText}>Add Payment Method</Text>
-      </View>
-
-      <View style={styles.form}>
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Cardholder Name</Text>
-          <TextInput
-            value={cardholderName}
-            onChangeText={setCardholderName}
-            style={styles.input}
-            theme={{ colors: { primary: '#FF0000', text: '#333333' } }}
-          />
+      <ScrollView>
+        <View style={styles.header}>
+          <Text style={styles.headerText}>Payment Page</Text>
         </View>
-
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Card Details</Text>
-          {/* <CardField
-            postalCodeEnabled={false}
-            placeholder={{
-              number: '4242 4242 4242 4242',
-            }}
-            cardStyle={styles.card}
-            style={styles.cardContainer}
-          /> */}
-        </View>
-
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Duration of Subscription</Text>
-          <View style={styles.pickerContainer}>
-            <Picker
-              selectedValue={duration}
-              onValueChange={(itemValue) => setDuration(itemValue)}
-              style={styles.picker}
-            >
-              <Picker.Item label="1 month" value="1" />
-              <Picker.Item label="2 months" value="2" />
-              <Picker.Item label="3 months" value="3" />
-              <Picker.Item label="6 months" value="6" />
-              <Picker.Item label="1 year" value="12" />
-            </Picker>
+        <View style={styles.form}>
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Cardholder Name</Text>
+            <TextInput
+              value={cardName}
+              onChangeText={setCardName}
+              style={styles.input}
+              theme={{ colors: { primary: '#00aacc', text: '#333333' } }}
+            />
           </View>
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Card Information</Text>
+            {/* <CardField
+              postalCodeEnabled={true}
+              placeholder={{
+                number: '4242 4242 4242 4242',
+              }}
+              cardStyle={styles.cardField}
+              style={styles.cardFieldContainer}
+              onCardChange={(cardDetails) => {
+                setCardDetails(cardDetails);
+              }}
+            /> */}
+          </View>
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Amount (USD)</Text>
+            <TextInput
+              value={amount}
+              onChangeText={setAmount}
+              style={styles.input}
+              keyboardType="numeric"
+              theme={{ colors: { primary: '#00aacc', text: '#333333' } }}
+            />
+          </View>
+          <Button
+            mode="contained"
+            onPress={handlePayment}
+            style={styles.payButton}
+            contentStyle={styles.payButtonContent}
+            labelStyle={styles.payButtonLabel}
+            color="#00aacc"
+            disabled={loading || !cardDetails?.complete}
+          >
+            {loading ? 'Processing...' : 'Pay'}
+          </Button>
         </View>
-
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Price </Text>
-          <Text style={styles.feeText}>{durationFees[`${duration} month${duration > 1 ? 's' : ''}`]} dt</Text>
-        </View>
-
-        <Button
-          mode="contained"
-          onPress={handleContinue}
-          style={styles.continueButton}
-          contentStyle={styles.continueButtonContent}
-          labelStyle={styles.continueButtonLabel}
-          color="#000000"
-          disabled={loading} 
-        >
-          {loading ? 'Processing...' : 'Continue'}
-        </Button>
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 };
@@ -144,7 +130,7 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#D2042D',
+    backgroundColor: '#00aacc',
     paddingVertical: 20,
     paddingHorizontal: 16,
     elevation: 4,
@@ -174,40 +160,27 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: '#333333',
   },
-  cardContainer: {
+  cardFieldContainer: {
     height: 50,
-    marginVertical: 30,
+    marginVertical: 10,
   },
-  card: {
+  cardField: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 8,
-    fontSize: 18,
-  },
-  pickerContainer: {
+    textColor: '#000000',
+    borderRadius: 5,
     borderWidth: 1,
     borderColor: '#E0E0E0',
-    borderRadius: 8,
-    overflow: 'hidden',
   },
-  picker: {
-    height: 50,
-    width: '100%',
-  },
-  feeText: {
-    fontSize: 18,
-    color: '#333333',
-    fontWeight: 'bold',
-  },
-  continueButton: {
+  payButton: {
     margin: 24,
     borderRadius: 30,
-    backgroundColor: '#000000',
+    backgroundColor: '#00aacc',
     elevation: 4,
   },
-  continueButtonContent: {
+  payButtonContent: {
     height: 56,
   },
-  continueButtonLabel: {
+  payButtonLabel: {
     fontSize: 18,
     fontWeight: 'bold',
     color: '#FFFFFF',

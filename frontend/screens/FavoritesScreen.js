@@ -5,6 +5,7 @@ import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import { useFocusEffect } from '@react-navigation/native';
 import { DB_HOST, PORT } from "@env";
+import Navbar from './Navbar'; 
 
 const FavoritesScreen = () => {
   const { explorer } = useAuth();
@@ -104,6 +105,8 @@ const FavoritesScreen = () => {
           contentContainerStyle={styles.postsContainer}
         />
       )}
+            <Navbar navigation={navigation} />
+
     </View>
   );
 };
