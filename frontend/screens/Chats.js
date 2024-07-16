@@ -3,59 +3,71 @@ import { Text, View, TextInput, Pressable, StyleSheet, KeyboardAvoidingView, Pla
 import { io } from 'socket.io-client';
 import axios from 'axios';
 import { useRoute } from '@react-navigation/native';
+import { useAuth } from '../context/AuthContext';
 
 const Chats = ({ navigation, route }) => {
-  const params = route.params || {};
-  const { idbusiness, idexplorer, eventName } = params;
-// const idbusiness = params
-  const [message, setMessage] = useState("");
-  const [chatMessages, setChatMessages] = useState([]);
-  const [socket, setSocket] = useState(null);
+  const { explorer, business } = useAuth();
+
+  const params = route.params || {}
+  const { eventName } = params
+
+  const [message, setMessage] = useState("")
+  const [chatMessages, setChatMessages] = useState([])
+  const [socket, setSocket] = useState(null)
+
+  const idexplorer = explorer.idexplorer;
+  const idbusiness = business.idbusiness;
 
   useEffect(() => {
-    const socketInstance = io('http://192.168.104.10:3000');
-    setSocket(socketInstance);
+    const socketInstance = io('http://192.168.104.18:3000')
+    setSocket(socketInstance)
 
     socketInstance.on('receive-message', (newMessage) => {
-      setChatMessages((prevMessages) => [...prevMessages, newMessage]);
-    });
+      setChatMessages((prevMessages) => [...prevMessages, newMessage])
+    })
 
     if (idexplorer && idbusiness && eventName) {
-      socketInstance.emit('join-room', { eventName, idexplorer, idbusiness });
+      socketInstance.emit('join-room', { eventName, idexplorer, idbusiness })
     }
 
     return () => {
-      socketInstance.disconnect();
-    };
-  }, [idexplorer, idbusiness, eventName]);
+      socketInstance.disconnect()
+    }
+  }, [idexplorer, idbusiness, eventName])
 
   useEffect(() => {
-    getMessage();
-  }, [idexplorer, idbusiness]);
+    console.log("Explorer ID:", idexplorer);
+    console.log("Business ID:", idbusiness);
+    if (idexplorer && idbusiness) {
+      getMessage();
+    }
+    getMessage()
+  }, [idexplorer, idbusiness])
 
   const getMessage = () => {
-    axios.get("http://192.168.104.10:3000/chat/get", { explorer_idexplorer: idexplorer, business_idbusiness: idbusiness })
+    axios.get("http://192.168.104.18:3000/chat/get", { params: { explorer_idexplorer: idexplorer, business_idbusiness: idbusiness } })
       .then((res) => {
-        setChatMessages(res.data);
+        setChatMessages(res.data)
       })
-      .catch((err) => console.log(err));
-  };
+      .catch((err) => console.log(err))
+  }
 
   const sendMessage = () => {
-    if (!idexplorer || !idbusiness) {
-      console.error("Missing idexplorer or idbusiness");
-      return;
+    if (!idexplorer ) {
+      console.error("Missing idexplorer or idbusiness")
+       return;
     }
 
     if (message.length > 0) {
       if (socket) {
-        socket.emit('send-message', { message, explorer_idexplorer: idexplorer, business_idbusiness: idbusiness });
+        socket.emit('send-message', { message, explorer_idexplorer: idexplorer, business_idbusiness: idbusiness })
       }
 
-      axios.post("http://192.168.104.10:3000/chat/send", {
+      axios.post("http://192.168.104.18:3000/chat/send", {
         message,
         explorer_idexplorer: idexplorer,
-        business_idbusiness: idbusiness
+        business_idbusiness: idbusiness,
+        eventName
       })
         .then((res) => {
           setChatMessages((prevMessages) => [...prevMessages, res.data]);
@@ -65,8 +77,7 @@ const Chats = ({ navigation, route }) => {
           if (err.response) {
             console.log("Server responded with:", err.response.data);
           }
-          console.error('Error sending message:', error);
-
+          console.error('Error sending message:', err);
         });
     }
   };
@@ -83,23 +94,20 @@ const Chats = ({ navigation, route }) => {
             ]}
           >
             <Text style={styles.senderText}>
-              {msg.explorer_idexplorer === idexplorer ? 'You' : msg.businessName}
+              {msg.explorer_idexplorer === idexplorer ? explorer?.username : msg.Business?.username}
             </Text>
             <Text style={styles.messageText}>{msg.message}</Text>
             <Text style={styles.receiverText}>
-              {msg.business_idbusiness === idbusiness ? msg.businessName : 'You'}
+              {msg.business_idbusiness === idbusiness ? msg.Business?.username : explorer?.username}
             </Text>
           </View>
         ))}
       </ScrollView>
-      <Text style={styles.noMessagesText}>There are no messages.</Text>
-
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 20}
         style={styles.inputContainer}
       >
-
         <TextInput
           style={styles.input}
           value={message}
@@ -174,12 +182,6 @@ const styles = StyleSheet.create({
   sendButtonText: {
     color: "#FFFFFF",
     fontWeight: "bold",
-  },
-  noMessagesText: {
-    fontSize: 16,
-     textAlign: 'center',
-    marginTop: 100,
-    color: '#7D848D',
   },
 });
 

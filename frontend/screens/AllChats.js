@@ -106,11 +106,11 @@ const AllChats = ({item}) => {
         
     };
     
-    const socket = io("http://192.168.104.10:3000");
+    const socket = io("http://192.168.104.18:3000");
     console.log(socket,"socketttttt");
     useEffect(()=>{
         try {
-            const socket = io("http://192.168.104.10:3000");
+            const socket = io("http://192.168.104.18:3000");
           
             console.log("socket=>",socket);} 
         catch (error) {

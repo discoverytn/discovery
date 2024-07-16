@@ -28,7 +28,8 @@ const EventListScreen = () => {
       console.error('Error fetching events:', error);
     }
   };
-
+const auth = useAuth()
+console.log("context from auth ",auth)
   useFocusEffect(
     useCallback(() => {
       fetchEvents();
@@ -67,13 +68,14 @@ const EventListScreen = () => {
 
   const navigateToChats = () => {
     if (joinButtonClicked) {
-      navigation.navigate('Chats');
+      navigation.navigate('Chats')
     } else {
       alert('Please click on "Join" button first.');
     }
   };
 
   const renderItem = ({ item }) => (
+    // console.log("Event item", item )
     <TouchableOpacity
       style={styles.eventItem}
       onPress={() => navigation.navigate('OneEvent', { event: item })}

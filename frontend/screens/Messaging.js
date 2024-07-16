@@ -26,7 +26,7 @@ const Messaging = ({ route, navigation }) => {
     const { name, id } = route.params;
 
 //👇🏻 this function gets the username saved on AsyncStorage
-    const getUsername = async () => {
+    const getUsername = async () =>  {
         try {
             const value = await AsyncStorage.getItem("username");
             if (value !== null) {

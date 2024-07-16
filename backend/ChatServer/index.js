@@ -46,3 +46,5 @@ app.get("/api", (req, res) => {
 server.listen(3001, () => {
   console.log('Server started - http://localhost:3001');
 });
+
+module.exports=io

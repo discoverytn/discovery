@@ -32,16 +32,13 @@ module.exports = (sequelize) => {
     Chat.associate = (models) => {
         Chat.belongsTo(models.Explorer, {
             foreignKey: 'explorer_idexplorer',
-            as: 'ExplorerInfo'
+            as: 'Explorer'
         });
         Chat.belongsTo(models.Business, {
             foreignKey: 'business_idbusiness',
-            as: 'BusinessInfo'
+            as: 'Business'
         });
-        Chat.belongsTo(Explorer, { as: 'ExplorerInfo', foreignKey: 'explorer_idexplorer' });
-
     };
 
     return Chat;
 }
-

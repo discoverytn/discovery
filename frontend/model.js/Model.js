@@ -2,7 +2,7 @@ import { View, Text, TextInput, Pressable } from "react-native";
 import React, { useState } from "react";
 import { styles } from "../utils/styles";
 
-//👇🏻 Import socket from the socket.js file in utils folder
+// Import socket from the socket.js file in utils folder
 import socket from "../utils/socket";
 
 const Modal = ({ setVisible }) => {
