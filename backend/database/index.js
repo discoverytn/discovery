@@ -29,7 +29,7 @@ db.Favorites = require('../Models/favorites')(sequelize, DataTypes);
 db.Traveled = require ("../Models/traveled.js")(sequelize, DataTypes);
 db.Payment = require ("../Models/payment.js")(sequelize, DataTypes);
 db.Rating = require("../Models/rating.js")(sequelize, DataTypes);
-
+db.Market = require("../Models/market")(sequelize, DataTypes);
 
 db.Explorer.hasMany(db.Posts, { foreignKey: 'explorer_idexplorer' });
 db.Posts.belongsTo(db.Explorer, { foreignKey: 'explorer_idexplorer' });
@@ -80,6 +80,8 @@ db.Rating.belongsTo(db.Explorer, { foreignKey: 'explorer_idexplorer' });
 db.Payment.belongsTo(db.Business, { foreignKey: 'business_idbusiness' });
 db.Business.hasMany(db.Payment, { foreignKey: 'business_idbusiness' });
 
+db.Market.belongsTo(db.Admin, { foreignKey: 'admin_idadmin' });
+db.Admin.hasMany(db.Market, { foreignKey: 'admin_idadmin' });
 
 
 
