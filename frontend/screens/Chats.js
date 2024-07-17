@@ -19,7 +19,7 @@ const Chats = ({ navigation, route }) => {
   const idbusiness = business.idbusiness;
 
   useEffect(() => {
-    const socketInstance = io('http://192.168.104.9:3000')
+    const socketInstance = io('http://192.168.1.1:3000')
     setSocket(socketInstance)
 
     socketInstance.on('receive-message', (newMessage) => {
@@ -45,7 +45,7 @@ const Chats = ({ navigation, route }) => {
   }, [idexplorer, idbusiness])
 
   const getMessage = () => {
-    axios.get("http://192.168.104.9:3000/chat/get", { params: { explorer_idexplorer: idexplorer, business_idbusiness: idbusiness } })
+    axios.get("http://192.168.1.1:3000/chat/get", { params: { explorer_idexplorer: idexplorer, business_idbusiness: idbusiness } })
       .then((res) => {
         setChatMessages(res.data)
       })
@@ -63,7 +63,7 @@ const Chats = ({ navigation, route }) => {
         socket.emit('send-message', { message, explorer_idexplorer: idexplorer, business_idbusiness: idbusiness })
       }
 
-      axios.post("http://192.168.104.9:3000/chat/send", {
+      axios.post("http://192.168.1.1:3000/chat/send", {
         message,
         explorer_idexplorer: idexplorer,
         business_idbusiness: idbusiness,
