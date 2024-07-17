@@ -1,164 +1,188 @@
 import React, { useState, useEffect } from 'react';
-import { Text, View, FlatList, TextInput, Pressable, StyleSheet, KeyboardAvoidingView, Platform, SafeAreaView } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Text, View, TextInput, Pressable, StyleSheet, KeyboardAvoidingView, Platform, SafeAreaView, ScrollView } from 'react-native';
 import { io } from 'socket.io-client';
-import AllChats from './AllChats';
 import axios from 'axios';
+import { useRoute } from '@react-navigation/native';
+import { useAuth } from '../context/AuthContext';
 
-const Chats = () => {
-  const [idexplorer, setIdExplorer] = useState(null);
-  const [idbusiness, setIdBusiness] = useState(null);
-  const [message, setMessage] = useState("");
-  const [chatMessages, setChatMessages] = useState([]);
-  const [socket, setSocket] = useState(null);
+const Chats = ({ navigation, route }) => {
+  const { explorer, business } = useAuth();
 
-  const getMessage = () => {
-    axios.get(`http://192.168.1.21:3000/api/chat/getmsg/${idexplorer}/${idbusiness}`)
-      .then((res) => {
-        setChatMessages(res.data);
-      })
-      .catch((err) => console.log(err));
-  };
+  const params = route.params || {}
+  const { eventName } = params
 
-  const sendMessage = (message) => {
-    if (socket) {
-      socket.emit("send-message", message);
-    }
-    axios.post(`http://192.168.1.21:3000/api/chat/send`, { 
-      message, 
-      idexplorer: idexplorer, 
-      idbusiness: idbusiness 
-    })
-      .then((res) => {
-        setMessage("");
-        getMessage();
-      })
-      .catch((err) => console.log(err));
-  };
+  const [message, setMessage] = useState("")
+  const [chatMessages, setChatMessages] = useState([])
+  const [socket, setSocket] = useState(null)
 
-  const handleAdd = () => {
-    if (message.trim()) {
-      sendMessage(message);
-    }
-  };
+  const idexplorer = explorer.idexplorer;
+  const idbusiness = business.idbusiness;
 
   useEffect(() => {
-    const socketConnection = io("http://192.168.1.21:3000");
-    setSocket(socketConnection);
+    const socketInstance = io('http://192.168.104.9:3000')
+    setSocket(socketInstance)
 
-    socketConnection.on("connect", () => {
-      console.log("Socket connected.");
-    });
+    socketInstance.on('receive-message', (newMessage) => {
+      setChatMessages((prevMessages) => [...prevMessages, newMessage])
+    })
 
-    socketConnection.on("disconnect", () => {
-      console.log("Socket disconnected !");
-    });
+    if (idexplorer && idbusiness && eventName) {
+      socketInstance.emit('join-room', { eventName, idexplorer, idbusiness })
+    }
 
     return () => {
-      if (socketConnection) {
-        socketConnection.disconnect();
-      }
-    };
-  }, []);
+      socketInstance.disconnect()
+    }
+  }, [idexplorer, idbusiness, eventName])
 
   useEffect(() => {
-    const fetchSessionData = async () => {
-      const storedIdExplorer = await AsyncStorage.getItem("idexplorer");
-      const storedIdBusiness = await AsyncStorage.getItem("idbusiness");
-      setIdExplorer(storedIdExplorer);
-      setIdBusiness(storedIdBusiness);
-    };
+    console.log("Explorer ID:", idexplorer);
+    console.log("Business ID:", idbusiness);
+    if (idexplorer && idbusiness) {
+      getMessage();
+    }
+    getMessage()
+  }, [idexplorer, idbusiness])
 
-    fetchSessionData();
-    getMessage();
-  }, []);
+  const getMessage = () => {
+    axios.get("http://192.168.104.9:3000/chat/get", { params: { explorer_idexplorer: idexplorer, business_idbusiness: idbusiness } })
+      .then((res) => {
+        setChatMessages(res.data)
+      })
+      .catch((err) => console.log(err))
+  }
+
+  const sendMessage = () => {
+    if (!idexplorer ) {
+      console.error("Missing idexplorer or idbusiness")
+       return;
+    }
+
+    if (message.length > 0) {
+      if (socket) {
+        socket.emit('send-message', { message, explorer_idexplorer: idexplorer, business_idbusiness: idbusiness })
+      }
+
+      axios.post("http://192.168.104.9:3000/chat/send", {
+        message,
+        explorer_idexplorer: idexplorer,
+        business_idbusiness: idbusiness,
+        eventName
+      })
+        .then((res) => {
+          setChatMessages((prevMessages) => [...prevMessages, res.data]);
+          setMessage("");
+        })
+        .catch((err) => {
+          if (err.response) {
+            console.log("Server responded with:", err.response.data);
+          }
+          console.error('Error sending message:', err);
+        });
+    }
+  };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <KeyboardAvoidingView 
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={styles.container}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
-      >
-        <View style={styles.messageContainer}>
-          {chatMessages.length > 0 ? (
-            <FlatList
-              data={chatMessages}
-              renderItem={({ item }) => <AllChats item={item} />}
-              keyExtractor={(item) => item.id.toString()}
-              inverted
-            />
-          ) : (
-            <Text style={styles.noMessagesText}>There are no messages.</Text>
-          )}
-        </View>
-
-        <View style={styles.inputContainer}>
-          <TextInput
-            value={message}
-            style={styles.textInput}
-            onChangeText={(value) => setMessage(value)}
-            placeholder="Type your message"
-            placeholderTextColor="#7D848D"
-          />
-          <Pressable
-            style={styles.sendButton}
-            onPress={handleAdd}
+    <SafeAreaView style={styles.container}>
+      <ScrollView contentContainerStyle={styles.messagesContainer}>
+        {chatMessages.map((msg, index) => (
+          <View
+            key={index}
+            style={[
+              styles.messageContainer,
+              msg.explorer_idexplorer === idexplorer ? styles.sentMessage : styles.receivedMessage
+            ]}
           >
-            <Text style={styles.sendButtonText}>SEND</Text>
-          </Pressable>
-        </View>
+            <Text style={styles.senderText}>
+              {msg.explorer_idexplorer === idexplorer ? explorer?.username : business?.username}
+            </Text>
+            <Text style={styles.messageText}>{msg.message}</Text>
+            <Text style={styles.receiverText}>
+              {msg.business_idbusiness === idbusiness ? msg.Business?.username : business?.username}
+            </Text>
+          </View>
+        ))}
+      </ScrollView>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 20}
+        style={styles.inputContainer}
+      >
+        <TextInput
+          style={styles.input}
+          value={message}
+          onChangeText={setMessage}
+          placeholder="Type your message..."
+        />
+        <Pressable onPress={sendMessage} style={styles.sendButton}>
+          <Text style={styles.sendButtonText}>Send</Text>
+        </Pressable>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: "#FFF",
-  },
   container: {
     flex: 1,
-    backgroundColor: "#FFF",
+    backgroundColor: "#F5F5F5",
+  },
+  messagesContainer: {
+    padding: 10,
   },
   messageContainer: {
-    flex: 1,
-    paddingHorizontal: 10,
+    padding: 8,
+    borderRadius: 20,
+    marginBottom: 10,
+    maxWidth: '75%',
   },
-  noMessagesText: {
-    textAlign: 'center',
-    marginTop: 100,
-    color: '#7D848D',
+  sentMessage: {
+    backgroundColor: "#D1E7DD",
+    alignSelf: 'flex-end',
+  },
+  receivedMessage: {
+    backgroundColor: "#F8D7DA",
+    alignSelf: 'flex-start',
+
+  },
+  senderText: {
+    fontSize: 12,
+    color: "#888888",
+    marginBottom: 5,
+  },
+  messageText: {
+    fontSize: 16,
+    color: "#000000",
+  },
+  receiverText: {
+    fontSize: 12,
+    color: "#888888",
+    marginTop: 5,
   },
   inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: "rgba(247, 247, 249, 1)",
-    paddingVertical: 12,
-    paddingHorizontal: 14,
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 10,
+    backgroundColor: "#FFFFFF",
     borderTopWidth: 1,
-    borderTopColor: '#E5E5E5',
+    borderColor: "#EEEEEE",
   },
-  textInput: {
+  input: {
     flex: 1,
-    fontSize: 16,
-    color: "#1B1E28",
-    fontWeight: "400",
-    letterSpacing: 0.3,
+    padding: 10,
+    borderWidth: 1,
+    borderColor: "#DDDDDD",
+    borderRadius: 20,
     marginRight: 10,
-    paddingVertical: 1,
   },
   sendButton: {
-    backgroundColor: "#1B1E28",
-    borderRadius: 16,
-    paddingVertical: 12,
-    paddingHorizontal: 20,
+    backgroundColor: "#32CD32",
+    padding: 10,
+    borderRadius: 20,
   },
   sendButtonText: {
-    color: "#f2f0f1",
-    fontSize: 16,
-    fontWeight: '600',
+    color: "#FFFFFF",
+    fontWeight: "bold",
   },
 });
 
