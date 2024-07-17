@@ -9,7 +9,7 @@ import axios from 'axios';
 import join from '../assets/join.gif';
 import { useAuth } from '../context/AuthContext';
 import { DB_HOST, PORT } from "@env";
-// import MessengerIcon from '../screens/MessageIconsScreen';
+import MessengerIcon from '../screens/MessageIconsScreen';
 
 const EventListScreen = () => {
   const navigation = useNavigation();
