@@ -1,6 +1,6 @@
 import 'react-native-gesture-handler';
-import React from 'react';
-import { StatusBar } from 'expo-status-bar';
+import React from 'react' ; 
+import { StatusBar } from 'expo-status-bar' ;
 import { NavigationContainer } from '@react-navigation/native';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { enableScreens } from 'react-native-screens';
@@ -46,6 +46,7 @@ function MainNavigator() {
         headerShown: false,
         tabBarStyle: { display: 'none' },
       }}
+
       
     >
       <Tab.Screen name="PaymentScreen" component={PaymentScreen} options={{ tabBarLabel: () => null }} />
@@ -54,9 +55,9 @@ function MainNavigator() {
       {/* <Tab.Screen name="ChatCopie" component={ChatCopie} options={{ tabBarLabel: () => null }} /> */}
 
        <Tab.Screen name="Home" component={HomeScreen} options={{ tabBarLabel: () => null }} />
-       <Tab.Screen name="Intro1" component={Intro1} options={{ tabBarLabel: () => null }} />
+       {/* <Tab.Screen name="Intro1" component={Intro1} options={{ tabBarLabel: () => null }} />
       <Tab.Screen name="Intro2" component={Intro2} options={{ tabBarLabel: () => null }} />
-      <Tab.Screen name="Intro3" component={Intro3} options={{ tabBarLabel: () => null }} />
+      <Tab.Screen name="Intro3" component={Intro3} options={{ tabBarLabel: () => null }} /> */}
       <Tab.Screen name="Signup" component={SignupScreen} options={{ tabBarLabel: () => null }} />
       <Tab.Screen name="Login" component={LoginScreen} options={{ tabBarLabel: () => null }} />
       <Tab.Screen name="Main" component={MainScreen} options={{ tabBarLabel: () => null }} />

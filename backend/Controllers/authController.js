@@ -123,16 +123,13 @@ const login = async (req, res) => {
       categories = user.categories; 
     } else if (user instanceof db.Business) {
       role = "business";
-      id = user.idbusiness;
-      subscribed = user.subscribed
+      id = user.idbusiness; 
     } else {
       return res.status(500).json({ error: "Unknown user type" });
     }
 
-    const tokenPayload = { id, email: user.email, role, categories,subscribed };
-
     const token = jwt.sign(
-      tokenPayload,
+      { id, email: user.email, role },
       process.env.JWT_SECRET,
       { expiresIn: "1h" }
     );
@@ -143,8 +140,6 @@ const login = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
-
-
 
 
 const resetPassword = async (req, res) => {

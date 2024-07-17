@@ -67,6 +67,34 @@ const getMessages = async (req, res) => {
     }
 };
 
+// const getChatHistory = async (req, res) => {
+//   const { explorer_idexplorer } = req.params;
+
+//   try {
+//     const history = await db.Chat.findAll({
+//       where: {
+//         explorer_idexplorer,
+//       },
+//       order: [['createdAt', 'ASC']],
+//       include: [
+//         { model: db.Explorer, as: 'explorer' }, 
+//         { model: db.Business, as: 'business' }, 
+//       ],
+//     });
+
+//     const formattedHistory = history.map((msg) => ({
+//       ...msg.toJSON(),
+//       explorerName: msg.explorer ? msg.explorer.name : null,
+//       businessName: msg.business ? msg.business.name : null,
+//     }));
+
+//     return res.status(200).json(formattedHistory);
+//   } catch (error) {
+//     console.error('Error fetching chat history:', error);
+//     return res.status(500).json({ error: 'Failed to fetch chat history' });
+//   }
+// };
+
 const deleteMessage = async (req, res) => {
     const { idchat } = req.params;
 

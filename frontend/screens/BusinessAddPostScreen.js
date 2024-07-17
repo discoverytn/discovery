@@ -4,7 +4,6 @@ import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import * as ImagePicker from 'expo-image-picker';
 import { useNavigation } from '@react-navigation/native';
-import { DB_HOST, PORT } from "@env";
 
 const CLOUDINARY_UPLOAD_PRESET = 'discovery';
 const CLOUDINARY_UPLOAD_URL = 'https://api.cloudinary.com/v1_1/dflixnywo/image/upload';
@@ -37,7 +36,7 @@ const BusinessAddPostScreen = () => {
   const fetchBusinessDetails = async (businessId) => {
     try {
       console.log('Fetching business details for ID:', businessId);
-      const response = await axios.get(`http://${DB_HOST}:${PORT}/admin/business/${businessId}`);
+      const response = await axios.get(`http://192.168.58.72:3000/admin/business/${businessId}`);
       if (response.status === 200) {
         const businessData = response.data;
         console.log('Business Data:', businessData);

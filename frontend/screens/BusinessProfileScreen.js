@@ -125,7 +125,7 @@ const BusinessProfileScreen = ({route}) => {
 
   const deleteBusinessPost = async (postId) => {
     try {
-      const response = await fetch(`http://${DB_HOST}:${PORT}/posts/business/delete/${postId}`, {
+      const response = await fetch(`http://192.168.1.15:3000/posts/business/delete/${postId}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',

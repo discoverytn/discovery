@@ -98,10 +98,10 @@ const MainScreen = ({ navigation }) => {
         </View>
         <View style={styles.iconsContainer}>
           <TouchableOpacity style={styles.searchIcon}>
-            <Image source={require('../assets/search.gif')} style={styles.searchImage} />
+            <Image source={require('../assets/search.jpg')} style={styles.searchImage} />
           </TouchableOpacity>
           <TouchableOpacity style={styles.notificationIcon}>
-            <Image source={require('../assets/notification.gif')} style={styles.notificationImage} />
+            <Image source={require('../assets/notification.jpg')} style={styles.notificationImage} />
           </TouchableOpacity>
         </View>
       </View>
@@ -242,7 +242,7 @@ const styles = StyleSheet.create({
     height: 50,
   },
   searchImage: {
-    width: 35,
+    width: 30,
     height: 30,
   },
   mainContentImage: {

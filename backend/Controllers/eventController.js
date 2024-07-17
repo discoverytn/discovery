@@ -2,6 +2,7 @@ const db = require('../database/index');
 const Events = db.Events;
 const Explorer = db.Explorer;
 const Business = db.Business;
+const Notif =  db.Notif
 
 // Create a new event
 const createEvent = async (req, res) => {
@@ -61,7 +62,25 @@ const getAllEvents = async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch events' });
   }
 };
+const handleJoinEvent = async (req, res) => {
+  const { idexplorer, idbusiness, idevent, eventName } = req.body;
 
+  try {
+    // Create join notification
+    await Notif.create({
+      type: 'join_request',
+      message: `${idexplorer} wants to join the event ${eventName}`,
+      idexplorer,
+      idbusiness,
+      idevent
+    });
+
+    res.status(201).json({ message: 'Join request sent! Waiting for business approval.' });
+  } catch (error) {
+    console.error('Error creating join notification:', error);
+    res.status(500).json({ error: 'Failed to send join request' });
+  }
+};
 // Get events for a specific user (explorer or business)
 const getUserEvents = async (req, res) => {
   const { userId } = req.params;
@@ -156,5 +175,6 @@ module.exports = {
   getAllEvents,
   getUserEvents,
   updateEvent,
-  deleteEvent
+  deleteEvent,
+  handleJoinEvent
 };

@@ -3,7 +3,6 @@ import { View, Text, Image, TouchableOpacity, StyleSheet, ScrollView } from 'rea
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faChevronLeft, faCalendarAlt, faClock, faMapMarkerAlt, faStar } from '@fortawesome/free-solid-svg-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { DB_HOST, PORT } from "@env";
 
 const OneEventScreen = ({ route, navigation }) => {
   const event = route.params?.event;

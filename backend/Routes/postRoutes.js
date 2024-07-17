@@ -23,7 +23,7 @@ router.get('/explorer/posts', getAllExplorerPosts);
 
 router.get('/business/posts', getAllBusinessPosts);
 
-router.get('/top5', getTopRatedPosts);
+router.get('/top5', getTopFavoritePosts);
 
 router.get('/recommended/:idexplorer', getRecommendedPosts);
 

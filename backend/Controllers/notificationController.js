@@ -10,19 +10,21 @@ const createNotification = async (req, res) => {
   const { type, message, explorer_idexplorer, business_idbusiness, senderImage } = req.body;
 
   try {
-    const notification = await Notif.create({
+    const newNotification = await Notif.create({
       type,
       message,
       explorer_idexplorer,
       business_idbusiness,
       created_at: new Date(),
       is_read: false,
-      senderImage 
+      senderImage ,
+      is_read: false,
+      created_at: new Date(),
     });
 
     res.status(201).json({
       message: 'Notification created successfully',
-      notification
+      newNotification
     });
   } catch (error) {
     console.error('Error creating notification:', error);
@@ -49,7 +51,6 @@ const getUserNotifications = async (req, res) => {
       where,
       order: [['created_at', 'DESC']],
       attributes: ['idnotif', 'type', 'message', 'created_at', 'is_read', 'senderImage'] // Include senderImage
-
     });
 
     res.status(200).json(notifications);

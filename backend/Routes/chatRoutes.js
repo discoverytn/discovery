@@ -8,4 +8,5 @@ router.delete('/delete', chatController.deleteMessage);
 router.get("/api", (req, res) => {
     res.json(chatRooms);
 })
+// router.get('/his',chatController.getChatHistory)
 module.exports = router;

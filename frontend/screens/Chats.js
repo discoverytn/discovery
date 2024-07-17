@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Text, View, TextInput, Pressable, StyleSheet, KeyboardAvoidingView, Platform, SafeAreaView, ScrollView } from 'react-native';
+import { Text, View, TextInput, Pressable, StyleSheet, KeyboardAvoidingView, Platform, SafeAreaView, ScrollView } from 'react-native';
 import { io } from 'socket.io-client';
 import axios from 'axios';
 import { useRoute } from '@react-navigation/native';
@@ -117,6 +118,18 @@ const Chats = ({ navigation, route }) => {
         <Pressable onPress={sendMessage} style={styles.sendButton}>
           <Text style={styles.sendButtonText}>Send</Text>
         </Pressable>
+        keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 20}
+        style={styles.inputContainer}
+      
+        <TextInput
+          style={styles.input}
+          value={message}
+          onChangeText={setMessage}
+          placeholder="Type your message..."
+        />
+        <Pressable onPress={sendMessage} style={styles.sendButton}>
+          <Text style={styles.sendButtonText}>Send</Text>
+        </Pressable>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -125,6 +138,10 @@ const Chats = ({ navigation, route }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: "#F5F5F5",
+  },
+  messagesContainer: {
+    padding: 10,
     backgroundColor: "#F5F5F5",
   },
   messagesContainer: {
@@ -157,17 +174,53 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: "#888888",
     marginTop: 5,
+    padding: 10,
+    borderRadius: 20,
+    marginBottom: 10,
+    maxWidth: '75%',
+  },
+  sentMessage: {
+    backgroundColor: "#D1E7DD",
+    alignSelf: 'flex-end',
+  },
+  receivedMessage: {
+    backgroundColor: "#F8D7DA",
+    alignSelf: 'flex-start',
+  },
+  senderText: {
+    fontSize: 12,
+    color: "#888888",
+    marginBottom: 5,
+  },
+  messageText: {
+    fontSize: 16,
+    color: "#000000",
+  },
+  receiverText: {
+    fontSize: 12,
+    color: "#888888",
+    marginTop: 5,
   },
   inputContainer: {
     flexDirection: "row",
     alignItems: "center",
     padding: 10,
     backgroundColor: "#FFFFFF",
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 10,
+    backgroundColor: "#FFFFFF",
     borderTopWidth: 1,
+    borderColor: "#EEEEEE",
     borderColor: "#EEEEEE",
   },
   input: {
+  input: {
     flex: 1,
+    padding: 10,
+    borderWidth: 1,
+    borderColor: "#DDDDDD",
+    borderRadius: 20,
     padding: 10,
     borderWidth: 1,
     borderColor: "#DDDDDD",
@@ -178,11 +231,15 @@ const styles = StyleSheet.create({
     backgroundColor: "#32CD32",
     padding: 10,
     borderRadius: 20,
+    backgroundColor: "#32CD32",
+    padding: 10,
+    borderRadius: 20,
   },
   sendButtonText: {
     color: "#FFFFFF",
     fontWeight: "bold",
+    color: "#FFFFFF",
+    fontWeight: "bold",
   },
-});
-
+  }})
 export default Chats;

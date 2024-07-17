@@ -1,41 +1,57 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet, FlatList, RefreshControl } from 'react-native';
+import { View, Text, Image, TouchableOpacity, StyleSheet, FlatList, RefreshControl, Modal } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faHome ,faCircleLeft} from '@fortawesome/free-solid-svg-icons';
+import { faHome, faCircleLeft } from '@fortawesome/free-solid-svg-icons';
 import { DB_HOST, PORT } from "@env";
 
 const NotificationScreen = () => {
   const [notifications, setNotifications] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [showJoinModal, setShowJoinModal] = useState(false);
+  const [joinRequest, setJoinRequest] = useState(null);
   const navigation = useNavigation();
   const { explorer, business } = useAuth();
   const [unreadCount, setUnreadCount] = useState(0);
-
-
   const fetchNotifications = useCallback(async () => {
     try {
       setIsLoading(true);
       const userId = explorer?.idexplorer || business?.idbusiness;
       const userType = explorer?.idexplorer ? 'explorer' : 'business';
+      
+      console.log('Fetching notifications for user type:', userType, 'with ID:', userId);
+  
       const response = await axios.get(`http://${DB_HOST}:${PORT}/notifications/user/${userId}?userType=${userType}`);
-
+      console.log('Notifications fetched:', response.data);
+  
       setNotifications(response.data);
-      // part to count unread notifications popup
       const unreadNotifications = response.data.filter(notif => !notif.is_read);
       setUnreadCount(unreadNotifications.length);
+  
+      // Check for join request notifications
+      if (userType === 'business') {
+        const joinRequestNotif = response.data.find(notif => notif.type === 'event_join' && !notif.is_read);
+        console.log('Join request notification:', joinRequestNotif);
+  
+        if (joinRequestNotif) {
+          setJoinRequest(joinRequestNotif);
+          setShowJoinModal(true);
+          console.log('Showing join request modal');
+        }
+      }
     } catch (error) {
       console.error('Error fetching notifications:', error);
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  }, [explorer, business]);
+  }, [explorer, business])
 
+    
   useEffect(() => {
-    fetchNotifications();
+    fetchNotifications()
   }, [fetchNotifications]);
 
   const onRefresh = useCallback(() => {
@@ -46,8 +62,7 @@ const NotificationScreen = () => {
   const markAsRead = async (notificationId) => {
     try {
       await axios.put(`http://${DB_HOST}:${PORT}/notifications/${notificationId}/read`);
-
-      setNotifications(notifications.map(notif => 
+      setNotifications(notifications.map(notif =>
         notif.idnotif === notificationId ? { ...notif, is_read: true } : notif
       ));
     } catch (error) {
@@ -55,10 +70,26 @@ const NotificationScreen = () => {
     }
   };
 
+  const handleAccept = async () => {
+    // Mark the notification as read
+    await markAsRead(joinRequest.idnotif);
+
+    // Navigate to the chat screen
+    navigation.navigate('Chat', { explorerId: joinRequest.explorer_idexplorer });
+  };
+
+  const handleDecline = async () => {
+    // Mark the notification as read
+    await markAsRead(joinRequest.idnotif);
+    setShowJoinModal(false);
+  };
+
   const renderNotificationItem = ({ item }) => {
     const renderMessage = (message, type) => {
+
       if (type === 'favorite' || type === 'event_join') {
         const parts = message.split(' ');
+        console.log(message)
         return (
           <Text style={styles.notificationText}>
             <Text style={styles.boldText}>{`${parts[0]} ${parts[1]}`}</Text>
@@ -68,14 +99,13 @@ const NotificationScreen = () => {
       }
       return <Text style={styles.notificationText}>{message}</Text>;
     };
-  
-  
+
     return (
-      <TouchableOpacity 
+      <TouchableOpacity
         style={[styles.notificationItem, !item.is_read && styles.unreadNotification]}
         onPress={() => markAsRead(item.idnotif)}
       >
-        <Image 
+        <Image
           source={item.senderImage ? { uri: item.senderImage } : require('../assets/user.jpg')}
           style={styles.notificationImage}
         />
@@ -89,24 +119,23 @@ const NotificationScreen = () => {
 
   return (
     <View style={styles.container}>
-   <View style={styles.header}>
-  <TouchableOpacity onPress={() => navigation.goBack()}>
-  <FontAwesomeIcon icon={faCircleLeft} style={styles.icon} size={20} color='darkgreen' />
-  </TouchableOpacity>
-  <View style={styles.headerTextContainer}>
-    <Text style={styles.headerText}>Notifications</Text>
-    {unreadCount > 0 && (
-      <View style={styles.unreadBadge}>
-        <Text style={styles.unreadBadgeText}>{unreadCount}</Text>
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <FontAwesomeIcon icon={faCircleLeft} style={styles.icon} size={20} color='darkgreen' />
+        </TouchableOpacity>
+        <View style={styles.headerTextContainer}>
+          <Text style={styles.headerText}>Notifications</Text>
+          {unreadCount > 0 && (
+            <View style={styles.unreadBadge}>
+              <Text style={styles.unreadBadgeText}>{unreadCount}</Text>
+            </View>
+          )}
+        </View>
+        <TouchableOpacity onPress={() => navigation.navigate('Home')}>
+          <FontAwesomeIcon icon={faHome} style={styles.commentActionIcon} size={22} color="darkgreen" />
+        </TouchableOpacity>
       </View>
-    )}
-  </View>
-  <TouchableOpacity onPress={() => navigation.navigate('Home')}>
-  <FontAwesomeIcon icon={faHome} style={styles.commentActionIcon} size={22}  color="darkgreen"/>
-
-  </TouchableOpacity>
-</View>
-<FlatList
+      <FlatList
         data={notifications}
         renderItem={renderNotificationItem}
         keyExtractor={(item) => item.idnotif.toString()}
@@ -117,10 +146,31 @@ const NotificationScreen = () => {
           <Text style={styles.emptyText}>No notifications yet</Text>
         }
       />
+      {showJoinModal && joinRequest && (
+        <Modal
+          visible={showJoinModal}
+          transparent
+          animationType="slide"
+          onRequestClose={() => setShowJoinModal(false)}
+        >
+          <View style={styles.modalContainer}>
+            <View style={styles.modalContent}>
+              <Text style={styles.modalMessage}>{joinRequest.message}</Text>
+              <View style={styles.modalButtons}>
+                <TouchableOpacity style={styles.acceptButton} onPress={handleAccept}>
+                  <Text style={styles.buttonText}>Accept</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.declineButton} onPress={handleDecline}>
+                  <Text style={styles.buttonText}>Decline</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </Modal>
+      )}
     </View>
   );
 };
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -196,12 +246,12 @@ const styles = StyleSheet.create({
   notificationText: {
     fontSize: 14,
     marginBottom: 5,
-    marginLeft:7
+    marginLeft: 7,
   },
   notificationTime: {
     fontSize: 12,
     color: '#888',
-    marginLeft:7
+    marginLeft: 7,
   },
   unreadNotification: {
     backgroundColor: '#E8F4FD',
@@ -228,10 +278,46 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: 'bold',
   },
-  boldText: {
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    width: '80%',
+    backgroundColor: '#fff',
+    padding: 20,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  modalMessage: {
+    fontSize: 16,
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+  },
+  acceptButton: {
+    backgroundColor: '#6CEAC7',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+  },
+  declineButton: {
+    backgroundColor: '#ff4d4d',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 16,
     fontWeight: 'bold',
-  }
-
+  },
 });
 
 export default NotificationScreen;
