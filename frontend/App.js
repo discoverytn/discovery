@@ -29,6 +29,7 @@ import OneEventScreen from "./screens/OneEventScreen"
 import Chat from "./screens/Chat";
 import Chats from './screens/Chats';
 import PaymentScreen from './screens/PaymentScreen';
+import RewardShopScreen from "./screens/RewardShopScreen"
 import { StripeProvider } from '@stripe/stripe-react-native'; 
 
 
@@ -49,6 +50,7 @@ function MainNavigator() {
       
     >
       <Tab.Screen name="PaymentScreen" component={PaymentScreen} options={{ tabBarLabel: () => null }} />
+      <Tab.Screen name="RewardShopScreen" component={RewardShopScreen} options={{ tabBarLabel: () => null }} />
                   <Tab.Screen name="Chat" component={Chat} options={{ tabBarLabel: () => null }} />
 
             <Tab.Screen name="Chats" component={Chats} options={{ tabBarLabel: () => null }} />

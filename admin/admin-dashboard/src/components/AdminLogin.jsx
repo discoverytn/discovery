@@ -11,7 +11,7 @@ import {
 } from "@mui/material";
 import { EmailOutlined, LockOutlined } from "@mui/icons-material";
 import axios from "axios";
-import { useAuth } from "../AuthContext";
+import { useAuth } from "../../context/AuthContext";
 import backgroundImage from "../assets/sidibou.jpg";
 
 const AdminLogin = () => {
@@ -24,37 +24,59 @@ const AdminLogin = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    console.log('API URL:', import.meta.env.VITE_API_URL);
+    console.log("API URL:", import.meta.env.VITE_API_URL);
   }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
-    const API_URL = import.meta.env.VITE_API_URL ;
+    const API_URL = import.meta.env.VITE_API_URL;
 
     try {
-      const response = await axios.post(
-        `${API_URL}/auth/login`,
-        {
-          email,
-          password,
-        }
-      );
+      console.log("Attempting login with:", { email, password: "********" });
+      const response = await axios.post(`${API_URL}/auth/login`, {
+        email,
+        password,
+      });
 
-      if (response.data.token) {
+      console.log("Full server response:", response);
+
+      if (response.data && response.data.token) {
+        console.log("Login successful. Token:", response.data.token);
+
         setOpenSuccessSnackbar(true);
         setTimeout(() => {
-          login(response.data.token);
+          login(
+            response.data.token,
+            response.data.username || email,
+            response.data.idadmin || null
+          );
           navigate("/dashboard");
         }, 1500);
       } else {
-        setError("Login failed. Please check your credentials.");
+        console.error(
+          "Login failed. Unexpected response structure:",
+          response.data
+        );
+        setError("Login failed. Unexpected server response.");
         setOpenErrorSnackbar(true);
       }
     } catch (err) {
       console.error("Login error:", err);
-      setError("Wrong info. Please try again.");
+      if (err.response) {
+        console.error("Error response:", err.response.data);
+        console.error("Error status:", err.response.status);
+        setError(
+          `Login failed: ${err.response.data.message || "Unknown error"}`
+        );
+      } else if (err.request) {
+        console.error("No response received:", err.request);
+        setError("No response from server. Please try again.");
+      } else {
+        console.error("Error details:", err.message);
+        setError("An unexpected error occurred. Please try again.");
+      }
       setOpenErrorSnackbar(true);
     }
   };
@@ -163,9 +185,7 @@ const AdminLogin = () => {
               },
             }}
             InputProps={{
-              startAdornment: (
-                <LockOutlined sx={{ color: "#000000", mr: 1 }} />
-              ),
+              startAdornment: <LockOutlined sx={{ color: "#000000", mr: 1 }} />,
             }}
           />
           <Button

@@ -61,6 +61,10 @@ module.exports = (sequelize) => {
       allowNull: true,
       defaultValue: 0,
     },
+    boughtItemName: {
+      type: DataTypes.STRING,
+      allowNull: true, 
+    },
     mobileNum: {
       type: DataTypes.INTEGER,
       allowNull: true,

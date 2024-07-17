@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Box, CssBaseline, ThemeProvider, createTheme } from '@mui/material';
-import { useAuth } from '../AuthContext';
+import { useAuth } from '../../context/AuthContext';
 import Sidebar from './Sidebar';
 import TopBar from './TopBar';
 import AnalyticsOverview from './AnalyticsOverview';
@@ -12,6 +12,7 @@ import UsersView from './UsersView';
 import PostsView from './PostsView';
 import RequestsView from "./RequestsView"
 import EventsView from './EventsView';
+import MarketView from "./MarketView"
 
 const darkTheme = createTheme({
   palette: {
@@ -47,16 +48,18 @@ function Dashboard() {
             </Box>
           </Box>
         );
-      case 'users':
-        return <UsersView />;
-      case 'posts':
-        return <PostsView />;
-      case 'requests':
-        return <RequestsView />;
-      case 'events':
-        return <EventsView />;
-      default:
-        return <div>View not found</div>;
+        case 'users':
+          return <UsersView />;
+        case 'posts':
+          return <PostsView />;
+        case 'requests':
+          return <RequestsView />;
+        case 'events':
+          return <EventsView />;
+        case 'market':  
+          return <MarketView />;
+        default:
+          return <div>View not found</div>;
     }
   };
 

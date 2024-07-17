@@ -3,7 +3,7 @@ import { AppBar, Toolbar, IconButton, Box, Typography } from "@mui/material";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
-import { useAuth } from "../AuthContext";
+import { useAuth } from '../../context/AuthContext';
 const API_URL = import.meta.env.VITE_API_URL;
 function TopBar() {
   const { username, logout } = useAuth();

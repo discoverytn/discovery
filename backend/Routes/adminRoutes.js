@@ -9,7 +9,12 @@ const {
   deleteExplorer,
   deleteBusinessOwner,
   approveBusiness,
-  declineBusiness
+  declineBusiness,
+  createMarketItem,
+  getAllMarketItems,
+  getMarketItemById,
+  updateMarketItem,
+  deleteMarketItem,
 } = require("../Controllers/adminController");
 const { changeUserRole } = require("../Controllers/authController")
 
@@ -26,5 +31,11 @@ router.delete("/delete/:email", deleteUser);
 router.delete("/decline/:idbusiness", declineBusiness);
 router.put("/change-role", changeUserRole);
 router.get('/business/:businessId', getBusinessById);
+/// Market
+router.post('/market/create', createMarketItem);
+router.get('/market/getall', getAllMarketItems);
+router.get('/market/getone/:id', getMarketItemById);
+router.put('/market/update/:id', updateMarketItem);
+router.delete('/market/delete/:id', deleteMarketItem);
 
 module.exports = router;
