@@ -336,7 +336,7 @@ const BusinessProfileScreen = ({route}) => {
           </View>
         )}
 
-        <View style={styles.navBar}>
+<View style={styles.navBar}>
           <TouchableOpacity
             style={[styles.navBarItem, activeTab === 'Business' && styles.activeTab]}
             onPress={() => handleTabChange('Business')}
@@ -350,7 +350,6 @@ const BusinessProfileScreen = ({route}) => {
             <Text style={styles.navBarText}>Events</Text>
           </TouchableOpacity>
         </View>
-
         {activeTab === 'Business' && (
         <FlatList
           data={posts}
@@ -540,25 +539,21 @@ const styles = StyleSheet.create({
   navBar: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 20,
-    marginHorizontal: 15,
-    marginBottom: 15,
-    elevation: 5,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
   },
   navBarItem: {
+    paddingVertical: 15,
     flex: 1,
     alignItems: 'center',
-    paddingVertical: 15,
   },
   activeTab: {
-    borderBottomWidth: 3,
-    borderBottomColor: '#FFD700',
+    borderBottomWidth: 2,
+    borderBottomColor: '#000',
   },
   navBarText: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#1a2a6c',
   },
   postsContainer: {
     paddingHorizontal: 10,

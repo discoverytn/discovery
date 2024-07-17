@@ -1,88 +1,80 @@
 const db = require('../database/index');
-const Explorer = require('../Models/explorer');
-const Business = require('../Models/business');
-const Chat = require('../Models/chat')(db.sequelize)
-const { Op } = require('sequelize');
+const io = require('../ChatServer/index');
 
 const sendMessage = async (req, res) => {
-    const { idexplorer, idbusiness, message } = req.body;
+    const { explorer_idexplorer, business_idbusiness, message, eventName } = req.body;
 
     try {
+        const explorer = await db.Explorer.findByPk(explorer_idexplorer);
+        const business = await db.Business.findByPk(business_idbusiness);
+
+        if (!explorer) {
+            return res.status(404).json({ error: 'Explorer not found' });
+        }
+        if (!business) {
+            return res.status(404).json({ error: 'Business not found' });
+        }
+
         const newMessage = await db.Chat.create({
-            explorer_idexplorer: idexplorer,
-            business_idbusiness: idbusiness,
-            message: message
+            explorer_idexplorer,
+            business_idbusiness,
+            message,
+            eventName,
         });
 
-        return res.status(201).json(newMessage);
+        const roomName = `${eventName}-${explorer_idexplorer}-${business_idbusiness}`;
+        const newMessageData = {
+            ...newMessage.toJSON(),
+            explorerName: explorer.username,
+            businessName: business.username,
+        };
+
+        io.to(roomName).emit('receive-message', newMessageData);
+
+        return res.status(201).json(newMessageData);
     } catch (error) {
         console.error('Error sending message:', error);
         return res.status(500).json({ error: 'Failed to send message' });
     }
-}
+};
 
 const getMessages = async (req, res) => {
-    const { idexplorer, idbusiness } = req.params;
-    if (!idexplorer || !idbusiness) {
-        return res.status(400).json({ error: 'Explorer ID and Business ID are required' });
-    }
+    const { explorer_idexplorer, business_idbusiness } = req.params;
+
     try {
-        const messages = await Chat.findAll({
+        const messages = await db.Chat.findAll({
             where: {
-                    explorer_idexplorer: idexplorer, business_idbusiness: idbusiness ,
-      
-                
+                explorer_idexplorer,
+                business_idbusiness,
             },
-            include: [
-                { model: db.Explorer, as: 'ExplorerInfo' },
-                { model: db.Business, as: 'BusinessInfo' }
-            ],
             order: [['createdAt', 'ASC']],
+            include: [
+                { model: db.Explorer, attributes: ['username'], as: 'Explorer' },
+                { model: db.Business, attributes: ['username'], as: 'Business' },
+            ],
         });
 
-        return res.status(200).json(messages);
+        const formattedMessages = messages.map((msg) => ({
+            ...msg.toJSON(),
+            explorerName: msg.Explorer ? msg.Explorer.username : null,
+            businessName: msg.Business ? msg.Business.username : null,
+        }));
+
+        return res.status(200).json(formattedMessages);
     } catch (error) {
         console.error('Error fetching messages:', error);
         return res.status(500).json({ error: 'Failed to fetch messages' });
     }
 };
-    
-    // const { explorer_idexplorer, business_idbusiness } = req.params;
-
-    // try {
-    //     const messages = await Chat.findAll({
-    //         where: {
-    //             [Op.or]: [
-    //                 {
-    //                     explorer_idexplorer,
-    //                     business_idbusiness,
-    //                 },
-    //                 {
-    //                     explorer_idexplorer: business_idbusiness,
-    //                     business_idbusiness: explorer_idexplorer,
-    //                 },
-    //             ],
-    //         },
-    //         include: [
-    //             { model: Explorer, as: 'ExplorerInfo' },
-    //             { model: Business, as: 'BusinessInfo' }
-//             ],
-//             order: [['createdAt', 'ASC']],
-//         });
-
-//         return res.status(200).json(messages);
-//     } catch (error) {
-//         console.error('Error fetching messages:', error);
-//         return res.status(500).json({ error: 'Failed to fetch messages' });
-//     }
-// };
 
 const deleteMessage = async (req, res) => {
     const { idchat } = req.params;
+
     try {
         const deleted = await db.Chat.destroy({
-            where: { idchat }
+            where: { idchat },
         });
+
         if (deleted) {
             return res.status(204).json({ message: 'Message deleted' });
         }
@@ -91,6 +83,6 @@ const deleteMessage = async (req, res) => {
         console.error('Error deleting message:', error);
         return res.status(500).json({ error: 'Failed to delete message' });
     }
-}
+};
 
-module.exports = { sendMessage, getMessages, deleteMessage }
+module.exports = { sendMessage, getMessages, deleteMessage };

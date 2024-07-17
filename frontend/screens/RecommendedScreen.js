@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, FlatList, StyleSheet, ImageBackground, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, FlatList, StyleSheet, ImageBackground, Alert, ActivityIndicator } from 'react-native';
 import { DB_HOST, PORT } from "@env";
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
@@ -8,23 +8,47 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 const RecommendedScreen = ({ navigation }) => {
   const [posts, setPosts] = useState([]);
   const [likedPosts, setLikedPosts] = useState({});
-  const { explorer } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
+  const { explorer, business } = useAuth();
 
   useEffect(() => {
-    fetchRecommendedPosts();
-  }, []);
+    if (explorer && explorer.idexplorer) {
+      fetchRecommendedPosts();
+    } else if (business && business.idbusiness) {
+      fetchAllPosts();
+    }
+  }, [explorer, business]);
 
   const fetchRecommendedPosts = async () => {
+    setIsLoading(true);
     try {
       const response = await axios.get(`http://${DB_HOST}:${PORT}/posts/recommended/${explorer.idexplorer}`);
       setPosts(response.data);
       checkFavouritePosts(response.data);
     } catch (error) {
       console.error('Error fetching recommended posts:', error);
+      setPosts([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const fetchAllPosts = async () => {
+    setIsLoading(true);
+    try {
+      const response = await axios.get(`http://${DB_HOST}:${PORT}/posts/allposts`);
+      setPosts(response.data);
+    } catch (error) {
+      console.error('Error fetching all posts:', error);
+      setPosts([]);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const checkFavouritePosts = async (fetchedPosts) => {
+    if (!explorer || !explorer.idexplorer) return;
+
     try {
       const favouriteChecks = await Promise.all(
         fetchedPosts.map(post => 
@@ -42,6 +66,8 @@ const RecommendedScreen = ({ navigation }) => {
   };
 
   const toggleLike = async (postId) => {
+    if (!explorer || !explorer.idexplorer) return;
+
     try {
       await axios.post(`http://${DB_HOST}:${PORT}/explorer/${explorer.idexplorer}/favourites/${postId}/addOrRemove`);
       setLikedPosts(prev => {
@@ -74,23 +100,52 @@ const RecommendedScreen = ({ navigation }) => {
             </View>
           </ImageBackground>
         </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.likeButton}
-          onPress={() => toggleLike(item.idposts)}
-        >
-          <Icon 
-            name={isLiked ? "heart" : "heart-o"} 
-            size={24} 
-            color={isLiked ? "red" : "white"} 
-          />
-        </TouchableOpacity>
+        {explorer && explorer.idexplorer && (
+          <TouchableOpacity
+            style={styles.likeButton}
+            onPress={() => toggleLike(item.idposts)}
+          >
+            <Icon 
+              name={isLiked ? "heart" : "heart-o"} 
+              size={24} 
+              color={isLiked ? "red" : "white"} 
+            />
+          </TouchableOpacity>
+        )}
       </View>
     );
   };
 
+  if (!explorer && !business) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.title}>Please log in to see posts</Text>
+      </View>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <View style={styles.container}>
+        <ActivityIndicator size="large" color="#0000ff" />
+        <Text style={styles.title}>Loading posts...</Text>
+      </View>
+    );
+  }
+
+  if (posts.length === 0) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.title}>No posts available</Text>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Recommended Places</Text>
+      <Text style={styles.title}>
+        {explorer ? "Recommended Places" : "All Posts"}
+      </Text>
       <FlatList
         data={posts}
         renderItem={renderPost}

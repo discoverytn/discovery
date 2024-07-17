@@ -9,14 +9,16 @@ import axios from 'axios';
 import join from '../assets/join.gif';
 import { useAuth } from '../context/AuthContext';
 import { DB_HOST, PORT } from "@env";
+import MessengerIcon from '../screens/MessageIconsScreen';
 
 const EventListScreen = () => {
   const navigation = useNavigation();
   const [showModal, setShowModal] = useState(false);
   const [events, setEvents] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
-  const [currentEvent, setCurrentEvent] = useState(null); 
+  const [currentEvent, setCurrentEvent] = useState(null);
   const { explorer } = useAuth();
+  const [joinButtonClicked, setJoinButtonClicked] = useState(false);
 
   const fetchEvents = async () => {
     try {
@@ -26,7 +28,8 @@ const EventListScreen = () => {
       console.error('Error fetching events:', error);
     }
   };
-
+const auth = useAuth()
+console.log("context from auth ",auth)
   useFocusEffect(
     useCallback(() => {
       fetchEvents();
@@ -41,8 +44,9 @@ const EventListScreen = () => {
   const toggleModal = async (event) => {
     setShowModal(!showModal);
     if (!showModal && event !== currentEvent) {
-     
       setCurrentEvent(event);
+      setJoinButtonClicked(true); //here's the state when joinButton is clicked
+
       if (explorer && explorer.idexplorer) {
         try {
           await axios.post(`http://${DB_HOST}:${PORT}/notifications/create`, {
@@ -62,7 +66,16 @@ const EventListScreen = () => {
     }
   };
 
+  const navigateToChats = () => {
+    if (joinButtonClicked) {
+      navigation.navigate('Chats')
+    } else {
+      alert('Please click on "Join" button first.');
+    }
+  };
+
   const renderItem = ({ item }) => (
+    // console.log("Event item", item )
     <TouchableOpacity
       style={styles.eventItem}
       onPress={() => navigation.navigate('OneEvent', { event: item })}
@@ -90,9 +103,14 @@ const EventListScreen = () => {
         <Text style={styles.eventDescription} numberOfLines={2}>{item.eventDescription}</Text>
         <View style={styles.footer}>
           <Text style={styles.eventPrice}>{item.eventPrice} DT</Text>
-          <TouchableOpacity style={styles.joinButton} onPress={() => toggleModal(item)}>
-            <Image source={join} style={styles.gif} />
-          </TouchableOpacity>
+          <View style={styles.buttonsContainer}>
+            <TouchableOpacity onPress={navigateToChats}>
+              <MessengerIcon size={52} color="#32CD32" />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.joinButton} onPress={() => toggleModal(item)}>
+              <Image source={join} style={styles.gif} />
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
     </TouchableOpacity>
@@ -226,15 +244,22 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#32CD32',
   },
+  buttonsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   joinButton: {
     backgroundColor: '#32CD32',
-    padding: 2,
-    borderRadius: 20,
+    padding: 5, 
+    borderRadius: 100,
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginLeft: 8, // add some space between the icon and the button
   },
   gif: {
-    width: 40,
-    height: 40,
-    resizeMode: 'contain',
+    width: 40, // match the size of the MessengerIcon
+    height: 40, // match the size of the MessengerIcon
+    marginLeft: 1, // Add some space between the text and the gif
   },
 });
 
