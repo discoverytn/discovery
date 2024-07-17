@@ -135,7 +135,7 @@ const addToFavorites = async () => {
 
         type: 'favorite',
         message: `${explorer.firstname} ${explorer.lastname} added your post to favorites`,
-        explorer_idexplorer: postDetails.explorer_idexplorer, // Assuming this is the post owner's ID
+        explorer_idexplorer: postDetails.explorer_idexplorer, 
         business_idbusiness: null,
         senderImage: explorer.image
       });

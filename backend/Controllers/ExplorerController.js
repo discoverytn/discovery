@@ -136,7 +136,7 @@ module.exports = {
     }
   },
 
-   addOrRemoveFromFavorites : async function (req, res)  {
+  addOrRemoveFromFavorites: async function (req, res) {
     const { idexplorer, idposts } = req.params;
   
     try {
@@ -148,21 +148,35 @@ module.exports = {
       });
   
       const post = await db.Posts.findByPk(idposts);
-  
       if (!post) {
         return res.status(404).json({ error: "Post not found" });
       }
   
-      const postOwner = await db.Explorer.findByPk(post.explorer_idexplorer);
+      const explorer = await db.Explorer.findByPk(idexplorer);
+      if (!explorer) {
+        return res.status(404).json({ error: "Explorer not found" });
+      }
+  
+      const postOwner = post.explorer_idexplorer ? 
+        await db.Explorer.findByPk(post.explorer_idexplorer) : 
+        await db.Business.findByPk(post.business_idbusiness);
   
       if (!postOwner) {
         return res.status(404).json({ error: "Post owner not found" });
       }
   
       if (favorite) {
+        // Post is already in favorites, remove it
         await favorite.destroy();
-        postOwner.coins -= 5;
+        explorer.numOfLikes = Math.max(explorer.numOfLikes - 1, 0);
+        await explorer.save();
+        
+        postOwner.coins = Math.max(postOwner.coins - 5, 0); // Ensure coins don't go negative
+        await postOwner.save();
+  
+        return res.status(200).json({ message: "Post removed from favorites" });
       } else {
+        // Post is not in favorites, add it
         await db.Favorites.create({
           explorer_idexplorer: idexplorer,
           posts_idposts: idposts,
@@ -171,16 +185,28 @@ module.exports = {
           post_location: post.location,
         });
   
+        explorer.numOfLikes += 1;
+        await explorer.save();
+  
         postOwner.coins += 5;
+        await postOwner.save();
+  
+        // Create a notification for the post owner
+        await db.Notif.create({
+          type: 'favorite',
+          message: `${explorer.firstname} ${explorer.lastname} added your post to favorites`,
+          explorer_idexplorer: postOwner.idexplorer || null,
+          business_idbusiness: postOwner.idbusiness || null,
+          created_at: new Date(),
+          is_read: false,
+          senderImage: explorer.image
+        });
+  
+        return res.status(200).json({ message: "Post added to favorites" });
       }
-  
-      await postOwner.save();
-  
-      return res.status(200).json({ message: "Operation completed successfully" });
-  
     } catch (error) {
-      console.error("Error adding/removing post to favorites:", error);
-      return res.status(500).json({ error: "Internal server error" });
+      console.error("Error adding/removing post to/from favorites:", error);
+      return res.status(500).json({ error: "Failed to add/remove post to/from favorites" });
     }
   },
   
