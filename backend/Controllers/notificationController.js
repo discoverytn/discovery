@@ -4,7 +4,6 @@ const Explorer = db.Explorer;
 const Business = db.Business;
 
 // create a new notification
-// In notificationController.js
 
 const createNotification = async (req, res) => {
   const { type, message, explorer_idexplorer, business_idbusiness, senderImage } = req.body;
@@ -102,7 +101,7 @@ const deleteNotification = async (req, res) => {
 };
 const getUnreadNotificationCount = async (req, res) => {
   const { userId } = req.params;
-  const { userType } = req.query; // 'explorer' or 'business'
+  const { userType } = req.query; 
 
   try {
     let where = {};
@@ -155,6 +154,39 @@ const eventsGroup = async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch events group' });
   }
 };
+
+
+const eventsGroup = async (req, res) => {
+  try {
+    const eventJoinNotifications = await Notif.findAll({
+      where: {
+        type: 'event_join'
+      },
+      attributes: [
+        'business_idbusiness', 
+        'explorer_idexplorer',
+        [db.sequelize.fn('MAX', db.sequelize.col('message')), 'message'],
+        [db.sequelize.fn('MAX', db.sequelize.col('senderImage')), 'senderImage'],
+        [db.sequelize.fn('SUBSTRING_INDEX', db.sequelize.fn('MAX', db.sequelize.col('message')), ' ', 1), 'expName']
+      ],
+      group: ['business_idbusiness', 'explorer_idexplorer']
+    });
+
+    // Process the results
+    const processedNotifications = eventJoinNotifications.map(notification => ({
+      business_idbusiness: notification.business_idbusiness,
+      explorer_idexplorer: notification.explorer_idexplorer,
+      expName: notification.getDataValue('expName'),
+      senderImage: notification.senderImage
+    }));
+
+    res.status(200).json(processedNotifications);
+  } catch (error) {
+    console.error('Error fetching events group:', error);
+    res.status(500).json({ error: 'Failed to fetch events group' });
+  }
+};
+
 
 
 module.exports = {

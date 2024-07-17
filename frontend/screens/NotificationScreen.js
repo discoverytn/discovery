@@ -6,6 +6,7 @@ import axios from 'axios';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faHome, faCircleLeft } from '@fortawesome/free-solid-svg-icons';
 import { DB_HOST, PORT } from "@env";
+import Navbar from './Navbar'; 
 
 const NotificationScreen = () => {
   const [notifications, setNotifications] = useState([]);
@@ -146,28 +147,8 @@ const NotificationScreen = () => {
           <Text style={styles.emptyText}>No notifications yet</Text>
         }
       />
-      {showJoinModal && joinRequest && (
-        <Modal
-          visible={showJoinModal}
-          transparent
-          animationType="slide"
-          onRequestClose={() => setShowJoinModal(false)}
-        >
-          <View style={styles.modalContainer}>
-            <View style={styles.modalContent}>
-              <Text style={styles.modalMessage}>{joinRequest.message}</Text>
-              <View style={styles.modalButtons}>
-                <TouchableOpacity style={styles.acceptButton} onPress={handleAccept}>
-                  <Text style={styles.buttonText}>Accept</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.declineButton} onPress={handleDecline}>
-                  <Text style={styles.buttonText}>Decline</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </View>
-        </Modal>
-      )}
+            <Navbar navigation={navigation} />
+
     </View>
   );
 };

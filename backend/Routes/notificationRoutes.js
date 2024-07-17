@@ -7,6 +7,8 @@ const {
   deleteNotification,
   getUnreadNotificationCount,
   eventsGroup
+  getUnreadNotificationCount,
+  eventsGroup
 } = require('../Controllers/notificationController.js');
 
 router.post('/create', createNotification);
