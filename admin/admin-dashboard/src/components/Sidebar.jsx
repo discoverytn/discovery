@@ -15,6 +15,8 @@ import EventIcon from "@mui/icons-material/Event";
 import SearchIcon from "@mui/icons-material/Search";
 import LogoDevIcon from "@mui/icons-material/LogoDev";
 import EmailIcon from "@mui/icons-material/Email";
+import StoreIcon from '@mui/icons-material/Store';
+
 const API_URL = import.meta.env.VITE_API_URL;
 function Sidebar({ onChangeView }) {
   const handleItemClick = (view) => {
@@ -49,6 +51,7 @@ function Sidebar({ onChangeView }) {
           { text: "Posts", icon: PostAddIcon, view: "posts" },
           { text: "Events", icon: EventIcon, view: "events" },
           { text: "Requests", icon: EmailIcon, view: "requests" },
+          { text: "Market", icon: StoreIcon, view: "market" },
         ].map((item, index) => (
           <ListItem
             button

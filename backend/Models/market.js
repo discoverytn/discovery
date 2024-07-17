@@ -2,7 +2,7 @@ const { DataTypes } = require('sequelize');
 
 module.exports = (sequelize) => {
   return sequelize.define('Market', {
-    idmarket: {
+    iditem: {
       type: DataTypes.INTEGER,
       primaryKey: true,
       autoIncrement: true,
@@ -22,6 +22,10 @@ module.exports = (sequelize) => {
     itemImage: {
       type: DataTypes.STRING,
       allowNull: true,
+    },
+    type: {
+      type: DataTypes.STRING, 
+      allowNull: false,
     },
     admin_idadmin: {
       type: DataTypes.INTEGER,

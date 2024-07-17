@@ -267,6 +267,85 @@ const declineBusiness = async (req, res) => {
     return res.status(500).send("Failed to decline business");
   }
 };
+/////////// Market
+const createMarketItem = async (req, res) => {
+  try {
+    const { itemName, itemDescription, itemPrice, type,itemImage, admin_idadmin } = req.body;
+    const newItem = await db.Market.create({
+      itemName,
+      itemDescription,
+      itemPrice,
+      type,
+      itemImage,
+      admin_idadmin,
+    });
+    res.status(201).json(newItem);
+  } catch (error) {
+    res.status(500).json({ message: 'Error creating market item', error: error.message });
+  }
+};
+
+// Get all market items
+const getAllMarketItems = async (req, res) => {
+  try {
+    const items = await db.Market.findAll();
+    res.status(200).json(items);
+  } catch (error) {
+    res.status(500).json({ message: 'Error retrieving market items', error: error.message });
+  }
+};
+
+// Get a single market item by ID
+const getMarketItemById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const item = await db.Market.findByPk(id);
+    if (!item) {
+      return res.status(404).json({ message: 'Market item not found' });
+    }
+    res.status(200).json(item);
+  } catch (error) {
+    res.status(500).json({ message: 'Error retrieving market item', error: error.message });
+  }
+};
+
+// Update a market item by ID
+const updateMarketItem = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { itemName, itemDescription, itemPrice,type, itemImage, admin_idadmin } = req.body;
+    const item = await db.Market.findByPk(id);
+    if (!item) {
+      return res.status(404).json({ message: 'Market item not found' });
+    }
+    item.itemName = itemName;
+    item.itemDescription = itemDescription;
+    item.itemPrice = itemPrice;
+    item.type = type
+    item.itemImage = itemImage;
+    item.admin_idadmin = admin_idadmin;
+    await item.save();
+    res.status(200).json(item);
+  } catch (error) {
+    res.status(500).json({ message: 'Error updating market item', error: error.message });
+  }
+};
+
+// Delete a market item by ID
+const deleteMarketItem = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const item = await db.Market.findByPk(id);
+    if (!item) {
+      return res.status(404).json({ message: 'Market item not found' });
+    }
+    await item.destroy();
+    res.status(200).json({ message: 'Market item deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ message: 'Error deleting market item', error: error.message });
+  }
+};
+
 
 module.exports = {
   getAllUsers,
@@ -280,4 +359,9 @@ module.exports = {
   deleteBusinessOwner,
   approveBusiness,
   declineBusiness,
+  createMarketItem,
+  getAllMarketItems,
+  getMarketItemById,
+  updateMarketItem,
+  deleteMarketItem,
 };

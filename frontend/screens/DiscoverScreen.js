@@ -4,6 +4,7 @@ import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import Rating from './Rating';
 import { useAuth } from '../context/AuthContext';
 import { DB_HOST, PORT } from "@env";
+import Navbar from './Navbar'; 
 
 const { width } = Dimensions.get('window');
 
@@ -91,7 +92,6 @@ const DiscoverScreen = () => {
       
       const data = await response.json();
       
-      // now update the state with the new average rating
       setCategories(prevCategories => 
         prevCategories.map(category => ({
           ...category,
@@ -101,7 +101,6 @@ const DiscoverScreen = () => {
         }))
       );
   
-      // show success message for explorer to know they rated
       Alert.alert('Success', 'Rating submitted successfully');
     } catch (error) {
       console.error('Error submitting rating:', error);
@@ -117,7 +116,6 @@ const DiscoverScreen = () => {
     const postId = item.id.toString();
   
     if (business && Object.keys(business).length > 0) {
-      // render for business view
       return (
         <TouchableOpacity onPress={() => navigateToPost(postId, item)} style={styles.postContainer}>
           <Image source={item.image} style={styles.postImage} />
@@ -130,7 +128,6 @@ const DiscoverScreen = () => {
         </TouchableOpacity>
       );
     } else if (explorer && Object.keys(explorer).length > 0) {
-      // render for explorer view
       return (
         <TouchableOpacity onPress={() => navigateToPost(postId, item)} style={styles.postContainer}>
           <Image source={item.image} style={styles.postImage} />
@@ -146,7 +143,6 @@ const DiscoverScreen = () => {
         </TouchableOpacity>
       );
     } else {
-      // handle the case when neither business nor explorer is logged in or if they are empty objects
       return (
         <TouchableOpacity onPress={() => navigateToPost(postId, item)} style={styles.postContainer}>
           <Image source={item.image} style={styles.postImage} />
@@ -193,30 +189,35 @@ const DiscoverScreen = () => {
   }
 
   return (
-    <ScrollView 
-      style={styles.container}
-      contentContainerStyle={styles.scrollContent}
-      refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-      }
-    >
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Image source={require('../assets/left-arrow.jpg')} style={styles.icon} />
-        </TouchableOpacity>
-        <Text style={styles.headerText}>Discover</Text>
-        <TouchableOpacity onPress={() => {/* Add notification functionality later */}}>
-          <Image source={require('../assets/notification.jpg')} style={styles.icon} />
-        </TouchableOpacity>
+    <View style={styles.container}>
+      <ScrollView 
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <Image source={require('../assets/left-arrow.jpg')} style={styles.icon} />
+          </TouchableOpacity>
+          <Text style={styles.headerText}>Discover</Text>
+          <TouchableOpacity onPress={() => {/* Add notification functionality later */}}>
+            <Image source={require('../assets/notification.jpg')} style={styles.icon} />
+          </TouchableOpacity>
+        </View>
+        <Text style={styles.subheaderText}>All Explored Places</Text>
+        <FlatList
+          data={categories}
+          renderItem={renderCategory}
+          keyExtractor={(category) => category.id.toString()}
+          contentContainerStyle={styles.categoriesContainer}
+        />
+      </ScrollView>
+      <View style={styles.navbarContainer}>
+        <Navbar navigation={navigation} />
       </View>
-      <Text style={styles.subheaderText}>All Explored Places</Text>
-      <FlatList
-        data={categories}
-        renderItem={renderCategory}
-        keyExtractor={(category) => category.id.toString()}
-        contentContainerStyle={styles.categoriesContainer}
-      />
-    </ScrollView>
+    </View>
   );
 };
 
@@ -224,8 +225,14 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#FFFFFF',
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
     paddingTop: 40,
     paddingHorizontal: 20,
+    paddingBottom: 80, // Add padding to the bottom to prevent content from being hidden by navbar
   },
   header: {
     flexDirection: 'row',
@@ -328,6 +335,12 @@ const styles = StyleSheet.create({
     color: '#666',
     marginTop: 5,
     textAlign: 'center',
+  },
+  navbarContainer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
   },
 });
 

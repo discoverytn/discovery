@@ -47,7 +47,7 @@ const LeaderScreen2 = () => {
   };
 
   return (
-    <LinearGradient colors={['#1a2a6c', '#b21f1f', '#fdbb2d']} style={styles.container}>
+    <LinearGradient colors={['#1a2a6c', '#e6e9f0', '#eef1f5']} style={styles.container}>
       <View style={styles.titleContainer}>
         <Text style={styles.title}>Explorers Leaderboard</Text>
       </View>

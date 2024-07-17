@@ -64,6 +64,11 @@ module.exports = (sequelize) => {
       allowNull: false,
       defaultValue: 0
     },
+    numOfLikes: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 0,
+    },
     totalRating: {
       type: DataTypes.INTEGER,
       allowNull: false,

@@ -5,7 +5,8 @@ const {
   getUserNotifications,
   markNotificationAsRead,
   deleteNotification,
-  getUnreadNotificationCount
+  getUnreadNotificationCount,
+  eventsGroup
 } = require('../Controllers/notificationController.js');
 
 router.post('/create', createNotification);
@@ -13,6 +14,8 @@ router.get('/user/:userId', getUserNotifications);
 router.put('/:idnotif/read', markNotificationAsRead);
 router.delete('/:idnotif', deleteNotification);
 router.get('/unread-count/:userId', getUnreadNotificationCount);
+router.get('/events-group', eventsGroup);
+
 
 
 module.exports = router;

@@ -4,6 +4,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faChevronLeft, faCalendarAlt, faClock, faMapMarkerAlt, faStar } from '@fortawesome/free-solid-svg-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { DB_HOST, PORT } from "@env";
+import Navbar from './Navbar'; 
+
 
 const OneEventScreen = ({ route, navigation }) => {
   const event = route.params?.event;
@@ -14,11 +16,13 @@ const OneEventScreen = ({ route, navigation }) => {
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
           <Text style={styles.backButtonText}>Go Back</Text>
         </TouchableOpacity>
+        <Navbar navigation={navigation} />
       </View>
     );
   }
 
   return (
+    <View style={styles.container} >
     <ScrollView style={styles.container}>
       <Image
         source={event.image ? { uri: event.image } : require('../assets/event-placeholder.jpg')}
@@ -61,7 +65,10 @@ const OneEventScreen = ({ route, navigation }) => {
           <Text style={styles.descriptionText}>{event.eventDescription}</Text>
         </View>
       </View>
-    </ScrollView>
+    
+</ScrollView>
+<Navbar navigation={navigation} />
+</View>
   );
 };
 

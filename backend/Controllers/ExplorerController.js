@@ -103,7 +103,7 @@ module.exports = {
       const numOfPosts = posts.length;
       await explorer.update({ numOfPosts: numOfPosts });
       
-      // Always return a 200 status, even if there are no posts
+      
       return res.status(200).json(numOfPosts);
     } catch (error) {
       console.error("Error fetching number explorer posts:", error);
@@ -136,7 +136,7 @@ module.exports = {
     }
   },
 
-  addOrRemoveFromFavorites: async function (req, res) {
+   addOrRemoveFromFavorites : async function (req, res)  {
     const { idexplorer, idposts } = req.params;
   
     try {
@@ -147,62 +147,42 @@ module.exports = {
         },
       });
   
+      const post = await db.Posts.findByPk(idposts);
+  
+      if (!post) {
+        return res.status(404).json({ error: "Post not found" });
+      }
+  
+      const postOwner = await db.Explorer.findByPk(post.explorer_idexplorer);
+  
+      if (!postOwner) {
+        return res.status(404).json({ error: "Post owner not found" });
+      }
+  
       if (favorite) {
-        // Post is already in favorites, remove it
         await favorite.destroy();
-  
-        // Decrease numOfLikes in Explorer model
-        const explorer = await db.Explorer.findByPk(idexplorer);
-        if (explorer) {
-          explorer.numOfLikes = Math.max(explorer.numOfLikes - 1, 0);
-          await explorer.save();
-        }
-  
-        return res.status(200).json({ message: "Post removed from favorites" });
+        postOwner.coins -= 5;
       } else {
-        // Post is not in favorites, add it
-        const post = await db.Posts.findByPk(idposts);
-        if (!post) {
-          return res.status(404).json({ error: "Post not found" });
-        }
-  
         await db.Favorites.create({
           explorer_idexplorer: idexplorer,
           posts_idposts: idposts,
-          post_title: post.title,         
+          post_title: post.title,
           post_image1: post.image1,
           post_location: post.location,
         });
   
-        // Increase numOfLikes in Explorer model
-        const explorer = await db.Explorer.findByPk(idexplorer);
-        if (explorer) {
-          explorer.numOfLikes += 1;
-          await explorer.save();
-        }
-  
-        // Create a notification for the post owner
-        const postOwner = post.explorer_idexplorer ? await db.Explorer.findByPk(post.explorer_idexplorer) : await db.Business.findByPk(post.business_idbusiness);
-        if (postOwner) {
-          await db.Notif.create({
-            type: 'favorite',
-            message: `${explorer.firstname} ${explorer.lastname} added your post to favorites`,
-            explorer_idexplorer: postOwner.idexplorer,
-            business_idbusiness: postOwner.idbusiness,
-            created_at: new Date(),
-            is_read: false,
-            senderImage: explorer.image
-          });
-        }
-  
-        return res.status(200).json({ message: "Post added to favorites" });
+        postOwner.coins += 5;
       }
+  
+      await postOwner.save();
+  
+      return res.status(200).json({ message: "Operation completed successfully" });
+  
     } catch (error) {
-      console.error("Error adding/removing post to/from favorites:", error);
-      return res.status(500).json({ error: "Failed to add/remove post to/from favorites" });
+      console.error("Error adding/removing post to favorites:", error);
+      return res.status(500).json({ error: "Internal server error" });
     }
   },
-  
   
   
   isPostFavoritedByExplorer: async function (req, res) {
@@ -255,19 +235,16 @@ module.exports = {
       });
   
       if (traveled) {
-        // Post is already in traveled, remove it
         await traveled.destroy();
   
-        // Decrease numOfVisits in Explorer model
         const explorer = await db.Explorer.findByPk(idexplorer);
         if (explorer) {
-          explorer.numOfVisits = Math.max(explorer.numOfVisits - 1, 0); // Ensure numOfVisits doesn't go below zero
+          explorer.numOfVisits = Math.max(explorer.numOfVisits - 1, 0); 
           await explorer.save();
         }
   
         return res.status(200).json({ message: "Post removed from traveled" });
       } else {
-        // Post is not in traveled, add it
         const post = await db.Posts.findByPk(idposts);
         if (!post) {
           return res.status(404).json({ error: "Post not found" });
@@ -281,7 +258,6 @@ module.exports = {
           post_location: post.location,
         });
   
-        // Increase numOfVisits in Explorer model
         const explorer = await db.Explorer.findByPk(idexplorer);
         if (explorer) {
           explorer.numOfVisits += 1;
@@ -349,7 +325,6 @@ module.exports = {
         return res.status(404).json({ error: "Explorer not found" });
       }
   
-      // Updating the categories field with the category names
       await explorer.update({ categories });
       return res.status(200).json({ message: "Categories updated successfully" });
     } catch (error) {
@@ -384,7 +359,6 @@ module.exports = {
         return res.status(404).json({ error: "No explorers found" });
       }
   
-      // Format the result to include postCount
       const formattedTopExplorers = topExplorers.map(explorer => ({
         idexplorer: explorer.idexplorer,
         firstname: explorer.firstname,
@@ -417,7 +391,6 @@ module.exports = {
         return res.status(404).json({ error: "No explorers found" });
       }
   
-      // Format the result
       const formattedTopExplorers = topExplorers.map(explorer => ({
         idexplorer: explorer.idexplorer,
         firstname: explorer.firstname,
@@ -452,4 +425,48 @@ module.exports = {
       return res.status(500).json({ error: "Failed to fetch explorer traveled" });
     }
   },
+
+  purchaseMarketItem: async function (req, res) {
+    const { idexplorer, iditem } = req.params;
+  
+    try {
+      const marketItem = await db.Market.findByPk(iditem);
+      if (!marketItem) {
+        return res.status(404).json({ error: "Market item not found" });
+      }
+  
+      const explorer = await db.Explorer.findByPk(idexplorer);
+      if (!explorer) {
+        return res.status(404).json({ error: "Explorer not found" });
+      }
+  
+      if (explorer.coins < marketItem.itemPrice) {
+        return res.status(400).json({ error: "Insufficient coins" });
+      }
+  
+      explorer.coins -= marketItem.itemPrice;
+  
+      if (explorer.boughtItemName) {
+        explorer.boughtItemName += `,${marketItem.itemName}`;
+      } else {
+        explorer.boughtItemName = marketItem.itemName;
+      }
+  
+      if (marketItem.type === "badge") {
+        explorer.badge = marketItem.itemName;
+        await explorer.save();
+        return res.status(200).json({ message: "Badge purchased successfully" });
+      } else {
+        
+        explorer.numOfPosts += 1;
+        await explorer.save();
+        return res.status(200).json({ message: "Item purchased successfully" });
+      }
+    } catch (error) {
+      console.error("Error purchasing market item:", error);
+      return res.status(500).json({ error: "Failed to purchase market item" });
+    }
+  },
+  
+  
 };
