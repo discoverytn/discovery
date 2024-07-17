@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, Dimensions, ScrollView, Animated } from 'react-native';
+import { View, Text, Image, TouchableOpacity, Dimensions, ScrollView, Animated, StyleSheet } from 'react-native';
 import { Icon } from 'react-native-elements';
-import LeaderScreen from './LeaderScreen'; 
+import LeaderScreen from './LeaderScreen';
 import LeaderScreen2 from './LeaderScreen2';
 import RecommendedScreen from './RecommendedScreen';
 import { DB_HOST, PORT } from "@env";
-import Navbar from './Navbar'; 
+import Navbar from './Navbar';
 import axios from 'axios';
+import { useAuth } from '../context/AuthContext';
 
 const { width } = Dimensions.get('window');
 
@@ -15,6 +16,7 @@ const MainScreen = ({ navigation }) => {
   const [events, setEvents] = useState([]);
   const flatListRef = useRef(null);
   const scrollX = useRef(new Animated.Value(0)).current;
+  const { token, explorer, business } = useAuth();
 
   useEffect(() => {
     fetchEvents();
@@ -32,7 +34,7 @@ const MainScreen = ({ navigation }) => {
           });
           setActiveIndex(nextIndex);
         }
-      }, 4000); // Change slide every 5 seconds
+      }, 4000);
 
       return () => clearInterval(autoSwipe);
     }
@@ -83,18 +85,40 @@ const MainScreen = ({ navigation }) => {
     setActiveIndex(pageNum);
   };
 
+  const defaultProfileImage = 'https://circleboom.com/blog/content/images/size/w600/2022/12/best-linkedin-profile-examples.jpeg';
+  const defaultDisplayName = 'Username';
+
+  const profileImage = token 
+    ? (explorer.image || business.image || defaultProfileImage) 
+    : defaultProfileImage;
+  
+  const displayName = token
+    ? (explorer.firstname || business.firstname || defaultDisplayName)
+    : defaultDisplayName;
+
+  const handleProfilePress = () => {
+    if (token) {
+      if (explorer) {
+        navigation.navigate('explorerProfil');
+      } else if (business.id) {
+        navigation.navigate('BusinessProfileScreen');
+      }
+    } else {
+      navigation.navigate('Login');
+    }
+  };
+
   return (
     <View style={styles.container}>
-      {/* Profile and Notification */}
       <View style={styles.header}>
         <View style={styles.headerLeft}>
-          <TouchableOpacity style={styles.profileCircle} onPress={() => navigation.navigate('Profile')}>
+          <TouchableOpacity style={styles.profileCircle} onPress={handleProfilePress}>
             <Image
-              source={{ uri: 'https://circleboom.com/blog/content/images/size/w600/2022/12/best-linkedin-profile-examples.jpeg' }}
+              source={{ uri: profileImage }}
               style={styles.profileImage}
             />
           </TouchableOpacity>
-          <Text style={styles.username}>Username</Text>
+          <Text style={styles.username}>{displayName}</Text>
         </View>
         <View style={styles.iconsContainer}>
           <TouchableOpacity style={styles.searchIcon}>
@@ -106,13 +130,11 @@ const MainScreen = ({ navigation }) => {
         </View>
       </View>
 
-      {/* Title */}
       <View style={styles.headerContainer}>
         <Text style={styles.title}>Discovery</Text>
         <Image source={require('../assets/flag.gif')} style={styles.flagimage} />
       </View>
       
-      {/* Content Section */}
       <ScrollView style={styles.scrollView}>
         <Image
           source={require('../assets/mainimg1.jpg')}
@@ -147,14 +169,11 @@ const MainScreen = ({ navigation }) => {
           />
         </View>
 
-        {/* Insert LeaderScreen Component */}
         <LeaderScreen />
         <LeaderScreen2 />
       
-        {/* Add RecommendedScreen Component */}
         <RecommendedScreen navigation={navigation} />
 
-        {/* Add padding to bottom for BottomNav */}
         <View style={{ paddingBottom: 80 }} />
       </ScrollView>
 
@@ -269,7 +288,6 @@ const styles = StyleSheet.create({
     padding: 5,
     borderRadius: 5,
   },
-
   flagimage: {
     width: 30,
     height: 40,
