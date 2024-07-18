@@ -1,22 +1,22 @@
 import React, { useState, useCallback, useMemo } from 'react';
-import { View, Text, Image, FlatList, StyleSheet, Dimensions, TouchableOpacity, ScrollView, ActivityIndicator, RefreshControl, Alert } from 'react-native';
+import { View, Text, Image, FlatList, StyleSheet, Dimensions, TouchableOpacity, ScrollView, ActivityIndicator, RefreshControl, Alert, ImageBackground } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import Rating from './Rating';
 import { useAuth } from '../context/AuthContext';
 import { DB_HOST, PORT } from "@env";
 import Navbar from './Navbar'; 
+import Icon from 'react-native-vector-icons/FontAwesome';
 
 const { width } = Dimensions.get('window');
 
 const DiscoverScreen = () => {
   const { explorer, business } = useAuth();
-  console.log('Business user:', business);
-
   const navigation = useNavigation();
   const [categories, setCategories] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState(null);
 
   const fetchPosts = useCallback(async () => {
     try {
@@ -115,62 +115,48 @@ const DiscoverScreen = () => {
   const renderPostItem = useMemo(() => ({ item }) => {
     const postId = item.id.toString();
   
-    if (business && Object.keys(business).length > 0) {
-      return (
-        <TouchableOpacity onPress={() => navigateToPost(postId, item)} style={styles.postContainer}>
-          <Image source={item.image} style={styles.postImage} />
-          <Text style={styles.postName}>{item.name}</Text>
-          <View style={styles.locationContainer}>
-            <Image source={require('../assets/location.jpg')} style={styles.locationIcon} />
-            <Text style={styles.postLocation}>{item.location}</Text>
+    return (
+      <TouchableOpacity onPress={() => navigateToPost(postId, item)} style={styles.postContainer}>
+        <ImageBackground source={item.image} style={styles.postImage}>
+          <View style={styles.overlay} />
+          <View style={styles.textContainer}>
+            <View>
+              <Text style={styles.postName}>{item.name}</Text>
+              <Text style={styles.postLocation}>{item.location}</Text>
+            </View>
+            {business && Object.keys(business).length > 0 ? (
+              <Text style={styles.businessText}>Business view, no ratings</Text>
+            ) : explorer && Object.keys(explorer).length > 0 ? (
+              <Rating 
+                postId={postId} 
+                onRate={(rating) => handleRating(postId, rating)}
+              />
+            ) : (
+              <Text style={styles.signupText}>Sign up to rate this!</Text>
+            )}
           </View>
-          <Text style={styles.businessText}>Business view, no ratings</Text>
-        </TouchableOpacity>
-      );
-    } else if (explorer && Object.keys(explorer).length > 0) {
-      return (
-        <TouchableOpacity onPress={() => navigateToPost(postId, item)} style={styles.postContainer}>
-          <Image source={item.image} style={styles.postImage} />
-          <Text style={styles.postName}>{item.name}</Text>
-          <View style={styles.locationContainer}>
-            <Image source={require('../assets/location.jpg')} style={styles.locationIcon} />
-            <Text style={styles.postLocation}>{item.location}</Text>
-          </View>
-          <Rating 
-            postId={postId} 
-            onRate={(rating) => handleRating(postId, rating)}
-          />
-        </TouchableOpacity>
-      );
-    } else {
-      return (
-        <TouchableOpacity onPress={() => navigateToPost(postId, item)} style={styles.postContainer}>
-          <Image source={item.image} style={styles.postImage} />
-          <Text style={styles.postName}>{item.name}</Text>
-          <View style={styles.locationContainer}>
-            <Image source={require('../assets/location.jpg')} style={styles.locationIcon} />
-            <Text style={styles.postLocation}>{item.location}</Text>
-          </View>
-          <Text style={styles.signupText}>Sign up to rate this!</Text>
-        </TouchableOpacity>
-      );
-    }
+        </ImageBackground>
+      </TouchableOpacity>
+    );
   }, [navigateToPost, handleRating, business, explorer]);
-  
 
   const renderCategory = useCallback(({ item }) => (
-    <View style={styles.categoryContainer}>
+    <TouchableOpacity 
+      style={[styles.categoryContainer, selectedCategory === item.name && styles.selectedCategory]}
+      onPress={() => setSelectedCategory(item.name === selectedCategory ? null : item.name)}
+    >
+      <Image source={{ uri: item.posts[0].image.uri }} style={styles.categoryImage} />
       <Text style={styles.categoryName}>{item.name}</Text>
-      <FlatList
-        data={item.posts}
-        renderItem={renderPostItem}
-        keyExtractor={(post) => post.id.toString()}
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.flatListContainer}
-      />
-    </View>
-  ), [renderPostItem]);
+      <Text style={styles.categoryCount}>{item.posts.length} post{item.posts.length !== 1 ? 's' : ''}</Text>
+    </TouchableOpacity>
+  ), [selectedCategory]);
+
+  const filteredPosts = useMemo(() => {
+    if (!selectedCategory) {
+      return categories.flatMap(category => category.posts);
+    }
+    return categories.find(category => category.name === selectedCategory)?.posts || [];
+  }, [categories, selectedCategory]);
 
   if (isLoading) {
     return (
@@ -206,12 +192,23 @@ const DiscoverScreen = () => {
             <Image source={require('../assets/notification.jpg')} style={styles.icon} />
           </TouchableOpacity>
         </View>
-        <Text style={styles.subheaderText}>All Explored Places</Text>
+        <Text style={styles.subheaderText}>Categories</Text>
         <FlatList
           data={categories}
           renderItem={renderCategory}
           keyExtractor={(category) => category.id.toString()}
+          horizontal
+          showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.categoriesContainer}
+        />
+        <Text style={styles.subheaderText}>
+          {selectedCategory ? `${selectedCategory} Places` : 'All Explored Places'}
+        </Text>
+        <FlatList
+          data={filteredPosts}
+          renderItem={renderPostItem}
+          keyExtractor={(post) => post.id.toString()}
+          contentContainerStyle={styles.postsContainer}
         />
       </ScrollView>
       <View style={styles.navbarContainer}>
@@ -232,7 +229,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingTop: 40,
     paddingHorizontal: 20,
-    paddingBottom: 80, // Add padding to the bottom to prevent content from being hidden by navbar
+    paddingBottom: 80,
   },
   header: {
     flexDirection: 'row',
@@ -252,61 +249,77 @@ const styles = StyleSheet.create({
     marginTop: 50,
   },
   subheaderText: {
-    textAlign: 'center',
-    fontSize: 16,
+    fontSize: 18,
+    fontWeight: 'bold',
     marginBottom: 13,
     marginTop: 20,
   },
   categoriesContainer: {
-    flexGrow: 1,
+    paddingBottom: 20,
   },
   categoryContainer: {
-    marginBottom: 20,
+    marginRight: 15,
+    alignItems: 'center',
+  },
+  selectedCategory: {
+    backgroundColor: '#e0e0e0',
+    borderRadius: 10,
+    padding: 5,
+  },
+  categoryImage: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
   },
   categoryName: {
-    fontSize: 18,
+    fontSize: 14,
     fontWeight: 'bold',
-    marginBottom: 10,
+    marginTop: 5,
+  },
+  categoryCount: {
+    fontSize: 12,
+    color: '#666',
+  },
+  postsContainer: {
+    flexGrow: 1,
   },
   postContainer: {
-    width: (width - 60) / 2, 
-    marginRight: 20,
-    backgroundColor: '#f8f8f8',
-    borderRadius: 10,
-    padding: 10,
-    marginLeft: -20,
-    alignItems: 'center',
-    marginBottom: 20, 
+    marginBottom: 16,
+    borderRadius: 8,
+    overflow: 'hidden',
+    position: 'relative',
   },
   postImage: {
     width: '100%',
-    height: 120,
-    borderRadius: 10,
+    height: 200,
+    justifyContent: 'flex-end',
+  },
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+  },
+  textContainer: {
+    padding: 8,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-end',
   },
   postName: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: 'bold',
-    marginTop: 8,
-    textAlign: 'center'
-  },
-  locationContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 5,
-  },
-  locationIcon: {
-    width: 12,
-    height: 12,
-    marginRight: 5,
+    color: '#fff',
   },
   postLocation: {
-    fontSize: 12,
-    color: '#666',
-    fontWeight: 'bold',
-    textAlign: 'center',
+    fontSize: 14,
+    color: '#fff',
   },
-  flatListContainer: {
-    paddingLeft: 20,
+  businessText: {
+    fontSize: 14,
+    color: '#fff',
+  },
+  signupText: {
+    fontSize: 14,
+    color: '#fff',
   },
   loadingContainer: {
     flex: 1,
@@ -322,18 +335,6 @@ const styles = StyleSheet.create({
   errorText: {
     fontSize: 16,
     color: 'red',
-    textAlign: 'center',
-  },
-  businessText: {
-    fontSize: 14,
-    color: '#666',
-    marginTop: 5,
-    textAlign: 'center',
-  },
-  signupText: {
-    fontSize: 14,
-    color: '#666',
-    marginTop: 5,
     textAlign: 'center',
   },
   navbarContainer: {
