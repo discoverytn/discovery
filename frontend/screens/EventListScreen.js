@@ -1,12 +1,10 @@
 import React, { useState, useCallback } from 'react';
-import { View, Text, Image, TouchableOpacity, FlatList, StyleSheet } from 'react-native';
+import { View, Text, Image, TouchableOpacity, FlatList, StyleSheet, SafeAreaView } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
-import LottieView from 'lottie-react-native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faLocationDot, faCalendarDays, faUser } from '@fortawesome/free-solid-svg-icons';
+import { faHome, faCircleLeft, faLocationDot, faCalendarDays, faUser } from '@fortawesome/free-solid-svg-icons';
 import CustomModal from './CustomModal';
 import axios from 'axios';
-import join from '../assets/join.gif';
 import { useAuth } from '../context/AuthContext';
 import { DB_HOST, PORT } from "@env";
 import MessengerIcon from '../screens/MessageIconsScreen';
@@ -28,8 +26,7 @@ const EventListScreen = () => {
       console.error('Error fetching events:', error);
     }
   };
-const auth = useAuth()
-console.log("context from auth ",auth)
+
   useFocusEffect(
     useCallback(() => {
       fetchEvents();
@@ -45,7 +42,7 @@ console.log("context from auth ",auth)
     setShowModal(!showModal);
     if (!showModal && event !== currentEvent) {
       setCurrentEvent(event);
-      setJoinButtonClicked(true); //here's the state when joinButton is clicked
+      setJoinButtonClicked(true);
 
       if (explorer && explorer.idexplorer) {
         try {
@@ -60,22 +57,19 @@ console.log("context from auth ",auth)
         } catch (error) {
           console.error('Error sending notification:', error);
         }
-      } else {
-        console.log('Explorer information is not available');
       }
     }
   };
 
   const navigateToChats = () => {
     if (joinButtonClicked) {
-      navigation.navigate('Chats')
+      navigation.navigate('Chats');
     } else {
       alert('Please click on "Join" button first.');
     }
   };
 
   const renderItem = ({ item }) => (
-    // console.log("Event item", item )
     <TouchableOpacity
       style={styles.eventItem}
       onPress={() => navigation.navigate('OneEvent', { event: item })}
@@ -87,15 +81,15 @@ console.log("context from auth ",auth)
       <View style={styles.eventDetails}>
         <Text style={styles.eventName}>{item.eventName}</Text>
         <View style={styles.infoRow}>
-          <FontAwesomeIcon icon={faLocationDot} size={16} color="#32CD32" />
+          <FontAwesomeIcon icon={faLocationDot} size={16} color="#8e9eef" />
           <Text style={styles.infoText}>{item.eventLocation}</Text>
         </View>
         <View style={styles.infoRow}>
-          <FontAwesomeIcon icon={faCalendarDays} size={16} color="#32CD32" />
+          <FontAwesomeIcon icon={faCalendarDays} size={16} color="#8e9eef" />
           <Text style={styles.infoText}>{item.startDate} - {item.endDate}</Text>
         </View>
         <View style={styles.infoRow}>
-          <FontAwesomeIcon icon={faUser} size={16} color="#32CD32" />
+          <FontAwesomeIcon icon={faUser} size={16} color="#8e9eef" />
           <Text style={styles.infoText}>
             By: {item.Explorer ? item.Explorer.username : item.Business ? item.Business.businessname : 'Unknown'}
           </Text>
@@ -105,10 +99,10 @@ console.log("context from auth ",auth)
           <Text style={styles.eventPrice}>{item.eventPrice} DT</Text>
           <View style={styles.buttonsContainer}>
             <TouchableOpacity onPress={navigateToChats}>
-              <MessengerIcon size={52} color="#32CD32" />
+              <MessengerIcon size={40} color="#8e9eef" />
             </TouchableOpacity>
             <TouchableOpacity style={styles.joinButton} onPress={() => toggleModal(item)}>
-              <Image source={join} style={styles.gif} />
+              <Text style={styles.joinButtonText}>Join</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -117,21 +111,15 @@ console.log("context from auth ",auth)
   );
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Image source={require('../assets/left-arrow.jpg')} style={styles.icon} />
+          <FontAwesomeIcon icon={faCircleLeft} size={24} color="#fff" />
         </TouchableOpacity>
-        <Text style={styles.headerText}></Text>
-      </View>
-      <View style={styles.subHeader}>
-        <Text style={styles.subHeaderText}>Available Events</Text>
-        <LottieView
-          source={require('../assets/sand-clock.json')}
-          autoPlay
-          loop
-          style={styles.sandClockAnimation}
-        />
+        <Text style={styles.headerText}>Available Events</Text>
+        <TouchableOpacity onPress={() => navigation.navigate('Main')}>
+          <FontAwesomeIcon icon={faHome} size={24} color="#fff" />
+        </TouchableOpacity>
       </View>
       <FlatList
         data={events}
@@ -146,63 +134,42 @@ console.log("context from auth ",auth)
         onClose={() => setShowModal(false)}
         message="Event request was sent!"
       />
-    </View>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F0FFF0',
-    paddingTop: 40,
+    backgroundColor: '#fff',
   },
   header: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 20,
-    marginBottom: 20,
-  },
-  icon: {
-    width: 30,
-    height: 30,
+    paddingTop: 50,
+    paddingBottom: 20,
+    backgroundColor: '#8e9eef',
   },
   headerText: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginLeft: 1,
-    color: '#000',
-    flex: 1,
-    textAlign: 'center',
-  },
-  subHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 20,
-  },
-  subHeaderText: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#32CD32',
-    textAlign: 'center',
-  },
-  sandClockAnimation: {
-    width: 50,
-    height: 50,
+    color: '#fff',
   },
   eventsContainer: {
-    paddingHorizontal: 20,
+    padding: 15,
   },
   eventItem: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 15,
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    marginBottom: 15,
     overflow: 'hidden',
-    marginBottom: 20,
+    elevation: 3,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
-    elevation: 3,
   },
   eventImage: {
     width: '100%',
@@ -216,7 +183,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 10,
-    color: '#333',
   },
   infoRow: {
     flexDirection: 'row',
@@ -242,24 +208,22 @@ const styles = StyleSheet.create({
   eventPrice: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#32CD32',
+    color: '#8e9eef',
   },
   buttonsContainer: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   joinButton: {
-    backgroundColor: '#32CD32',
-    padding: 5, 
-    borderRadius: 100,
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginLeft: 8, // add some space between the icon and the button
+    backgroundColor: '#8e9eef',
+    paddingVertical: 8,
+    paddingHorizontal: 15,
+    borderRadius: 20,
+    marginLeft: 10,
   },
-  gif: {
-    width: 40, // match the size of the MessengerIcon
-    height: 40, // match the size of the MessengerIcon
-    marginLeft: 1, // Add some space between the text and the gif
+  joinButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
   },
 });
 

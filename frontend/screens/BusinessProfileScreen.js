@@ -202,7 +202,7 @@ const BusinessProfileScreen = ({route}) => {
       <Text style={styles.eventDate}>End: {new Date(item.endDate).toLocaleDateString()}</Text>
       <Text style={styles.eventLocation}>{item.eventLocation || 'No location specified'}</Text>
       <TouchableOpacity style={styles.deleteButton} onPress={() => deleteBusinessEvent(item.id)}>
-        <Text style={styles.deleteButtonText}>Delete</Text>
+        <Text style={styles.deleteButtonText}>Cancel Event</Text>
       </TouchableOpacity>
     </LinearGradient>
   );

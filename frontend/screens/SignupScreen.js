@@ -271,7 +271,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   button: {
-    backgroundColor: "#00aacc",
+    backgroundColor:'#8e9eef',
     padding: 15,
     borderRadius: 6,
     alignItems: "center",
@@ -287,7 +287,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   selectImageButton: {
-    backgroundColor: "#00aacc",
+    backgroundColor:'#8e9eef',
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 6,

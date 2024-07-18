@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { StyleSheet, Text, View, Image, TouchableOpacity, FlatList, Alert, Modal, ScrollView, RefreshControl } from 'react-native';
+import { StyleSheet, Text, View, Image, TouchableOpacity, FlatList, Alert, Modal, ScrollView, RefreshControl, SafeAreaView } from 'react-native';
 import axios from 'axios';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { useAuth } from '../context/AuthContext';
@@ -330,7 +330,7 @@ const ExplorerProfile = ({route}) => {
   }
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <ScrollView
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
@@ -411,39 +411,40 @@ const ExplorerProfile = ({route}) => {
             <Text style={styles.navBarText}>Visited</Text>
           </TouchableOpacity>
         </View>
-        {activeTab === 'Posts' && (
-          <FlatList
-            key="threeColumns"
-            data={posts}
-            keyExtractor={(item, index) => item.id ? item.id.toString() : index.toString()}
-            renderItem={renderPostItem}
-            numColumns={3}
-            contentContainerStyle={styles.postsContainer}
-          />
-        )}
-        {activeTab === 'Favourites' && (
-          <FlatList
-            key="threeColumnsFavourites"
-            data={favourites}
-            keyExtractor={(item, index) => item.id ? item.id.toString() : index.toString()}
-            renderItem={renderFavouriteItem}
-            numColumns={3}
-            contentContainerStyle={styles.postsContainer}
-          />
-        )}
-        {activeTab === 'Visited' && (
-          <FlatList
-            key="threeColumnsVisited"
-            data={visited}
-            keyExtractor={(item, index) => item.id ? item.id.toString() : index.toString()}
-            renderItem={renderVisitedItem}
-            numColumns={3}
-            contentContainerStyle={styles.postsContainer}
-          />
-        )}
+        <View style={styles.contentContainer}>
+          {activeTab === 'Posts' && (
+            <FlatList
+              data={posts}
+              keyExtractor={(item) => item.id.toString()}
+              renderItem={renderPostItem}
+              numColumns={3}
+              contentContainerStyle={styles.postsContainer}
+            />
+          )}
+          {activeTab === 'Favourites' && (
+            <FlatList
+              data={favourites}
+              keyExtractor={(item) => item.id.toString()}
+              renderItem={renderFavouriteItem}
+              numColumns={3}
+              contentContainerStyle={styles.postsContainer}
+            />
+          )}
+          {activeTab === 'Visited' && (
+            <FlatList
+              data={visited}
+              keyExtractor={(item) => item.id.toString()}
+              renderItem={renderVisitedItem}
+              numColumns={3}
+              contentContainerStyle={styles.postsContainer}
+            />
+          )}
+        </View>
       </ScrollView>
-      <Navbar navigation={navigation} />
-    </View>
+      <View style={styles.navbarContainer}>
+        <Navbar navigation={navigation} />
+      </View>
+    </SafeAreaView>
   );
 };
 
@@ -458,18 +459,17 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   headerContent: {
-    marginTop:20,
+    marginTop: 20,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
   fullNameText: {
-  marginLeft:95,
+    marginLeft: 95,
     fontSize: 22,
     fontWeight: 'bold',
     flex: 1,
     color: '#001861'
-
   },
   optionsContainer: {
     width: 30,
@@ -506,7 +506,7 @@ const styles = StyleSheet.create({
     borderBottomColor: '#e0e0e0',
   },
   profileImage: {
-    marginTop:-20,
+    marginTop: -20,
     width: 100,
     height: 100,
     borderRadius: 50,
@@ -590,6 +590,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
+  contentContainer: {
+    flex: 1,
+    paddingBottom: 60, // Adjust this value to ensure content is not hidden by the navbar
+  },
   postsContainer: {
     padding: 1,
   },
@@ -635,6 +639,12 @@ const styles = StyleSheet.create({
     color: 'red',
     textAlign: 'center',
     marginTop: 20,
+  },
+  navbarContainer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
   },
 });
 

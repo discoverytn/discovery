@@ -89,7 +89,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   header: {
-    backgroundColor: '#00AACC',
+    backgroundColor: '#8e9eef',
     paddingVertical: 20,
     alignItems: 'center',
     marginBottom: 10,
@@ -142,15 +142,16 @@ const styles = StyleSheet.create({
     resizeMode: 'cover',
   },
   button: {
-    backgroundColor: '#00AACC',
+    backgroundColor: '#6b7bc1',
+    
     padding: 15,
     borderRadius: 6,
     alignItems: 'center',
     marginTop: 10,
   },
   buttonDisabled: {
-    backgroundColor: '#87CEEB',
-  },
+    backgroundColor: '#8e9eef',
+    },
   buttonText: {
     color: '#fff',
     fontSize: 18,

@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { View, Image, TouchableOpacity, Text, StyleSheet } from 'react-native';
+import { View, TouchableOpacity, Text, StyleSheet } from 'react-native';
 import { useAuth } from '../context/AuthContext';
 import { DB_HOST, PORT } from "@env";
-
-const starGrey = require('../assets/star_grey.jpg');
-const starGold = require('../assets/star_gold.jpg');
+import Icon from 'react-native-vector-icons/FontAwesome';
 
 const Rating = ({ postId, onRate }) => {
   const [userRating, setUserRating] = useState(null);
@@ -92,8 +90,10 @@ const Rating = ({ postId, onRate }) => {
         activeOpacity={0.7}
         onPress={() => handleRate(number)}
       >
-        <Image
-          source={index < Math.round(rating) ? starGold : starGrey}
+        <Icon
+          name={index < Math.round(rating) ? 'star' : 'star-o'}
+          size={15}
+          color="#FFD700"
           style={styles.star}
         />
       </TouchableOpacity>
@@ -106,11 +106,13 @@ const Rating = ({ postId, onRate }) => {
         {renderStars(userRating || 0)}
       </View>
       <Text style={styles.ratingText}>
-        {userRating ? userRating.toFixed(1) : 'Rate this'}
+        {userRating ? userRating.toFixed(1) : 'Rate'}
       </Text>
-      <Text style={styles.averageRatingText}>
-        {averageRating ? `Avg: ${averageRating.toFixed(1)}` : ''}
-      </Text>
+      {averageRating && (
+        <Text style={styles.averageRatingText}>
+          Avg: {averageRating.toFixed(1)}
+        </Text>
+      )}
     </View>
   );
 };
@@ -118,26 +120,24 @@ const Rating = ({ postId, onRate }) => {
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'column',
-    alignItems: 'center',
-    marginTop: 5,
+    alignItems: 'flex-end',
+    justifyContent: 'flex-end',
   },
   starsContainer: {
     flexDirection: 'row',
-    marginRight: 10,
+    marginBottom: 2,
   },
   star: {
-    width: 20,
-    height: 20,
-    marginRight: 3,
+    marginRight: 2,
   },
   ratingText: {
+    color: '#fff',
     fontWeight: 'bold',
-    fontSize: 16,
-    marginTop: 5, 
+    fontSize: 14,
   },
   averageRatingText: {
+    color: '#fff',
     fontSize: 12,
-    marginTop: 5,
   },
 });
 

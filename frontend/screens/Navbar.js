@@ -60,15 +60,15 @@ const Navbar = ({ navigation }) => {
   const renderBusinessNavbar = () => (
     <>
       <LinearGradient colors={['#667eea', '#764ba2']} style={styles.bottomNav}>
-        <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Home')}>
+        <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Main')}>
           <Icon name="home" type="font-awesome" color="#fff" size={24} />
           <Text style={styles.navText}>Home</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Categories')}>
+        <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Discover')}>
           <Icon name="globe" type="font-awesome" color="#fff" size={24} />
           <Text style={styles.navText}>Explore</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Discover')}>
+        <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('ExplorerAddPostScreen')}>
           <Icon name="plus-square" type="font-awesome" color="#fff" size={24} />
           <Text style={styles.navText}>Add</Text>
         </TouchableOpacity>

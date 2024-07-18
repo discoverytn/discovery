@@ -128,14 +128,16 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
   },
   header: {
+    height:90,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#00aacc',
+    backgroundColor: '#8e9eef',
     paddingVertical: 20,
     paddingHorizontal: 16,
     elevation: 4,
   },
   headerText: {
+    marginLeft:120,
     color: '#FFFFFF',
     fontSize: 20,
     fontWeight: 'bold',
@@ -174,7 +176,7 @@ const styles = StyleSheet.create({
   payButton: {
     margin: 24,
     borderRadius: 30,
-    backgroundColor: '#00aacc',
+    backgroundColor: '#8e9eef',
     elevation: 4,
   },
   payButtonContent: {
