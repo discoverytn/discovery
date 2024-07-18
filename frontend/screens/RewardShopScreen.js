@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, Alert } from 'react-native';
 import axios from 'axios';
 import { DB_HOST, PORT } from "@env";
-import Icon from 'react-native-vector-icons/FontAwesome';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { faHome, faCircleLeft } from '@fortawesome/free-solid-svg-icons';
 import { useAuth } from '../context/AuthContext';
+import Navbar from './Navbar';
 
 const RewardShopScreen = ({ navigation }) => {
   const [items, setItems] = useState([]);
@@ -92,12 +94,12 @@ const RewardShopScreen = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-          <Icon name="arrow-left" size={24} color="#000" />
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <FontAwesomeIcon icon={faCircleLeft} style={styles.icon} size={20} color='#fff' />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Reward Shop</Text>
-        <TouchableOpacity style={styles.searchButton}>
-          <Icon name="search" size={24} color="#000" />
+        <TouchableOpacity onPress={() => navigation.navigate('Main')}>
+          <FontAwesomeIcon icon={faHome} style={styles.icon} size={22} color="#fff"/>
         </TouchableOpacity>
       </View>
       <FlatList
@@ -107,6 +109,7 @@ const RewardShopScreen = ({ navigation }) => {
         numColumns={2}
         contentContainerStyle={styles.listContainer}
       />
+      <Navbar navigation={navigation} />
     </View>
   );
 };
@@ -120,20 +123,19 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 20,
-    paddingTop: 40,
-    backgroundColor: '#f8f8f8',
-  },
-  backButton: {
-    padding: 5,
+    paddingHorizontal: 20,
+    paddingTop: 50,
+    paddingBottom: 20,
+    backgroundColor: '#8e9eef',
   },
   headerTitle: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: 'bold',
-    color: '#000',
+    color: '#fff',
   },
-  searchButton: {
-    padding: 5,
+  icon: {
+    width: 24,
+    height: 24,
   },
   listContainer: {
     padding: 10,
@@ -178,16 +180,6 @@ const styles = StyleSheet.create({
     color: '#000',
     fontWeight: 'bold',
     marginBottom: 10,
-  },
-  buyButton: {
-    backgroundColor: '#4CAF50',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 5,
-  },
-  buyButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
   },
   buyButton: {
     backgroundColor: '#4CAF50',

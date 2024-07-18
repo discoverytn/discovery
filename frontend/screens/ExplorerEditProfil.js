@@ -262,7 +262,8 @@ const ExplorerEditProfileScreen = () => {
         </>
       )}
 
-      <TouchableOpacity style={styles.button} onPress={handleSave}>
+      <TouchableOpacity style={styles.button} 
+      onPress={handleSave}>
         <Text style={styles.buttonText}>Save</Text>
       </TouchableOpacity>
     </ScrollView>
@@ -327,7 +328,7 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   button: {
-    backgroundColor: '#007bff',
+    backgroundColor:'#8e9eef',
     padding: 15,
     borderRadius: 5,
     alignItems: 'center',

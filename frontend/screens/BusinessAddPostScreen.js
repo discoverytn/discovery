@@ -274,7 +274,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   button: {
-    backgroundColor: '#00aacc',
+    backgroundColor: '#8e9eef',
     padding: 15,
     borderRadius: 8,
     alignItems: 'center',
@@ -315,7 +315,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   selectImageButton: {
-    backgroundColor: '#28A745',
+    backgroundColor: '#937fd6',
     padding: 10,
     borderRadius: 8,
     alignItems: 'center',

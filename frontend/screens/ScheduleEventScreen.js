@@ -5,6 +5,9 @@ import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import * as ImagePicker from 'expo-image-picker';
 import { DB_HOST, PORT } from "@env";
+import Navbar from './Navbar';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { faCircleLeft, faBell } from '@fortawesome/free-solid-svg-icons';
 
 const CLOUDINARY_UPLOAD_PRESET = 'discovery';
 const CLOUDINARY_UPLOAD_URL = 'https://api.cloudinary.com/v1_1/dflixnywo/image/upload';
@@ -149,10 +152,12 @@ const ScheduleEventScreen = ({ navigation }) => {
     <View style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Image source={require('../assets/left-arrow.jpg')} style={styles.icon} />
+          <FontAwesomeIcon icon={faCircleLeft} style={styles.icon} size={20} color='#fff' />
         </TouchableOpacity>
         <Text style={styles.headerText}>Schedule Event</Text>
-        <Image source={require('../assets/notification.jpg')} style={styles.icon} />
+        <TouchableOpacity onPress={() => {/* Add notification functionality */}}>
+          <FontAwesomeIcon icon={faBell} style={styles.icon} size={20} color="#FFD700" />
+        </TouchableOpacity>
       </View>
 
       {canPostEvent ? (
@@ -233,6 +238,9 @@ const ScheduleEventScreen = ({ navigation }) => {
       ) : (
         <Text style={styles.notEligibleText}>{notEligibleReason}</Text>
       )}
+      <View style={styles.navbarContainer}>
+        <Navbar navigation={navigation} />
+      </View>
     </View>
   );
 };
@@ -240,41 +248,43 @@ const ScheduleEventScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
     backgroundColor: '#fff',
   },
   scrollContainer: {
     flexGrow: 1,
-    paddingBottom: 20,
+    paddingHorizontal: 20,
+    paddingBottom: 100, // Added padding to prevent overlap with navbar
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 20,
-    marginTop: 40,
+    paddingHorizontal: 20,
+    paddingTop: 50,
+    paddingBottom: 20,
+    backgroundColor: '#8e9eef',
   },
   icon: {
-    width: 30,
-    height: 30,
+    width: 24,
+    height: 24,
   },
   headerText: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: 'bold',
+    color: '#fff',
   },
   datePickerContainer: {
     marginBottom: 20,
     borderWidth: 1,
-    borderColor: '#007BFF',
+    borderColor: '#8e9eef',
     borderRadius: 5,
     padding: 15,
     marginTop: 20,
-    marginBottom: 20,
   },
   dateText: {
     fontSize: 18,
     marginVertical: 10,
-    color: '#007BFF',
+    color: '#8e9eef',
   },
   label: {
     fontSize: 18,
@@ -282,7 +292,7 @@ const styles = StyleSheet.create({
   },
   input: {
     height: 40,
-    borderColor: '#007BFF',
+    borderColor: '#8e9eef',
     borderWidth: 1,
     marginBottom: 20,
     paddingHorizontal: 10,
@@ -290,10 +300,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#f9f9f9',
   },
   button: {
-    backgroundColor: '#007BFF',
+    backgroundColor: '#8e9eef',
     padding: 15,
     borderRadius: 5,
     alignItems: 'center',
+    marginBottom: 20,
   },
   buttonText: {
     color: '#fff',
@@ -323,7 +334,13 @@ const styles = StyleSheet.create({
     borderRadius: 50,
   },
   imagePickerText: {
-    color: '#007BFF',
+    color: '#8e9eef',
+  },
+  navbarContainer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
   },
 });
 

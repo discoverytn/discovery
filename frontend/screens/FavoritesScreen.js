@@ -1,11 +1,14 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { View, Text, Image, TouchableOpacity, FlatList, StyleSheet, ImageBackground, ActivityIndicator } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import { useFocusEffect } from '@react-navigation/native';
 import { DB_HOST, PORT } from "@env";
-import Navbar from './Navbar'; 
+import Navbar from './Navbar';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
+import LottieView from 'lottie-react-native';
 
 const FavoritesScreen = () => {
   const { explorer } = useAuth();
@@ -13,8 +16,9 @@ const FavoritesScreen = () => {
   const [favorites, setFavorites] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigation = useNavigation();
+  const lottieRef = useRef(null);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (explorer && explorer.idexplorer) {
       setExplorerId(explorer.idexplorer);
     }
@@ -27,6 +31,29 @@ const FavoritesScreen = () => {
       }
     }, [explorerId])
   );
+
+  useEffect(() => {
+    if (lottieRef.current) {
+      lottieRef.current.play();
+      
+      // Set up a loop to play the animation twice
+      let playCount = 0;
+      const loopAnimation = () => {
+        playCount++;
+        if (playCount < 2) {
+          lottieRef.current.play();
+        }
+      };
+
+      lottieRef.current.onAnimationFinish = loopAnimation;
+    }
+
+    return () => {
+      if (lottieRef.current) {
+        lottieRef.current.onAnimationFinish = null;
+      }
+    };
+  }, []);
 
   const fetchFavorites = async (explorerId) => {
     setLoading(true);
@@ -72,7 +99,7 @@ const FavoritesScreen = () => {
   if (loading) {
     return (
       <View style={[styles.container, styles.loadingContainer]}>
-        <ActivityIndicator size="large" color="#007BFF" />
+        <ActivityIndicator size="large" color="#8e9eef" />
       </View>
     );
   }
@@ -80,18 +107,18 @@ const FavoritesScreen = () => {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.navigate('Discover')}>
-          <View style={styles.backArrowContainer}>
-            <ImageBackground
-              source={require('../assets/left-arrow.jpg')}
-              style={styles.backArrow}
-              imageStyle={{ borderRadius: 15 }}
-            />
-          </View>
+        <TouchableOpacity onPress={() => navigation.navigate('Discover')} style={styles.backButton}>
+          <FontAwesomeIcon icon={faArrowLeft} size={20} color="#fff" />
         </TouchableOpacity>
         <View style={styles.titleContainer}>
           <Text style={styles.headerText}>Favorite Places</Text>
-          <Image source={require('../assets/favoritesicon.gif')} style={styles.logo} />
+          <LottieView
+            ref={lottieRef}
+            source={require('../assets/favoriteslogo.json')}
+            style={styles.logo}
+            loop={false}
+            autoPlay={true}
+          />
         </View>
       </View>
       {favorites.length === 0 ? (
@@ -105,8 +132,7 @@ const FavoritesScreen = () => {
           contentContainerStyle={styles.postsContainer}
         />
       )}
-            <Navbar navigation={navigation} />
-
+      <Navbar navigation={navigation} />
     </View>
   );
 };
@@ -114,8 +140,7 @@ const FavoritesScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-    paddingTop: 60,
+    backgroundColor: '#f8f8f8',
   },
   loadingContainer: {
     justifyContent: 'center',
@@ -124,18 +149,13 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 10,
-    marginBottom: 20,
+    paddingHorizontal: 20,
+    paddingTop: 50,
+    paddingBottom: 20,
+    backgroundColor: '#8e9eef',
   },
-  backArrowContainer: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    overflow: 'hidden',
-  },
-  backArrow: {
-    width: '100%',
-    height: '100%',
+  backButton: {
+    padding: 5,
   },
   titleContainer: {
     flex: 1,
@@ -144,25 +164,27 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   headerText: {
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: 'bold',
-    color: '#20281d',
+    color: '#fff',
     marginRight: 10,
-    textShadowColor: 'rgba(0, 0, 0, 0.75)',
-    textShadowOffset: { width: -1, height: 1 },
+    textShadowColor: 'rgba(0, 0, 0, 0.1)',
+    textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 2,
   },
   logo: {
-    width: 30,
-    height: 30,
+    width: 40,
+    height: 40,
   },
   noFavoritesText: {
     fontSize: 18,
     textAlign: 'center',
     marginTop: 20,
+    color: '#333',
   },
   postsContainer: {
     paddingHorizontal: 10,
+    paddingTop: 10,
   },
   post: {
     flex: 1,
@@ -172,8 +194,8 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 5,
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
     elevation: 3,
   },
   postImage: {
@@ -202,6 +224,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginTop: 5,
     textAlign: 'center',
+    color: '#333',
   },
   locationContainer: {
     flexDirection: 'row',
@@ -222,7 +245,7 @@ const styles = StyleSheet.create({
     height: '100%',
   },
   postLocation: {
-    color: 'grey',
+    color: '#666',
     fontSize: 12,
   },
 });

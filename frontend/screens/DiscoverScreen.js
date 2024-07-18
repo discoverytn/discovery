@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useMemo } from 'react';
-import { View, Text, Image, FlatList, StyleSheet, Dimensions, TouchableOpacity, ScrollView, ActivityIndicator, RefreshControl, Alert, ImageBackground } from 'react-native';
+import {  View, Text, FlatList, StyleSheet, Dimensions, TouchableOpacity,ScrollView,ActivityIndicator, RefreshControl, Alert,ImageBackground } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import Rating from './Rating';
 import { useAuth } from '../context/AuthContext';
@@ -120,12 +120,15 @@ const DiscoverScreen = () => {
         <ImageBackground source={item.image} style={styles.postImage}>
           <View style={styles.overlay} />
           <View style={styles.textContainer}>
-            <View>
+            <View style={styles.leftContent}>
               <Text style={styles.postName}>{item.name}</Text>
-              <Text style={styles.postLocation}>{item.location}</Text>
+              <View style={styles.locationContainer}>
+                <Icon name="map-marker" size={16} color="#fff" style={styles.locationIcon} />
+                <Text style={styles.postLocation}>{item.location}</Text>
+              </View>
             </View>
             {business && Object.keys(business).length > 0 ? (
-              <Text style={styles.businessText}>Business view, no ratings</Text>
+              <Text style={styles.businessText}>Business view</Text>
             ) : explorer && Object.keys(explorer).length > 0 ? (
               <Rating 
                 postId={postId} 
@@ -145,9 +148,11 @@ const DiscoverScreen = () => {
       style={[styles.categoryContainer, selectedCategory === item.name && styles.selectedCategory]}
       onPress={() => setSelectedCategory(item.name === selectedCategory ? null : item.name)}
     >
-      <Image source={{ uri: item.posts[0].image.uri }} style={styles.categoryImage} />
-      <Text style={styles.categoryName}>{item.name}</Text>
-      <Text style={styles.categoryCount}>{item.posts.length} post{item.posts.length !== 1 ? 's' : ''}</Text>
+      <ImageBackground source={{ uri: item.posts[0].image.uri }} style={styles.categoryImage}>
+        <View style={styles.categoryOverlay} />
+        <Text style={styles.categoryName}>{item.name}</Text>
+        <Text style={styles.categoryCount}>{item.posts.length} post{item.posts.length !== 1 ? 's' : ''}</Text>
+      </ImageBackground>
     </TouchableOpacity>
   ), [selectedCategory]);
 
@@ -176,6 +181,15 @@ const DiscoverScreen = () => {
 
   return (
     <View style={styles.container}>
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <Icon name="arrow-left" size={24} color="#fff" />
+        </TouchableOpacity>
+        <Text style={styles.headerText}>Discover</Text>
+        <TouchableOpacity onPress={() => navigation.navigate('NotificationScreen')}>
+          <Icon name="bell" size={24} color="#FFD700" />
+        </TouchableOpacity>
+      </View>
       <ScrollView 
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
@@ -183,15 +197,6 @@ const DiscoverScreen = () => {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Image source={require('../assets/left-arrow.jpg')} style={styles.icon} />
-          </TouchableOpacity>
-          <Text style={styles.headerText}>Discover</Text>
-          <TouchableOpacity onPress={() => {/* Add notification functionality later */}}>
-            <Image source={require('../assets/notification.jpg')} style={styles.icon} />
-          </TouchableOpacity>
-        </View>
         <Text style={styles.subheaderText}>Categories</Text>
         <FlatList
           data={categories}
@@ -202,7 +207,7 @@ const DiscoverScreen = () => {
           contentContainerStyle={styles.categoriesContainer}
         />
         <Text style={styles.subheaderText}>
-          {selectedCategory ? `${selectedCategory} Places` : 'All Explored Places'}
+          {selectedCategory ? `${selectedCategory}` : 'All Explored Places'}
         </Text>
         <FlatList
           data={filteredPosts}
@@ -227,7 +232,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingTop: 40,
     paddingHorizontal: 20,
     paddingBottom: 80,
   },
@@ -235,23 +239,20 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 10,
-  },
-  icon: {
-    width: 30,
-    height: 30,
-    marginTop: 50,
+    paddingHorizontal: 20,
+    paddingTop: 50,
+    paddingBottom: 20,
+    backgroundColor: '#8e9eef',
   },
   headerText: {
-    color: '#000',
     fontSize: 20,
     fontWeight: 'bold',
-    marginTop: 50,
+    color: '#fff',
   },
   subheaderText: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
-    marginBottom: 13,
+    marginBottom: 15,
     marginTop: 20,
   },
   categoriesContainer: {
@@ -259,35 +260,48 @@ const styles = StyleSheet.create({
   },
   categoryContainer: {
     marginRight: 15,
-    alignItems: 'center',
-  },
-  selectedCategory: {
-    backgroundColor: '#e0e0e0',
+    width: 150,
+    height: 100,
     borderRadius: 10,
-    padding: 5,
+    overflow: 'hidden',
   },
   categoryImage: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+    width: '100%',
+    height: '100%',
+    justifyContent: 'flex-end',
+  },
+  categoryOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
   },
   categoryName: {
-    fontSize: 14,
+    color: '#fff',
+    fontSize: 16,
     fontWeight: 'bold',
-    marginTop: 5,
+    padding: 10,
   },
   categoryCount: {
+    color: '#fff',
     fontSize: 12,
-    color: '#666',
+    padding: 10,
+    paddingTop: 0,
+  },
+  selectedCategory: {
+    borderWidth: 2,
+    borderColor: '#0000ff',
   },
   postsContainer: {
     flexGrow: 1,
   },
   postContainer: {
-    marginBottom: 16,
-    borderRadius: 8,
+    marginBottom: 20,
+    borderRadius: 10,
     overflow: 'hidden',
-    position: 'relative',
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
   postImage: {
     width: '100%',
@@ -296,18 +310,29 @@ const styles = StyleSheet.create({
   },
   overlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
   },
   textContainer: {
-    padding: 8,
+    padding: 15,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-end',
+  },
+  leftContent: {
+    flex: 1,
   },
   postName: {
     fontSize: 18,
     fontWeight: 'bold',
     color: '#fff',
+    marginBottom: 5,
+  },
+  locationContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  locationIcon: {
+    marginRight: 5,
   },
   postLocation: {
     fontSize: 14,
@@ -316,10 +341,16 @@ const styles = StyleSheet.create({
   businessText: {
     fontSize: 14,
     color: '#fff',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    padding: 5,
+    borderRadius: 5,
   },
   signupText: {
     fontSize: 14,
     color: '#fff',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    padding: 5,
+    borderRadius: 5,
   },
   loadingContainer: {
     flex: 1,

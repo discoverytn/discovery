@@ -90,7 +90,7 @@ const RecommendedScreen = ({ navigation }) => {
     return (
       <View style={styles.postContainer}>
         <TouchableOpacity
-          onPress={() => navigation.navigate('OnePost', { postId: item.idposts })}
+          onPress={() => navigation.navigate('Onepost', { postId: item.idposts })}
         >
           <ImageBackground source={{ uri: item.image1 }} style={styles.postImage}>
             <View style={styles.overlay} />
