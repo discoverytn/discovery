@@ -255,8 +255,8 @@ const BusinessProfileScreen = ({route}) => {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
-        <LinearGradient colors={['#333333', '#e6e9f0', '#eef1f5']} style={styles.header}>
-  <View style={styles.profileImageContainer}>
+<LinearGradient colors={['#3C1E7F', '#7A5D8E', '#F0F3F7']} style={styles.header}>
+<View style={styles.profileImageContainer}>
     <Image source={require('../assets/profilepic.jpg')} style={styles.profileBackground} />
     <Image source={{ uri: business.image }} style={styles.profileImage} />
   </View>
@@ -465,6 +465,7 @@ const styles = StyleSheet.create({
     color: '#1a2a6c',
   },
   infoContainer: {
+    marginTop:-10,
     backgroundColor: '#FFFFFF',
     borderRadius: 20,
     padding: 20,

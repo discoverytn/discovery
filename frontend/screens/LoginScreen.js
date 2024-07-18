@@ -38,7 +38,7 @@ const LoginScreen = () => {
           if (decodedToken.categories !== null) {
             navigation.navigate("Main");
           } else {
-            navigation.navigate("RewardShopScreen");
+            navigation.navigate("Categories");
           }
         } else if (userRole === "business") {
           if (decodedToken.subscribed !=='no') {

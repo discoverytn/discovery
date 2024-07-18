@@ -50,6 +50,10 @@ const Navbar = ({ navigation }) => {
         <Icon name="calendar" type="font-awesome" color="#fff" size={24} />
         <Text style={styles.navText}>Event</Text>
       </TouchableOpacity>
+      <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('RewardShopScreen')}>
+        <Icon name="trophy" type="font-awesome" color="#fff" size={24} />
+        <Text style={styles.navText}>Rewards</Text>
+      </TouchableOpacity>
     </>
   );
 
@@ -76,6 +80,10 @@ const Navbar = ({ navigation }) => {
           <Icon name="calendar" type="font-awesome" color="#fff" size={24} />
           <Text style={styles.navText}>Event</Text>
         </TouchableOpacity>
+        <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('NotificationScreen')}>
+        <Icon name="bell" type="font-awesome" color="#fff" size={24} />
+        <Text style={styles.navText}>Notif</Text>
+      </TouchableOpacity>
       </LinearGradient>
     </>
   );
