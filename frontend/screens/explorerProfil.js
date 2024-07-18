@@ -1,11 +1,12 @@
-import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, View, Image, TouchableOpacity, FlatList, Alert, Modal } from 'react-native';
+import React, { useEffect, useState, useCallback } from 'react';
+import { StyleSheet, Text, View, Image, TouchableOpacity, FlatList, Alert, Modal, ScrollView, RefreshControl } from 'react-native';
 import axios from 'axios';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { useAuth } from '../context/AuthContext';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { DB_HOST, PORT } from "@env";
 import Navbar from './Navbar'; 
+import LottieView from 'lottie-react-native';
 
 const ExplorerProfile = ({route}) => {
   const { explorer, setExplorer, logOut } = useAuth();
@@ -19,8 +20,10 @@ const ExplorerProfile = ({route}) => {
   const [numTraveled, setNumTraveled] = useState(0);
   const [numFavourites, setNumFavourites] = useState(0);
   const [numVisited, setNumVisited] = useState(0);
-  const [showMenu, setShowMenu] = useState(false);
   const [showUserInfo, setShowUserInfo] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+  const [isOptionsOpen, setIsOptionsOpen] = useState(false);
+  const lottieRef = React.useRef(null);
   
   const fetchNumPosts = async () => {
     try {
@@ -155,10 +158,6 @@ const ExplorerProfile = ({route}) => {
     setActiveTab(tabName);
   };
 
-  const navigateToEditProfile = () => {
-    navigation.navigate('ExplorerEditProfilScreen');
-  };
-
   const handleLogout = () => {
     logOut();
     navigation.navigate('Login');
@@ -289,22 +288,38 @@ const ExplorerProfile = ({route}) => {
     </View>
   );
 
-  const toggleMenu = () => {
-    setShowMenu(!showMenu);
+  const toggleOptions = () => {
+    setIsOptionsOpen(!isOptionsOpen);
+    if (lottieRef.current) {
+      if (!isOptionsOpen) {
+        lottieRef.current.play();
+      } else {
+        lottieRef.current.reset();
+      }
+    }
   };
 
-  const handleMenuOption = (option) => {
-    setShowMenu(false);
-    if (option === 'Home') {
-      navigation.navigate('Main');
-    } else if (option === 'AddPost') {
-      navigation.navigate('ExplorerAddPostScreen');
+  const handleOptionSelect = (option) => {
+    setIsOptionsOpen(false);
+    switch (option) {
+      case 'EditProfile':
+        navigation.navigate('ExplorerEditProfilScreen');
+        break;
+      case 'Logout':
+        handleLogout();
+        break;
     }
   };
 
   const toggleUserInfo = () => {
     setShowUserInfo(!showUserInfo);
   };
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    // Refresh your data here
+    setRefreshing(false);
+  }, []);
 
   if (!explorer) {
     return (
@@ -316,118 +331,118 @@ const ExplorerProfile = ({route}) => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <View style={styles.headerContent}>
-          <Text style={styles.fullNameText}>{`${explorer.firstname} ${explorer.lastname}`}</Text>
-          <TouchableOpacity onPress={toggleMenu} style={styles.menuIcon}>
-            <Icon name="bars" size={24} color="#000" />
-          </TouchableOpacity>
-        </View>
-      </View>
-      <Modal
-        visible={showMenu}
-        transparent={true}
-        animationType="fade"
-        onRequestClose={() => setShowMenu(false)}
+      <ScrollView
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
       >
-        <TouchableOpacity style={styles.modalOverlay} onPress={() => setShowMenu(false)}>
-          <View style={styles.menuContainer}>
-            <TouchableOpacity style={styles.menuItem} onPress={() => handleMenuOption('Home')}>
-              <Text style={styles.menuItemText}>Home</Text>
+        <View style={styles.header}>
+          <View style={styles.headerContent}>
+            <Text style={styles.fullNameText}>{`${explorer.firstname} ${explorer.lastname}`}</Text>
+            <TouchableOpacity style={styles.optionsContainer} onPress={toggleOptions}>
+              <LottieView
+                ref={lottieRef}
+                source={require('../assets/dropdown.json')}
+                style={styles.dropdownAnimation}
+                loop={false}
+              />
             </TouchableOpacity>
-            <TouchableOpacity style={styles.menuItem} onPress={() => handleMenuOption('AddPost')}>
-              <Text style={styles.menuItemText}>Add Post</Text>
-            </TouchableOpacity>
-          </View>
-        </TouchableOpacity>
-      </Modal>
-      <View style={styles.profileContainer}>
-        <Image source={{ uri: explorer.image }} style={styles.profileImage} />
-        <Text style={styles.usernameText}>@{generateUsername(explorer)}</Text>
-        <View style={styles.statsContainer}>
-          <View style={styles.statItem}>
-            <Text style={styles.statValue}>{numPosts}</Text>
-            <Text style={styles.statLabel}>Posts</Text>
-          </View>
-          <View style={styles.statItem}>
-            <Text style={styles.statValue}>{numFavourites}</Text>
-            <Text style={styles.statLabel}>Favourites</Text>
-          </View>
-          <View style={styles.statItem}>
-            <Text style={styles.statValue}>{numVisited}</Text>
-            <Text style={styles.statLabel}>Visited</Text>
           </View>
         </View>
-        <Text style={styles.descriptionText}>{explorer.description}</Text>
-        <TouchableOpacity onPress={toggleUserInfo} style={styles.toggleInfoButton}>
-          <Text style={styles.toggleInfoText}>{showUserInfo ? "Hide Info" : "Display Info"}</Text>
-        </TouchableOpacity>
-        {showUserInfo && (
-          <View style={styles.userInfoContainer}>
-            <Text style={styles.infoText}>Email: {explorer.email}</Text>
-            <Text style={styles.infoText}>Location: {explorer.governorate}, {explorer.municipality}</Text>
-            <Text style={styles.infoText}>Phone: {explorer.mobileNum}</Text>
+        {isOptionsOpen && (
+          <View style={styles.optionsWrapper}>
+            <TouchableOpacity style={styles.optionItem} onPress={() => handleOptionSelect('EditProfile')}>
+              <Text style={styles.optionText}>Edit Profile</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.optionItem} onPress={() => handleOptionSelect('Logout')}>
+              <Text style={styles.optionText}>Logout</Text>
+            </TouchableOpacity>
           </View>
         )}
-        <TouchableOpacity style={styles.editButton} onPress={navigateToEditProfile}>
-          <Text style={styles.editButtonText}>Edit profile</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-          <Text style={styles.logoutButtonText}>Logout</Text>
-        </TouchableOpacity>
-      </View>
-      <View style={styles.navBar}>
-        <TouchableOpacity
-          style={[styles.navBarItem, activeTab === 'Posts' && styles.activeTab]}
-          onPress={() => handleTabChange('Posts')}
-        >
-          <Text style={styles.navBarText}>Posts</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.navBarItem, activeTab === 'Favourites' && styles.activeTab]}
-          onPress={() => handleTabChange('Favourites')}
-        >
-          <Text style={styles.navBarText}>Favourites</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.navBarItem, activeTab === 'Visited' && styles.activeTab]}
-          onPress={() => handleTabChange('Visited')}
-        >
-          <Text style={styles.navBarText}>Visited</Text>
-        </TouchableOpacity>
-      </View>
-      {activeTab === 'Posts' && (
-        <FlatList
-          key="threeColumns"
-          data={posts}
-          keyExtractor={(item, index) => item.id ? item.id.toString() : index.toString()}
-          renderItem={renderPostItem}
-          numColumns={3}
-          contentContainerStyle={styles.postsContainer}
-        />
-      )}
-      {activeTab === 'Favourites' && (
-        <FlatList
-          key="threeColumnsFavourites"
-          data={favourites}
-          keyExtractor={(item, index) => item.id ? item.id.toString() : index.toString()}
-          renderItem={renderFavouriteItem}
-          numColumns={3}
-          contentContainerStyle={styles.postsContainer}
-        />
-      )}
-      {activeTab === 'Visited' && (
-        <FlatList
-          key="threeColumnsVisited"
-          data={visited}
-          keyExtractor={(item, index) => item.id ? item.id.toString() : index.toString()}
-          renderItem={renderVisitedItem}
-          numColumns={3}
-          contentContainerStyle={styles.postsContainer}
-        />
-      )}
-              <Navbar navigation={navigation} />
-
+        <View style={styles.profileContainer}>
+          <Image source={{ uri: explorer.image }} style={styles.profileImage} />
+          <Text style={styles.usernameText}>@{generateUsername(explorer)}</Text>
+          <View style={styles.statsContainer}>
+            <View style={styles.statItem}>
+              <Text style={styles.statValue}>{numPosts}</Text>
+              <Text style={styles.statLabel}>Posts</Text>
+            </View>
+            <View style={styles.statItem}>
+              <Text style={styles.statValue}>{numFavourites}</Text>
+              <Text style={styles.statLabel}>Favourites</Text>
+            </View>
+            <View style={styles.statItem}>
+              <Text style={styles.statValue}>{numVisited}</Text>
+              <Text style={styles.statLabel}>Visited</Text>
+            </View>
+          </View>
+          <Text style={styles.descriptionText}>{explorer.description}</Text>
+          <TouchableOpacity onPress={toggleUserInfo} style={styles.businessDetailsToggle}>
+            <Text style={styles.businessDetailsToggleText}>
+              {showUserInfo ? "Hide Info" : "Display Info"}
+            </Text>
+            <Icon name={showUserInfo ? 'chevron-up' : 'chevron-down'} size={14} color="#333333" />
+          </TouchableOpacity>
+          {showUserInfo && (
+            <View style={styles.userInfoContainer}>
+              <Text style={styles.infoText}>Email: {explorer.email}</Text>
+              <Text style={styles.infoText}>Location: {explorer.governorate}, {explorer.municipality}</Text>
+              <Text style={styles.infoText}>Phone: {explorer.mobileNum}</Text>
+            </View>
+          )}
+        </View>
+        <View style={styles.navBar}>
+          <TouchableOpacity
+            style={[styles.navBarItem, activeTab === 'Posts' && styles.activeTab]}
+            onPress={() => handleTabChange('Posts')}
+          >
+            <Text style={styles.navBarText}>Posts</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.navBarItem, activeTab === 'Favourites' && styles.activeTab]}
+            onPress={() => handleTabChange('Favourites')}
+          >
+            <Text style={styles.navBarText}>Favourites</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.navBarItem, activeTab === 'Visited' && styles.activeTab]}
+            onPress={() => handleTabChange('Visited')}
+          >
+            <Text style={styles.navBarText}>Visited</Text>
+          </TouchableOpacity>
+        </View>
+        {activeTab === 'Posts' && (
+          <FlatList
+            key="threeColumns"
+            data={posts}
+            keyExtractor={(item, index) => item.id ? item.id.toString() : index.toString()}
+            renderItem={renderPostItem}
+            numColumns={3}
+            contentContainerStyle={styles.postsContainer}
+          />
+        )}
+        {activeTab === 'Favourites' && (
+          <FlatList
+            key="threeColumnsFavourites"
+            data={favourites}
+            keyExtractor={(item, index) => item.id ? item.id.toString() : index.toString()}
+            renderItem={renderFavouriteItem}
+            numColumns={3}
+            contentContainerStyle={styles.postsContainer}
+          />
+        )}
+        {activeTab === 'Visited' && (
+          <FlatList
+            key="threeColumnsVisited"
+            data={visited}
+            keyExtractor={(item, index) => item.id ? item.id.toString() : index.toString()}
+            renderItem={renderVisitedItem}
+            numColumns={3}
+            contentContainerStyle={styles.postsContainer}
+          />
+        )}
+      </ScrollView>
+      <Navbar navigation={navigation} />
     </View>
   );
 };
@@ -440,47 +455,49 @@ const styles = StyleSheet.create({
   header: {
     padding: 10,
     marginTop: 20,
+    marginBottom: 10,
   },
   headerContent: {
+    marginTop:20,
     flexDirection: 'row',
-    justifyContent: 'center',
+    justifyContent: 'space-between',
     alignItems: 'center',
   },
   fullNameText: {
+  marginLeft:95,
     fontSize: 22,
     fontWeight: 'bold',
-    textAlign: 'center',
     flex: 1,
+    color: '#001861'
+
   },
-  menuIcon: {
+  optionsContainer: {
+    width: 30,
+    height: 30,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  dropdownAnimation: {
+    width: 170,
+    height: 170,
+  },
+  optionsWrapper: {
     position: 'absolute',
+    top: 83,
     right: 10,
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'flex-start',
-    alignItems: 'flex-end',
-  },
-  menuContainer: {
-    backgroundColor: '#fff',
-    width: 150,
-    marginTop: 60,
-    marginRight: 10,
-    borderRadius: 5,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 10,
+    padding: 5,
     elevation: 5,
+    zIndex: 1000,
   },
-  menuItem: {
-    padding: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+  optionItem: {
+    paddingVertical: 10,
+    paddingHorizontal: 15,
   },
-  menuItemText: {
+  optionText: {
     fontSize: 16,
+    color: '#001861',
   },
   profileContainer: {
     alignItems: 'center',
@@ -489,14 +506,15 @@ const styles = StyleSheet.create({
     borderBottomColor: '#e0e0e0',
   },
   profileImage: {
+    marginTop:-20,
     width: 100,
     height: 100,
     borderRadius: 50,
     marginBottom: 10,
   },
   usernameText: {
-    fontSize: 16,
-    color: '#333',
+    fontSize: 18,
+    color: '#565656',
     marginBottom: 10,
     fontWeight: '500',
   },
@@ -524,54 +542,34 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     paddingHorizontal: 20,
   },
-  toggleInfoButton: {
-    marginBottom: 10,
+  businessDetailsToggle: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    padding: 15,
+    margin: 15,
+    elevation: 5,
   },
-  toggleInfoText: {
-    fontSize: 16,
-    color: '#007AFF',
-    fontWeight: '600',
+  businessDetailsToggleText: {
+    marginRight: 15,
+    fontSize: 15,
+    fontWeight: 'bold',
+    color: '#001861',
   },
   userInfoContainer: {
-    backgroundColor: '#f8f8f8',
-    borderWidth: 1,
-    borderColor: '#gold',
-    borderRadius: 10,
-    padding: 15,
-    marginBottom: 15,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    padding: 20,
+    margin: 15,
+    elevation: 5,
   },
   infoText: {
-    fontSize: 16,
+    fontWeight: 'bold',
+    fontSize: 14,
     color: '#333',
     marginBottom: 5,
-    fontWeight: '500',
-  },
-  editButton: {
-    backgroundColor: 'red',
-    paddingVertical: 8,
-    paddingHorizontal: 20,
-    borderRadius: 4,
-  },
-  editButtonText: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: '#fff',
-  },
-  logoutButton: {
-    marginTop: 10,
-    backgroundColor: '#000',
-    paddingVertical: 8,
-    paddingHorizontal: 20,
-    borderRadius: 4,
-  },
-  logoutButtonText: {
-    fontSize: 14,
-    color: '#fff',
   },
   navBar: {
     flexDirection: 'row',
@@ -599,7 +597,7 @@ const styles = StyleSheet.create({
     flex: 1,
     aspectRatio: 1,
     margin: 1,
-    maxWidth: '30%',
+    maxWidth: '33%',
   },
   postImage: {
     width: '100%',

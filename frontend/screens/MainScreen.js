@@ -227,7 +227,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   notificationIcon: {
-    marginLeft: 10,
+    marginLeft: -15,
     backgroundColor: 'transparent',
   },
   searchIcon: {
