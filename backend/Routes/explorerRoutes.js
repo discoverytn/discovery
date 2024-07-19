@@ -1,5 +1,5 @@
 const express = require("express");
-const { getExplorerById, editExplorer, getExplorerPosts,getExplorerNumberPosts, removeFromFavourites, addOrRemoveFromFavorites, isPostFavoritedByExplorer, getExplorerFavorites,addOrRemoveFromTraveled,removeFromTraveled,isPostTraveledByExplorer,updateCategories,getTopExplorersByPosts ,getTopExplorersByPostCount,getExplorerTraveled,purchaseMarketItem } = require("../Controllers/ExplorerController");
+const { getExplorerById, editExplorer, getExplorerPosts,getExplorerNumberPosts, removeFromFavourites, addOrRemoveFromFavorites, isPostFavoritedByExplorer, getExplorerFavorites,addOrRemoveFromTraveled,removeFromTraveled,isPostTraveledByExplorer,updateCategories,getTopExplorersByPosts ,getTopExplorersByPostCount,getExplorerTraveled,purchaseMarketItem,getBoughtItems } = require("../Controllers/ExplorerController");
 const router = express.Router();
 
 router.get('/topthree', getTopExplorersByPostCount);
@@ -43,6 +43,8 @@ router.put('/:idexplorer/categories', updateCategories);
 
 ///Market 
 router.post('/market/purchase/:iditem/:idexplorer', purchaseMarketItem);
+
+router.get("/:idexplorer/bought-items", getBoughtItems);
 
 
 

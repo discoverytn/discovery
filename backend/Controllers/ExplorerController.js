@@ -21,11 +21,11 @@ module.exports = {
       if (!explorer) {
         return res.status(404).send("Explorer not found");
       }
-
+  
       if (!req.body.currentPassword) {
         return res.status(400).send("Current password is required");
       }
-
+  
       const isPasswordValid = await bcrypt.compare(
         req.body.currentPassword,
         explorer.password
@@ -33,7 +33,7 @@ module.exports = {
       if (!isPasswordValid) {
         return res.status(401).send("Invalid password");
       }
-
+  
       const updateFields = {
         firstname: req.body.firstname || explorer.firstname,
         lastname: req.body.lastname || explorer.lastname,
@@ -42,17 +42,18 @@ module.exports = {
         mobileNum: req.body.mobileNum || explorer.mobileNum,
         governorate: req.body.governorate || explorer.governorate,
         municipality: req.body.municipality || explorer.municipality,
+        selectedItemName: req.body.selectedItemName ||  explorer.selectedItemName,
       };
-
+  
       if (req.body.newPassword) {
         const hashedPassword = await bcrypt.hash(req.body.newPassword, 10);
         updateFields.password = hashedPassword;
       }
-
+  
       const result = await db.Explorer.update(updateFields, {
         where: { idexplorer: req.params.idexplorer },
       });
-
+  
       if (result[0] === 1) {
         const newData = await db.Explorer.findOne({
           where: { idexplorer: req.params.idexplorer },
@@ -493,6 +494,34 @@ module.exports = {
       return res.status(500).json({ error: "Failed to purchase market item" });
     }
   },
+  getBoughtItems: async function (req, res) {
+    const { idexplorer } = req.params;
   
+    try {
+      // Find the explorer
+      const explorer = await db.Explorer.findByPk(idexplorer);
+      if (!explorer) {
+        return res.status(404).json({ error: "Explorer not found" });
+      }
+  
+      // Get the bought item names
+      const boughtItemNames = explorer.boughtItemName ? explorer.boughtItemName.split(',') : [];
+  
+      // Find all market items that match the bought item names
+      const boughtItems = await db.Market.findAll({
+        where: {
+          itemName: {
+            [db.Sequelize.Op.in]: boughtItemNames
+          }
+        },
+        attributes: ['iditem','itemName', 'itemImage']
+      });
+  
+      return res.status(200).json(boughtItems);
+    } catch (error) {
+      console.error("Error fetching bought items:", error);
+      return res.status(500).json({ error: "Failed to fetch bought items" });
+    }
+  },
   
 };
