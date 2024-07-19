@@ -140,7 +140,7 @@ const ScheduleEventScreen = ({ navigation }) => {
   
       console.log('Event Data:', response.data);
       Alert.alert('Success', 'Your event has been posted successfully!', [
-        { text: "OK", onPress: () => navigation.navigate('BusinessProfileScreen') }
+        { text: "OK", onPress: () => navigation.navigate('EventList') }
       ]);
     } catch (error) {
       console.error('Error posting event:', error);

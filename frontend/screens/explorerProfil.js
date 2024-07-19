@@ -7,6 +7,7 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import { DB_HOST, PORT } from "@env";
 import Navbar from './Navbar'; 
 import LottieView from 'lottie-react-native';
+import thoughts from '../assets/thoughts.gif'
 
 const ExplorerProfile = ({route}) => {
   const { explorer, setExplorer, logOut } = useAuth();
@@ -369,6 +370,7 @@ const ExplorerProfile = ({route}) => {
         )}
         <View style={styles.profileContainer}>
           <Image source={{ uri: explorer.image }} style={styles.profileImage} />
+          <Image source={require('../assets/dropdown.json')} />
           <Text style={styles.usernameText}>@{generateUsername(explorer)}</Text>
           <View style={styles.statsContainer}>
             <View style={styles.statItem}>

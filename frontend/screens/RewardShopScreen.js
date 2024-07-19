@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, Alert, SafeAreaView } from 'react-native';
 import axios from 'axios';
 import { DB_HOST, PORT } from "@env";
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
@@ -92,7 +92,7 @@ const RewardShopScreen = ({ navigation }) => {
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <FontAwesomeIcon icon={faCircleLeft} style={styles.icon} size={20} color='#fff' />
@@ -109,8 +109,9 @@ const RewardShopScreen = ({ navigation }) => {
         numColumns={2}
         contentContainerStyle={styles.listContainer}
       />
+      <View style={styles.navbarPlaceholder} />
       <Navbar navigation={navigation} />
-    </View>
+    </SafeAreaView>
   );
 };
 
@@ -139,6 +140,7 @@ const styles = StyleSheet.create({
   },
   listContainer: {
     padding: 10,
+    paddingBottom: 80, // Add extra padding at the bottom
   },
   itemContainer: {
     flex: 1,
@@ -193,6 +195,9 @@ const styles = StyleSheet.create({
   },
   disabledButton: {
     backgroundColor: '#ccc', 
+  },
+  navbarPlaceholder: {
+    height: 60, 
   },
 });
 

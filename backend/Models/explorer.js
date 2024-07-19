@@ -66,7 +66,7 @@ module.exports = (sequelize) => {
       allowNull: true, 
     },
     boughtItemImage: {
-      type: DataTypes.STRING,
+      type: DataTypes.TEXT('long'),
       allowNull: true,
     },
     selectedItemName: {

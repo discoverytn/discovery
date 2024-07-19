@@ -68,7 +68,7 @@ const Navbar = ({ navigation }) => {
           <Icon name="globe" type="font-awesome" color="#fff" size={24} />
           <Text style={styles.navText}>Explore</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('ExplorerAddPostScreen')}>
+        <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('BusinessddPostScreen')}>
           <Icon name="plus-square" type="font-awesome" color="#fff" size={24} />
           <Text style={styles.navText}>Add</Text>
         </TouchableOpacity>
