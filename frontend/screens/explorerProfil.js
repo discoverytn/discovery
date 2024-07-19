@@ -24,6 +24,7 @@ const ExplorerProfile = ({route}) => {
   const [refreshing, setRefreshing] = useState(false);
   const [isOptionsOpen, setIsOptionsOpen] = useState(false);
   const lottieRef = React.useRef(null);
+  const [selectedItemImage, setSelectedItemImage] = useState(null);
   
   const fetchNumPosts = async () => {
     try {
@@ -58,6 +59,13 @@ const ExplorerProfile = ({route}) => {
           setNumLikes(explorerData.Likes || 0);
           setNumTraveled(explorerData.Traveled || 0);
           fetchNumPosts();
+
+          if (explorerData.boughtItemName) {
+            const marketResponse = await axios.get(`http://${DB_HOST}:${PORT}/market/item/${explorerData.boughtItemName}`);
+            if (marketResponse.status === 200 && marketResponse.data) {
+              setSelectedItemImage(marketResponse.data.itemImage);
+            }
+          }
         } else {
           console.error('Failed to fetch explorer data');
         }
@@ -317,7 +325,6 @@ const ExplorerProfile = ({route}) => {
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
-    // Refresh your data here
     setRefreshing(false);
   }, []);
 
@@ -338,7 +345,12 @@ const ExplorerProfile = ({route}) => {
       >
         <View style={styles.header}>
           <View style={styles.headerContent}>
-            <Text style={styles.fullNameText}>{`${explorer.firstname} ${explorer.lastname}`}</Text>
+            <Text style={styles.fullNameText}>
+              {`${explorer.firstname} ${explorer.lastname}`}
+            </Text>
+            {selectedItemImage && (
+              <Image source={{ uri: selectedItemImage }} style={styles.selectedItemImage} />
+            )}
             <TouchableOpacity style={styles.optionsContainer} onPress={toggleOptions}>
               <LottieView
                 ref={lottieRef}
@@ -377,7 +389,7 @@ const ExplorerProfile = ({route}) => {
             </View>
           </View>
           <Text style={styles.descriptionText}>{explorer.description}</Text>
-          <TouchableOpacity onPress={toggleUserInfo} style={styles.businessDetailsToggle}>
+       <TouchableOpacity onPress={toggleUserInfo} style={styles.businessDetailsToggle}>
             <Text style={styles.businessDetailsToggleText}>
               {showUserInfo ? "Hide Info" : "Display Info"}
             </Text>
@@ -465,11 +477,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   fullNameText: {
-    marginLeft: 95,
     fontSize: 22,
     fontWeight: 'bold',
     flex: 1,
     color: '#001861'
+  },
+  selectedItemImage: {
+    width: 30,
+    height: 30,
+    marginLeft: 10,
+    marginRight: 10,
   },
   optionsContainer: {
     width: 30,
@@ -592,7 +609,7 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     flex: 1,
-    paddingBottom: 60, // Adjust this value to ensure content is not hidden by the navbar
+    paddingBottom: 60,
   },
   postsContainer: {
     padding: 1,

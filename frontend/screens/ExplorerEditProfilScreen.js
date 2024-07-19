@@ -18,7 +18,6 @@ const governorateOptions = [
 
 const ExplorerEditProfileScreen = () => {
   const navigation = useNavigation();
-
   const { explorer, setExplorer } = useAuth();
   const [explorerId, setExplorerId] = useState(null);
   const [firstname, setFirstname] = useState('');
@@ -34,16 +33,35 @@ const ExplorerEditProfileScreen = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [showPasswordFields, setShowPasswordFields] = useState(false);
+  const [boughtItems, setBoughtItems] = useState([]);
+  const [selectedBoughtItem, setSelectedBoughtItem] = useState('');
 
   useEffect(() => {
     if (explorer) {
-      console.log('Explorer object:', explorer);  
       if (explorer.id) {
         setExplorerId(explorer.id);
-        console.log('Explorer ID set:', explorer.id);
       }
+      setFirstname(explorer.firstname || '');
+      setLastname(explorer.lastname || '');
+      setDescription(explorer.description || '');
+      setGovernorate(explorer.governorate || '');
+      setMunicipality(explorer.municipality || '');
+      setMobileNum(explorer.mobileNum || '');
+      setImage(explorer.image || null);
+      setSelectedBoughtItem(explorer.selectedItemName || '');
+      fetchBoughtItems();
     }
   }, [explorer]);
+
+  const fetchBoughtItems = async () => {
+    try {
+      const response = await axios.get(`http://${DB_HOST}:${PORT}/explorer/${explorerId}/bought-items`);
+      setBoughtItems(response.data);
+    } catch (error) {
+      console.error('Error fetching bought items:', error);
+      Alert.alert('Error', 'Failed to fetch bought items');
+    }
+  };
 
   const clearFields = () => {
     setFirstname('');
@@ -55,6 +73,7 @@ const ExplorerEditProfileScreen = () => {
     setNewPassword('');
     setConfirmNewPassword('');
     setCurrentPassword('');
+    setSelectedBoughtItem('');
   };
 
   const handleSave = async () => {
@@ -67,9 +86,6 @@ const ExplorerEditProfileScreen = () => {
 
   const handleConfirmPassword = async () => {
     setModalVisible(false);
-
-    console.log("Explorer ID:", explorerId); 
-
     const payload = {
       firstname: firstname,
       lastname: lastname,
@@ -79,34 +95,28 @@ const ExplorerEditProfileScreen = () => {
       mobileNum: mobileNum,
       image,
       currentPassword: currentPassword,
+      selectedItemName: selectedBoughtItem,
     };
-
     if (newPassword) {
       payload.newPassword = newPassword;
     }
-
     try {
       const response = await axios.put(`http://${DB_HOST}:${PORT}/explorer/${explorerId}/edit`, payload);
-
       if (response.status === 200) {
         setExplorer(response.data);
         Alert.alert('Success', 'Profile updated successfully');
-        clearFields()
-               navigation.navigate("explorerProfil");
-
+        clearFields();
+        navigation.navigate("explorerProfil");
       } else {
         Alert.alert('Error', 'Failed to update profile');
       }
     } catch (error) {
       console.error('Error updating profile:', error);
       if (error.response) {
-        console.error('Server responded with:', error.response.data);
         Alert.alert('Error', 'Failed to update profile: Server error');
       } else if (error.request) {
-        console.error('No response received:', error.request);
         Alert.alert('Error', 'Failed to update profile: No response');
       } else {
-        console.error('Error setting up the request:', error.message);
         Alert.alert('Error', 'Failed to update profile: Request setup error');
       }
     }
@@ -120,12 +130,8 @@ const ExplorerEditProfileScreen = () => {
         aspect: [4, 3],
         quality: 1,
       });
-
-      console.log('ImagePicker result:', result);
-
       if (!result.cancelled) {
         const source = { uri: result.assets[0].uri };
-        console.log('Selected image URI:', source.uri);
         uploadImage(source.uri);
       }
     } catch (error) {
@@ -141,16 +147,12 @@ const ExplorerEditProfileScreen = () => {
       name: uri.split("/").pop(),
     });
     formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
-
     try {
       const response = await axios.post(CLOUDINARY_UPLOAD_URL, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
       });
-
-      console.log("Upload response:", response);
-
       if (response.status === 200) {
         const imageUrl = response.data.secure_url;
         setImage(imageUrl);
@@ -256,6 +258,18 @@ const ExplorerEditProfileScreen = () => {
         onChangeText={setMobileNum}
         keyboardType="numeric"
       />
+
+      <Text style={styles.label}>Bought Items</Text>
+      <Picker
+        style={styles.input}
+        selectedValue={selectedBoughtItem}
+        onValueChange={(itemValue, itemIndex) => setSelectedBoughtItem(itemValue)}
+      >
+        <Picker.Item label="Select a bought item" value="" />
+        {boughtItems.map((item) => (
+          <Picker.Item key={item.iditem} label={item.itemName} value={item.itemName} />
+        ))}
+      </Picker>
 
       <TouchableOpacity onPress={() => setShowPasswordFields(!showPasswordFields)}>
         <Text style={styles.changePasswordText}>Click here to change your password</Text>
@@ -377,6 +391,11 @@ const styles = StyleSheet.create({
   },
   cancelButton: {
     backgroundColor: 'red',
+  },
+  label: {
+    fontSize: 16,
+    marginBottom: 5,
+    fontWeight: 'bold',
   },
 });
 

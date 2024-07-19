@@ -445,15 +445,7 @@ return (
               <View style={styles.userInfo}>
                 <Text style={styles.userName}>Yessmine nouri</Text>
                 <Text style={styles.userHandle}>@janesmith</Text>
-                <Text style={styles.comment}>Amazing experience, will come back!</Text>
-              </View>
-            </View>
-            <View style={styles.userRow}>
-              <Image source={require('../assets/user.jpg')} style={styles.profileImage} />
-              <View style={styles.userInfo}>
-                <Text style={styles.userName}>Amen jbeli</Text>
-                <Text style={styles.userHandle}>@alexjohnson</Text>
-                <Text style={styles.comment}>Beautiful scenery and great weather.</Text>
+                <Text style={styles.comment}>Amazing site, will come back!</Text>
               </View>
             </View>
           </View>
@@ -653,12 +645,12 @@ const styles = StyleSheet.create({
     marginBottom: 3,
   },
   commentUserName: {
-    color: 'grey',
+    color: 'violet',
     marginBottom: 3,
     fontSize: 12,
   },
   commentText: {
-    color: '#333',
+    color: 'grey',
   },
   editCommentInput: {
     borderWidth: 1,
