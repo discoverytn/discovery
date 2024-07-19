@@ -445,7 +445,7 @@ return (
               <View style={styles.userInfo}>
                 <Text style={styles.userName}>Yessmine nouri</Text>
                 <Text style={styles.userHandle}>@janesmith</Text>
-                <Text style={styles.comment}>Amazing site, will come back!</Text>
+                <Text style={styles.comment}>Amazing , will come back!</Text>
               </View>
             </View>
           </View>

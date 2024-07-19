@@ -28,7 +28,7 @@ if (explorer_idexplorer) {
   commenterImage = explorer.image;
 } else if (business_idbusiness) {
   const business = await Business.findByPk(business_idbusiness);
-  commenterName = business.businessname;
+  commenterName = business.firstname;
   commenterImage = business.image;
 }
 

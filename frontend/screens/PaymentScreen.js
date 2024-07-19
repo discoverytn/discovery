@@ -84,7 +84,7 @@ const PaymentScreen = () => {
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Card Information</Text>
             {/* <CardField
-              postalCodeEnabled={true}
+              postalCodeEnabled={false}
               placeholder={{
                 number: '4242 4242 4242 4242',
               }}
