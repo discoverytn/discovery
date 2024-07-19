@@ -339,21 +339,23 @@ const ExplorerProfile = ({route}) => {
       >
         <View style={styles.header}>
           <View style={styles.headerContent}>
-            <Text style={styles.fullNameText}>
-              {`${explorer.firstname} ${explorer.lastname}`}
-            </Text>
+            <View style={styles.nameContainer}>
+              <Text style={styles.fullNameText}>
+                {`${explorer.firstname} ${explorer.lastname}`}
+              </Text>
+            </View>
             {selectedItemImage && (
               <Image source={{ uri: selectedItemImage }} style={styles.selectedItemImage} />
             )}
-            <TouchableOpacity style={styles.optionsContainer} onPress={toggleOptions}>
-              <LottieView
-                ref={lottieRef}
-                source={require('../assets/dropdown.json')}
-                style={styles.dropdownAnimation}
-                loop={false}
-              />
-            </TouchableOpacity>
           </View>
+          <TouchableOpacity style={styles.optionsContainer} onPress={toggleOptions}>
+            <LottieView
+              ref={lottieRef}
+              source={require('../assets/dropdown.json')}
+              style={styles.dropdownAnimation}
+              loop={false}
+            />
+          </TouchableOpacity>
         </View>
         {isOptionsOpen && (
           <View style={styles.optionsWrapper}>
@@ -383,280 +385,289 @@ const ExplorerProfile = ({route}) => {
             </View>
           </View>
           <Text style={styles.descriptionText}>{explorer.description}</Text>
-       <TouchableOpacity onPress={toggleUserInfo} style={styles.businessDetailsToggle}>
+          <TouchableOpacity onPress={toggleUserInfo} style={styles.businessDetailsToggle}>
             <Text style={styles.businessDetailsToggleText}>
               {showUserInfo ? "Hide Info" : "Display Info"}
             </Text>
-            <Icon name={showUserInfo ? 'chevron-up' : 'chevron-down'} size={14} color="#333333" />
-          </TouchableOpacity>
-          {showUserInfo && (
-            <View style={styles.userInfoContainer}>
-              <Text style={styles.infoText}>Email: {explorer.email}</Text>
-              <Text style={styles.infoText}>Location: {explorer.governorate}, {explorer.municipality}</Text>
-              <Text style={styles.infoText}>Phone: {explorer.mobileNum}</Text>
-            </View>
-          )}
+            <Icon name={showUserInfo ? 'chevron-up' : 'chevron-down'} size={14} 
+            color="#333333" />
+            </TouchableOpacity>
+            {showUserInfo && (
+              <View style={styles.userInfoContainer}>
+                <Text style={styles.infoText}>Email: {explorer.email}</Text>
+                <Text style={styles.infoText}>Location: {explorer.governorate}, {explorer.municipality}</Text>
+                <Text style={styles.infoText}>Phone: {explorer.mobileNum}</Text>
+              </View>
+            )}
+          </View>
+          <View style={styles.navBar}>
+            <TouchableOpacity
+              style={[styles.navBarItem, activeTab === 'Posts' && styles.activeTab]}
+              onPress={() => handleTabChange('Posts')}
+            >
+              <Text style={styles.navBarText}>Posts</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.navBarItem, activeTab === 'Favourites' && styles.activeTab]}
+              onPress={() => handleTabChange('Favourites')}
+            >
+              <Text style={styles.navBarText}>Favourites</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.navBarItem, activeTab === 'Visited' && styles.activeTab]}
+              onPress={() => handleTabChange('Visited')}
+            >
+              <Text style={styles.navBarText}>Visited</Text>
+            </TouchableOpacity>
+          </View>
+          <View style={styles.contentContainer}>
+            {activeTab === 'Posts' && (
+              <FlatList
+                data={posts}
+                keyExtractor={(item) => item.id.toString()}
+                renderItem={renderPostItem}
+                numColumns={3}
+                contentContainerStyle={styles.postsContainer}
+              />
+            )}
+            {activeTab === 'Favourites' && (
+              <FlatList
+                data={favourites}
+                keyExtractor={(item) => item.id.toString()}
+                renderItem={renderFavouriteItem}
+                numColumns={3}
+                contentContainerStyle={styles.postsContainer}
+              />
+            )}
+            {activeTab === 'Visited' && (
+              <FlatList
+                data={visited}
+                keyExtractor={(item) => item.id.toString()}
+                renderItem={renderVisitedItem}
+                numColumns={3}
+                contentContainerStyle={styles.postsContainer}
+              />
+            )}
+          </View>
+        </ScrollView>
+        <View style={styles.navbarContainer}>
+          <Navbar navigation={navigation} />
         </View>
-        <View style={styles.navBar}>
-          <TouchableOpacity
-            style={[styles.navBarItem, activeTab === 'Posts' && styles.activeTab]}
-            onPress={() => handleTabChange('Posts')}
-          >
-            <Text style={styles.navBarText}>Posts</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.navBarItem, activeTab === 'Favourites' && styles.activeTab]}
-            onPress={() => handleTabChange('Favourites')}
-          >
-            <Text style={styles.navBarText}>Favourites</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.navBarItem, activeTab === 'Visited' && styles.activeTab]}
-            onPress={() => handleTabChange('Visited')}
-          >
-            <Text style={styles.navBarText}>Visited</Text>
-          </TouchableOpacity>
-        </View>
-        <View style={styles.contentContainer}>
-          {activeTab === 'Posts' && (
-            <FlatList
-              data={posts}
-              keyExtractor={(item) => item.id.toString()}
-              renderItem={renderPostItem}
-              numColumns={3}
-              contentContainerStyle={styles.postsContainer}
-            />
-          )}
-          {activeTab === 'Favourites' && (
-            <FlatList
-              data={favourites}
-              keyExtractor={(item) => item.id.toString()}
-              renderItem={renderFavouriteItem}
-              numColumns={3}
-              contentContainerStyle={styles.postsContainer}
-            />
-          )}
-          {activeTab === 'Visited' && (
-            <FlatList
-              data={visited}
-              keyExtractor={(item) => item.id.toString()}
-              renderItem={renderVisitedItem}
-              numColumns={3}
-              contentContainerStyle={styles.postsContainer}
-            />
-          )}
-        </View>
-      </ScrollView>
-      <View style={styles.navbarContainer}>
-        <Navbar navigation={navigation} />
-      </View>
-    </SafeAreaView>
-  );
-};
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-  header: {
-    padding: 10,
-    marginTop: 20,
-    marginBottom: 10,
-  },
-  headerContent: {
-    marginTop: 20,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  fullNameText: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    flex: 1,
-    color: '#001861'
-  },
-  selectedItemImage: {
-    width: 30,
-    height: 30,
-    marginLeft: 10,
-    marginRight: 10,
-  },
-  optionsContainer: {
-    width: 30,
-    height: 30,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  dropdownAnimation: {
-    width: 170,
-    height: 170,
-  },
-  optionsWrapper: {
-    position: 'absolute',
-    top: 83,
-    right: 10,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 10,
-    padding: 5,
-    elevation: 5,
-    zIndex: 1000,
-  },
-  optionItem: {
-    paddingVertical: 10,
-    paddingHorizontal: 15,
-  },
-  optionText: {
-    fontSize: 16,
-    color: '#001861',
-  },
-  profileContainer: {
-    alignItems: 'center',
-    paddingVertical: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
-  },
-  profileImage: {
-    marginTop: -20,
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    marginBottom: 10,
-  },
-  usernameText: {
-    fontSize: 18,
-    color: '#565656',
-    marginBottom: 10,
-    fontWeight: '500',
-  },
-  statsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    width: '100%',
-    marginBottom: 15,
-  },
-  statItem: {
-    alignItems: 'center',
-  },
-  statValue: {
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  statLabel: {
-    fontSize: 14,
-    color: '#666',
-  },
-  descriptionText: {
-    fontSize: 14,
-    color: '#333',
-    textAlign: 'center',
-    marginBottom: 15,
-    paddingHorizontal: 20,
-  },
-  businessDetailsToggle: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 20,
-    padding: 15,
-    margin: 15,
-    elevation: 5,
-  },
-  businessDetailsToggleText: {
-    marginRight: 15,
-    fontSize: 15,
-    fontWeight: 'bold',
-    color: '#001861',
-  },
-  userInfoContainer: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 20,
-    padding: 20,
-    margin: 15,
-    elevation: 5,
-  },
-  infoText: {
-    fontWeight: 'bold',
-    fontSize: 14,
-    color: '#333',
-    marginBottom: 5,
-  },
-  navBar: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
-  },
-  navBarItem: {
-    paddingVertical: 15,
-    flex: 1,
-    alignItems: 'center',
-  },
-  activeTab: {
-    borderBottomWidth: 2,
-    borderBottomColor: '#000',
-  },
-  navBarText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  contentContainer: {
-    flex: 1,
-    paddingBottom: 60,
-  },
-  postsContainer: {
-    padding: 1,
-  },
-  postItem: {
-    flex: 1,
-    aspectRatio: 1,
-    margin: 1,
-    maxWidth: '33%',
-  },
-  postImage: {
-    width: '100%',
-    height: '80%',
-  },
-  postTitle: {
-    fontSize: 12,
-    textAlign: 'center',
-    marginTop: 2,
-  },
-  deleteButton: {
-    position: 'absolute',
-    top: 5,
-    right: 5,
-    backgroundColor: 'rgba(220, 53, 69, 0.8)',
-    padding: 3,
-    borderRadius: 3,
-  },
-  deleteButtonText: {
-    color: '#fff',
-    fontSize: 10,
-  },
-  heartIcon: {
-    position: 'absolute',
-    top: 5,
-    right: 5,
-  },
-  planeIcon: {
-    position: 'absolute',
-    top: 5,
-    right: 5,
-  },
-  errorText: {
-    fontSize: 18,
-    color: 'red',
-    textAlign: 'center',
-    marginTop: 20,
-  },
-  navbarContainer: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-  },
-});
-
-export default ExplorerProfile;
+      </SafeAreaView>
+    );
+  };
+  
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: '#fff',
+    },
+    header: {
+      padding: 10,
+      marginTop: 20,
+      marginBottom: 10,
+    },
+    headerContent: {
+      marginTop: 20,
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+    },
+    nameContainer: {
+    
+      alignItems: 'center',
+    },
+    fullNameText: {
+      marginLeft:110,
+      fontSize: 22,
+      fontWeight: 'bold',
+      color: '#001861',
+      textAlign: 'center',
+    },
+    selectedItemImage: {
+      marginRight:90,
+      width: 40,
+      height: 40,
+    
+    },
+    optionsContainer: {
+      width: 30,
+      height: 30,
+      justifyContent: 'center',
+      alignItems: 'center',
+      position: 'absolute',
+      top: 20,
+      right: 10,
+    },
+    dropdownAnimation: {
+      width: 170,
+      height: 170,
+    },
+    optionsWrapper: {
+      position: 'absolute',
+      top: 83,
+      right: 10,
+      backgroundColor: '#FFFFFF',
+      borderRadius: 10,
+      padding: 5,
+      elevation: 5,
+      zIndex: 1000,
+    },
+    optionItem: {
+      paddingVertical: 10,
+      paddingHorizontal: 15,
+    },
+    optionText: {
+      fontSize: 16,
+      color: '#001861',
+    },
+    profileContainer: {
+      alignItems: 'center',
+      paddingVertical: 20,
+      borderBottomWidth: 1,
+      borderBottomColor: '#e0e0e0',
+    },
+    profileImage: {
+      marginTop: -20,
+      width: 100,
+      height: 100,
+      borderRadius: 50,
+      marginBottom: 10,
+    },
+    usernameText: {
+      fontSize: 18,
+      color: '#565656',
+      marginBottom: 10,
+      fontWeight: '500',
+    },
+    statsContainer: {
+      flexDirection: 'row',
+      justifyContent: 'space-around',
+      width: '100%',
+      marginBottom: 15,
+    },
+    statItem: {
+      alignItems: 'center',
+    },
+    statValue: {
+      fontSize: 18,
+      fontWeight: 'bold',
+    },
+    statLabel: {
+      fontSize: 14,
+      color: '#666',
+    },
+    descriptionText: {
+      fontSize: 14,
+      color: '#333',
+      textAlign: 'center',
+      marginBottom: 15,
+      paddingHorizontal: 20,
+    },
+    businessDetailsToggle: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      backgroundColor: '#FFFFFF',
+      borderRadius: 20,
+      padding: 15,
+      margin: 15,
+      elevation: 5,
+    },
+    businessDetailsToggleText: {
+      marginRight: 15,
+      fontSize: 15,
+      fontWeight: 'bold',
+      color: '#001861',
+    },
+    userInfoContainer: {
+      backgroundColor: '#FFFFFF',
+      borderRadius: 20,
+      padding: 20,
+      margin: 15,
+      elevation: 5,
+    },
+    infoText: {
+      fontWeight: 'bold',
+      fontSize: 14,
+      color: '#333',
+      marginBottom: 5,
+    },
+    navBar: {
+      flexDirection: 'row',
+      justifyContent: 'space-around',
+      borderBottomWidth: 1,
+      borderBottomColor: '#e0e0e0',
+    },
+    navBarItem: {
+      paddingVertical: 15,
+      flex: 1,
+      alignItems: 'center',
+    },
+    activeTab: {
+      borderBottomWidth: 2,
+      borderBottomColor: '#000',
+    },
+    navBarText: {
+      fontSize: 16,
+      fontWeight: 'bold',
+    },
+    contentContainer: {
+      flex: 1,
+      paddingBottom: 60,
+    },
+    postsContainer: {
+      padding: 1,
+    },
+    postItem: {
+      flex: 1,
+      aspectRatio: 1,
+      margin: 1,
+      maxWidth: '33%',
+    },
+    postImage: {
+      width: '100%',
+      height: '80%',
+    },
+    postTitle: {
+      fontSize: 12,
+      textAlign: 'center',
+      marginTop: 2,
+    },
+    deleteButton: {
+      position: 'absolute',
+      top: 5,
+      right: 5,
+      backgroundColor: 'rgba(220, 53, 69, 0.8)',
+      padding: 3,
+      borderRadius: 3,
+    },
+    deleteButtonText: {
+      color: '#fff',
+      fontSize: 10,
+    },
+    heartIcon: {
+      position: 'absolute',
+      top: 5,
+      right: 5,
+    },
+    planeIcon: {
+      position: 'absolute',
+      top: 5,
+      right: 5,
+    },
+    errorText: {
+      fontSize: 18,
+      color: 'red',
+      textAlign: 'center',
+      marginTop: 20,
+    },
+    navbarContainer: {
+      position: 'absolute',
+      bottom: 0,
+      left: 0,
+      right: 0,
+    },
+  });
+  
+  export default ExplorerProfile;

@@ -8,6 +8,8 @@ import { DB_HOST, PORT } from "@env";
 import Navbar from './Navbar';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
+import {jwtDecode} from "jwt-decode"; 
+
 
 const { width } = Dimensions.get('window');
 
@@ -97,13 +99,15 @@ const MainScreen = ({ navigation }) => {
     : defaultDisplayName;
 
   const handleProfilePress = () => {
-    if (token) {
-      if (explorer) {
+    const decodedToken = jwtDecode(token);
+    const userRole = decodedToken.role;
+    console.log("decodedtok",decodedToken);
+      if (userRole=="explorer") {
         navigation.navigate('explorerProfil');
-      } else if (business) {
+      }  else if (userRole=="business") {
         navigation.navigate('BusinessProfileScreen');
       }
-    } else {
+     else {
       navigation.navigate('Login');
     }
   };

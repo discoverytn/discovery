@@ -31,16 +31,14 @@ module.exports = (sequelize) => {
 
     Chat.associate = (models) => {
         Chat.belongsTo(models.Explorer, {
-            foreignKey: 'explorer_idexplorer',
-            as: 'ExplorerInfo'
+          foreignKey: 'explorer_idexplorer',
+          as: 'Explorer'
         });
         Chat.belongsTo(models.Business, {
-            foreignKey: 'business_idbusiness',
-            as: 'BusinessInfo'
+          foreignKey: 'business_idbusiness',
+          as: 'Business'
         });
-        Chat.belongsTo(Explorer, { as: 'ExplorerInfo', foreignKey: 'explorer_idexplorer' });
-
-    };
+      };
 
     return Chat;
 }
