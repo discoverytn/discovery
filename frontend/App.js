@@ -26,7 +26,6 @@ import BusinessEditProfileScreen from "./screens/BusinessEditProfileScreen"
 import BusinessProfileScreen from "./screens/BusinessProfileScreen"
 import NotificationScreen from "./screens/NotificationScreen"
 import OneEventScreen from "./screens/OneEventScreen"
-import Chat from "./screens/Chat";
 import Chats from './screens/Chats';
 import PaymentScreen from './screens/PaymentScreen';
 import RewardShopScreen from "./screens/RewardShopScreen"
@@ -51,8 +50,8 @@ function MainNavigator() {
     >
       <Tab.Screen name="PaymentScreen" component={PaymentScreen} options={{ tabBarLabel: () => null }} />
       <Tab.Screen name="RewardShopScreen" component={RewardShopScreen} options={{ tabBarLabel: () => null }} />
-      <Tab.Screen name="Chat" component={Chat} options={{ tabBarLabel: () => null }} />
-       <Tab.Screen name="Chats" component={Chats} options={{ tabBarLabel: () => null }} />
+      
+     
       <Tab.Screen name="Home" component={HomeScreen} options={{ tabBarLabel: () => null }} />
        <Tab.Screen name="Intro1" component={Intro1} options={{ tabBarLabel: () => null }} />
       <Tab.Screen name="Intro2" component={Intro2} options={{ tabBarLabel: () => null }} />
@@ -72,6 +71,7 @@ function MainNavigator() {
      <Tab.Screen name="Favorites" component={FavoritesScreen} options={{ tabBarLabel: () => null }} />
       <Tab.Screen name="ScheduleEvent" component={ScheduleEventScreen} options={{ tabBarLabel: () => null }} />
       <Tab.Screen name="EventList" component={EventListScreen} options={{ tabBarLabel: () => null }} />
+      <Tab.Screen name="Chats" component={Chats} options={{ tabBarLabel: () => null }} />
       <Tab.Screen name="NotificationScreen" component={NotificationScreen} options={{ tabBarLabel: () => null }} />
       <Tab.Screen name="OneEvent" component={OneEventScreen} options={{ tabBarLabel: () => null }} />
      

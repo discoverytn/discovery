@@ -61,9 +61,14 @@ const EventListScreen = () => {
     }
   };
 
-  const navigateToChats = () => {
+  const navigateToChats = (event) => {
     if (joinButtonClicked) {
-      navigation.navigate('Chats');
+      navigation.navigate('Chats', {
+        eventName: event.eventName,
+        explorer_idexplorer: explorer.idexplorer,
+        business_idbusiness: event.business_idbusiness,
+        otherUserId: event.business_idbusiness
+      });
     } else {
       alert('Please click on "Join" button first.');
     }
@@ -91,14 +96,14 @@ const EventListScreen = () => {
         <View style={styles.infoRow}>
           <FontAwesomeIcon icon={faUser} size={16} color="#8e9eef" />
           <Text style={styles.infoText}>
-            By: {item.Explorer ? item.Explorer.username : item.Business ? item.Business.businessname : 'Unknown'}
+            By: {item.Business ? item.Business.businessname : 'Unknown'}
           </Text>
         </View>
         <Text style={styles.eventDescription} numberOfLines={2}>{item.eventDescription}</Text>
         <View style={styles.footer}>
           <Text style={styles.eventPrice}>{item.eventPrice} DT</Text>
           <View style={styles.buttonsContainer}>
-            <TouchableOpacity onPress={navigateToChats}>
+            <TouchableOpacity onPress={() => navigateToChats(item)}>
               <MessengerIcon size={40} color="#8e9eef" />
             </TouchableOpacity>
             <TouchableOpacity style={styles.joinButton} onPress={() => toggleModal(item)}>

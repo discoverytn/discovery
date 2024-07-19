@@ -20,7 +20,7 @@ const sendMessage = async (req, res) => {
             business_idbusiness,
             message,
             eventName,
-        });
+          });
 
         const roomName = `${eventName}-${explorer_idexplorer}-${business_idbusiness}`;
         const newMessageData = {
@@ -39,13 +39,17 @@ const sendMessage = async (req, res) => {
 };
 
 const getMessages = async (req, res) => {
-    const { explorer_idexplorer, business_idbusiness } = req.params;
+    const { explorer_idexplorer, business_idbusiness } = req.query;
+
+    if (!explorer_idexplorer || !business_idbusiness) {
+        return res.status(400).json({ error: 'Missing required parameters' });
+    }
 
     try {
         const messages = await db.Chat.findAll({
             where: {
-                explorer_idexplorer,
-                business_idbusiness,
+                explorer_idexplorer: parseInt(explorer_idexplorer),
+                business_idbusiness: parseInt(business_idbusiness),
             },
             order: [['createdAt', 'ASC']],
             include: [
@@ -55,7 +59,12 @@ const getMessages = async (req, res) => {
         });
 
         const formattedMessages = messages.map((msg) => ({
-            ...msg.toJSON(),
+            idchat: msg.idchat,
+            message: msg.message,
+            explorer_idexplorer: msg.explorer_idexplorer,
+            business_idbusiness: msg.business_idbusiness,
+            createdAt: msg.createdAt,
+            updatedAt: msg.updatedAt,
             explorerName: msg.Explorer ? msg.Explorer.username : null,
             businessName: msg.Business ? msg.Business.username : null,
         }));
@@ -63,9 +72,11 @@ const getMessages = async (req, res) => {
         return res.status(200).json(formattedMessages);
     } catch (error) {
         console.error('Error fetching messages:', error);
-        return res.status(500).json({ error: 'Failed to fetch messages' });
+        return res.status(500).json({ error: 'Failed to fetch messages', details: error.message });
     }
 };
+
+
 
 const deleteMessage = async (req, res) => {
     const { idchat } = req.params;

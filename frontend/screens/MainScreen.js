@@ -100,7 +100,7 @@ const MainScreen = ({ navigation }) => {
     if (token) {
       if (explorer) {
         navigation.navigate('explorerProfil');
-      } else if (business) {
+      }  if (business) {
         navigation.navigate('BusinessProfileScreen');
       }
     } else {

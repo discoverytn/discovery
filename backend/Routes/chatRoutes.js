@@ -1,11 +1,17 @@
 const express = require('express');
 const router = express.Router();
-const chatController = require('../Controllers/chatController');
 
-router.post('/send', chatController.sendMessage);
-router.get('/chat/:explorer_idexplorer/:business_idbusiness', chatController.getMessages);
-router.delete('/delete', chatController.deleteMessage);
+ const {
+    sendMessage,
+    getMessages,
+    deleteMessage,
+    
+  } = require('../Controllers/ChatController.js');
+router.post('/send', sendMessage);
+router.get('/get', getMessages);
+router.delete('/delete', deleteMessage);
 router.get("/api", (req, res) => {
     res.json(chatRooms);
 })
+
 module.exports = router;
