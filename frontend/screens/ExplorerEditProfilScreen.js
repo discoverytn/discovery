@@ -35,6 +35,7 @@ const ExplorerEditProfileScreen = () => {
   const [showPasswordFields, setShowPasswordFields] = useState(false);
   const [boughtItems, setBoughtItems] = useState([]);
   const [selectedBoughtItem, setSelectedBoughtItem] = useState('');
+  const [selectedItemImage, setSelectedItemImage] = useState('');
 
   useEffect(() => {
     if (explorer) {
@@ -49,6 +50,7 @@ const ExplorerEditProfileScreen = () => {
       setMobileNum(explorer.mobileNum || '');
       setImage(explorer.image || null);
       setSelectedBoughtItem(explorer.selectedItemName || '');
+      setSelectedItemImage(explorer.selectedItemImage || '');
       fetchBoughtItems();
     }
   }, [explorer]);
@@ -74,6 +76,7 @@ const ExplorerEditProfileScreen = () => {
     setConfirmNewPassword('');
     setCurrentPassword('');
     setSelectedBoughtItem('');
+    setSelectedItemImage('');
   };
 
   const handleSave = async () => {
@@ -96,6 +99,7 @@ const ExplorerEditProfileScreen = () => {
       image,
       currentPassword: currentPassword,
       selectedItemName: selectedBoughtItem,
+      selectedItemImage: selectedItemImage,
     };
     if (newPassword) {
       payload.newPassword = newPassword;
@@ -263,7 +267,15 @@ const ExplorerEditProfileScreen = () => {
       <Picker
         style={styles.input}
         selectedValue={selectedBoughtItem}
-        onValueChange={(itemValue, itemIndex) => setSelectedBoughtItem(itemValue)}
+        onValueChange={(itemValue, itemIndex) => {
+          setSelectedBoughtItem(itemValue);
+          const selectedItem = boughtItems.find(item => item.itemName === itemValue);
+          if (selectedItem) {
+            setSelectedItemImage(selectedItem.itemImage);
+          } else {
+            setSelectedItemImage('');
+          }
+        }}
       >
         <Picker.Item label="Select a bought item" value="" />
         {boughtItems.map((item) => (
