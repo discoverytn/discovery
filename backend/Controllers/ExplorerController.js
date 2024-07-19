@@ -42,7 +42,8 @@ module.exports = {
         mobileNum: req.body.mobileNum || explorer.mobileNum,
         governorate: req.body.governorate || explorer.governorate,
         municipality: req.body.municipality || explorer.municipality,
-        selectedItemName: req.body.selectedItemName ||  explorer.selectedItemName,
+        selectedItemName: req.body.selectedItemName || explorer.selectedItemName,
+        selectedItemImage: req.body.selectedItemImage || explorer.selectedItemImage,
       };
   
       if (req.body.newPassword) {
@@ -55,10 +56,11 @@ module.exports = {
       });
   
       if (result[0] === 1) {
-        const newData = await db.Explorer.findOne({
+        const updatedExplorer = await db.Explorer.findOne({
           where: { idexplorer: req.params.idexplorer },
         });
-        return res.status(200).send(newData);
+        
+        return res.status(200).send(updatedExplorer.toJSON());
       } else {
         return res.status(500).send("Failed to update explorer");
       }
@@ -88,6 +90,7 @@ module.exports = {
       return res.status(500).json({ error: "Failed to fetch explorer posts" });
     }
   },
+
   getExplorerNumberPosts: async function (req, res) {
     const { idexplorer } = req.params;
   
@@ -104,13 +107,13 @@ module.exports = {
       const numOfPosts = posts.length;
       await explorer.update({ numOfPosts: numOfPosts });
       
-      
       return res.status(200).json(numOfPosts);
     } catch (error) {
       console.error("Error fetching number explorer posts:", error);
       return res.status(500).json({ error: "Failed to fetch explorer posts" });
     }
   },
+
   removeFromFavourites: async function (req, res) {
     const { idexplorer, idposts } = req.params;
 
@@ -167,17 +170,15 @@ module.exports = {
       }
   
       if (favorite) {
-        // Post is already in favorites, remove it
         await favorite.destroy();
         explorer.numOfLikes = Math.max(explorer.numOfLikes - 1, 0);
         await explorer.save();
         
-        postOwner.coins = Math.max(postOwner.coins - 5, 0); // Ensure coins don't go negative
+        postOwner.coins = Math.max(postOwner.coins - 5, 0);
         await postOwner.save();
   
         return res.status(200).json({ message: "Post removed from favorites" });
       } else {
-        // Post is not in favorites, add it
         await db.Favorites.create({
           explorer_idexplorer: idexplorer,
           posts_idposts: idposts,
@@ -192,7 +193,6 @@ module.exports = {
         postOwner.coins += 5;
         await postOwner.save();
   
-        // Create a notification for the post owner
         await db.Notif.create({
           type: 'favorite',
           message: `${explorer.firstname} ${explorer.lastname} added your post to favorites`,
@@ -210,7 +210,6 @@ module.exports = {
       return res.status(500).json({ error: "Failed to add/remove post to/from favorites" });
     }
   },
-  
   
   isPostFavoritedByExplorer: async function (req, res) {
     const { idexplorer, idposts } = req.params;
@@ -250,6 +249,7 @@ module.exports = {
       return res.status(500).json({ error: "Failed to fetch explorer favorites" });
     }
   },
+
   addOrRemoveFromTraveled: async function (req, res) {
     const { idexplorer, idposts } = req.params;
   
@@ -324,6 +324,7 @@ module.exports = {
         .json({ error: "Failed to remove post from traveled" });
     }
   },
+
   isPostTraveledByExplorer: async function (req, res) {
     const { idexplorer, idposts } = req.params;
 
@@ -359,47 +360,7 @@ module.exports = {
       return res.status(500).json({ error: "Failed to update categories" });
     }
   },
-  getTopExplorersByPosts: async function (req, res) {
-    try {
-      console.log("Attempting to fetch top explorers");
-      const topExplorers = await db.Explorer.findAll({
-        attributes: [
-          'idexplorer', 
-          'firstname', 
-          'image',
-          [db.sequelize.fn('COUNT', db.sequelize.col('Posts.idposts')), 'postCount']
-        ],
-        include: [{
-          model: db.Posts,
-          attributes: [],
-        }],
-        group: ['Explorer.idexplorer', 'Explorer.firstname', 'Explorer.image'],
-        order: [[db.sequelize.literal('postCount'), 'DESC']],
-        limit: 3
-      });
-  
-      console.log("Query executed successfully");
-      console.log("Top explorers:", JSON.stringify(topExplorers, null, 2));
-  
-      if (topExplorers.length === 0) {
-        console.log("No explorers found");
-        return res.status(404).json({ error: "No explorers found" });
-      }
-  
-      const formattedTopExplorers = topExplorers.map(explorer => ({
-        idexplorer: explorer.idexplorer,
-        firstname: explorer.firstname,
-        image: explorer.image,
-        postCount: parseInt(explorer.get('postCount'))
-      }));
-  
-      return res.status(200).json(formattedTopExplorers);
-    } catch (error) {
-      console.error("Error fetching top explorers by posts:", error);
-      console.error("Error stack:", error.stack);
-      return res.status(500).json({ error: "Failed to fetch top explorers", details: error.message });
-    }
-  },
+
   getTopExplorersByPostCount: async function (req, res) {
     try {
       console.log("Attempting to fetch top explorers by post count");
@@ -432,6 +393,7 @@ module.exports = {
       return res.status(500).json({ error: "Failed to fetch top explorers", details: error.message });
     }
   },
+
   getExplorerTraveled: async function (req, res) {
     const { idexplorer } = req.params;
   
@@ -457,71 +419,137 @@ module.exports = {
     const { idexplorer, iditem } = req.params;
   
     try {
-      const marketItem = await db.Market.findByPk(iditem);
-      if (!marketItem) {
-        return res.status(404).json({ error: "Market item not found" });
-      }
+      const transaction = await db.sequelize.transaction();
   
-      const explorer = await db.Explorer.findByPk(idexplorer);
-      if (!explorer) {
-        return res.status(404).json({ error: "Explorer not found" });
-      }
+      try {
+        const marketItem = await db.Market.findByPk(iditem, { transaction });
+        if (!marketItem) {
+          await transaction.rollback();
+          return res.status(404).json({ error: "Market item not found" });
+        }
   
-      if (explorer.coins < marketItem.itemPrice) {
-        return res.status(400).json({ error: "Insufficient coins" });
-      }
+        const explorer = await db.Explorer.findByPk(idexplorer, { transaction });
+        if (!explorer) {
+          await transaction.rollback();
+          return res.status(404).json({ error: "Explorer not found" });
+        }
   
-      explorer.coins -= marketItem.itemPrice;
+        if (explorer.coins < marketItem.itemPrice) {
+          await transaction.rollback();
+          return res.status(400).json({ error: "Insufficient coins" });
+        }
   
-      if (explorer.boughtItemName) {
-        explorer.boughtItemName += `,${marketItem.itemName}`;
-      } else {
-        explorer.boughtItemName = marketItem.itemName;
-      }
+        explorer.coins -= marketItem.itemPrice;
   
-      if (marketItem.type === "badge") {
-        explorer.badge = marketItem.itemName;
-        await explorer.save();
-        return res.status(200).json({ message: "Badge purchased successfully" });
-      } else {
-        
-        explorer.numOfPosts += 1;
-        await explorer.save();
-        return res.status(200).json({ message: "Item purchased successfully" });
+        explorer.boughtItemName = explorer.boughtItemName
+          ? `${explorer.boughtItemName},${marketItem.itemName}`
+          : marketItem.itemName;
+  
+        explorer.boughtItemImage = explorer.boughtItemImage
+          ? `${explorer.boughtItemImage},${marketItem.itemImage}`
+          : marketItem.itemImage;
+  
+        if (marketItem.type === "badge") {
+          explorer.badge = marketItem.itemName;
+        } else {
+          explorer.numOfPosts += 1;
+        }
+  
+        await explorer.save({ transaction });
+  
+        await transaction.commit();
+  
+        return res.status(200).json({ 
+          message: marketItem.type === "badge" 
+            ? "Badge purchased successfully" 
+            : "Item purchased successfully" 
+        });
+      } catch (error) {
+        await transaction.rollback();
+        throw error;
       }
     } catch (error) {
       console.error("Error purchasing market item:", error);
       return res.status(500).json({ error: "Failed to purchase market item" });
     }
   },
+
   getBoughtItems: async function (req, res) {
     const { idexplorer } = req.params;
   
     try {
-      // Find the explorer
       const explorer = await db.Explorer.findByPk(idexplorer);
       if (!explorer) {
         return res.status(404).json({ error: "Explorer not found" });
       }
   
-      // Get the bought item names
       const boughtItemNames = explorer.boughtItemName ? explorer.boughtItemName.split(',') : [];
   
-      // Find all market items that match the bought item names
       const boughtItems = await db.Market.findAll({
         where: {
           itemName: {
             [db.Sequelize.Op.in]: boughtItemNames
           }
         },
-        attributes: ['iditem','itemName', 'itemImage']
+        attributes: ['iditem', 'itemName', 'itemImage', 'itemPrice', 'type']
       });
   
-      return res.status(200).json(boughtItems);
+      if (boughtItems.length === 0) {
+        return res.status(200).json([]);
+      }
+  
+      const formattedItems = boughtItems.map(item => ({
+        iditem: item.iditem,
+        itemName: item.itemName,
+        itemImage: item.itemImage,
+        itemPrice: item.itemPrice,
+        type: item.type
+      }));
+  
+      return res.status(200).json(formattedItems);
     } catch (error) {
       console.error("Error fetching bought items:", error);
       return res.status(500).json({ error: "Failed to fetch bought items" });
     }
   },
-  
-};
+getTopExplorersByPosts: async function (req, res) {
+  try {
+    console.log("Attempting to fetch top explorers");
+    const topExplorers = await db.Explorer.findAll({
+      attributes: [
+        'idexplorer', 
+        'firstname', 
+        'image',
+        [db.sequelize.fn('COUNT', db.sequelize.col('Posts.idposts')), 'postCount']
+      ],
+      include: [{
+        model: db.Posts,
+        attributes: [],
+      }],
+      group: ['Explorer.idexplorer', 'Explorer.firstname', 'Explorer.image'],
+      order: [[db.sequelize.literal('postCount'), 'DESC']],
+      limit: 3
+    });
+
+    console.log("Query executed successfully");
+    console.log("Top explorers:", JSON.stringify(topExplorers, null, 2));
+
+    if (topExplorers.length === 0) {
+      console.log("No explorers found");
+      return res.status(404).json({ error: "No explorers found" });
+    }
+
+    const formattedTopExplorers = topExplorers.map(explorer => ({
+      idexplorer: explorer.idexplorer,
+      firstname: explorer.firstname,
+      image: explorer.image,
+      postCount: parseInt(explorer.get('postCount'))
+    }));
+
+    return res.status(200).json(formattedTopExplorers);
+  } catch (error) {
+    console.error("Error fetching top explorers by posts:", error);
+    console.error("Error stack:", error.stack);
+    return res.status(500).json({ error: "Failed to fetch top explorers", details: error.message });
+  }
+}}

@@ -58,14 +58,8 @@ const ExplorerProfile = ({route}) => {
           setExplorer({ ...explorerData, numOfPosts: explorerData.Posts?.length || 0 });
           setNumLikes(explorerData.Likes || 0);
           setNumTraveled(explorerData.Traveled || 0);
+          setSelectedItemImage(explorerData.selectedItemImage);
           fetchNumPosts();
-
-          if (explorerData.boughtItemName) {
-            const marketResponse = await axios.get(`http://${DB_HOST}:${PORT}/market/item/${explorerData.boughtItemName}`);
-            if (marketResponse.status === 200 && marketResponse.data) {
-              setSelectedItemImage(marketResponse.data.itemImage);
-            }
-          }
         } else {
           console.error('Failed to fetch explorer data');
         }
